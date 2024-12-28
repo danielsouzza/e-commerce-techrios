@@ -5,3 +5,17 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
+
+#app.lp-wraper {
+  padding: 0;
+}
+
+.lp-wraper {
+  overflow: hidden;
+  margin-top: 70px;
+}
+
+.maxWidth {
+  max-width: 1200px !important ;
+  margin: 0 auto;
+}

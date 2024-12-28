@@ -13,11 +13,13 @@ const props = defineProps({
   <v-carousel
       cycle
       continuous
-      class="!tw-h-[170px] lg:!tw-h-[300px]"
+
+      class="!tw-h-full !tw-w-full"
       show-arrows="hover"
       hide-delimiter-background
   >
     <v-carousel-item
+
         v-for="(item,i) in slides"
         :key="i"
         :src="item.src"

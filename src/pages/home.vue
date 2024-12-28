@@ -12,7 +12,7 @@ const bannerPrimaryItems = [
   {
     title: "Banner primary 1",
     link: "#",
-    src: "./src/_mockData/banners/banner-primary-1.png"
+    src: "./src/_mockData/banners/banner-primary-1-full.png"
   }
 ]
 
@@ -33,13 +33,16 @@ const bannerSecondaryItems = [
 
 <template>
   <Banner1 :slides="bannerPrimaryItems"/>
-  <CardFilter class=" tw-top-[-40px] !tw-mb-[-40px]"/>
-  <RiversOfOffers class="!tw-my-5"/>
-  <div class="tw-grid lg:tw-grid-cols-2 tw-gap-2 tw-px-4 tw-py-2">
-    <Banner2 v-for="i in bannerSecondaryItems" :key="i" :src="i.src" :title="i.title" :link="i.link"/>
+  <div class="maxWidth">
+    <CardFilter class=" tw-top-[-30px]  !tw-mb-[-30px] lg:tw-top-[-70px] lg:!tw-mb-[-70px]"/>
+    <RiversOfOffers class="!tw-my-5"/>
+    <div class="tw-grid lg:tw-grid-cols-2 tw-gap-2 tw-px-4 tw-py-2">
+      <Banner2 v-for="i in bannerSecondaryItems" :key="i" :src="i.src" :title="i.title" :link="i.link"/>
+    </div>
+    <FeaturedTrip/>
+    <TravelAtUnbeatablePrices  class="!tw-my-5 !tw-mb-10"/>
   </div>
-  <FeaturedTrip/>
-  <TravelAtUnbeatablePrices  class="!tw-my-5 !tw-mb-10"/>
+
 </template>
 
 <style scoped>

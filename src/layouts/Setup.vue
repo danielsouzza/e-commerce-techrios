@@ -7,15 +7,18 @@ import Header from "./Header.vue";
 </script>
 
 <template>
-  <v-app min-height="100vh" class="tw-flex tw-flex-col">
-    <Header class="mb-auto border-t-lg !tw-border-secondary" />
-    <v-main>
-      <slot/>
-    </v-main>
+  <div class="lp-wraper">
+    <Header class="mb-auto border-t-lg  !tw-border-secondary" />
+    <slot/>
     <Footer class="mt-auto"/>
-  </v-app>
+  </div>
+
 </template>
 
 <style scoped>
-
+.v-app-bar.v-toolbar{
+  top:0 !important;
+  border-radius: 0 !important;
+  max-width: 100% !important;
+}
 </style>

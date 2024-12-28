@@ -4,9 +4,9 @@ import { VDateInput } from 'vuetify/labs/VDateInput'
 </script>
 
 <template>
-  <v-card class="ma-5" elevation="0" rounded="xl" >
-    <div class="tw-grid tw-grid-cols-2">
-      <div class="tw-flex tw-flex-col tw-px-5 tw-py-3 tw-border-r tw-border-b">
+  <v-card class="my-5 !tw-rounded-xl" elevation="0" >
+    <div class="tw-grid tw-grid-cols-2 lg:tw-grid-cols-5 ">
+      <div class="tw-flex tw-flex-col tw-px-5 tw-py-3 tw-border-r tw-border-b lg:tw-border-b-0 lg:!tw-ml-5">
         <div class="tw-text-p tw-font-extrabold tw-text-[20px]">Saindo de</div>
         <div class="tw-flex tw-items-center tw-text-p tw-text-[14px]">
           <v-autocomplete
@@ -23,7 +23,7 @@ import { VDateInput } from 'vuetify/labs/VDateInput'
           </v-autocomplete>
         </div>
       </div>
-      <div class="tw-flex tw-flex-col tw-px-5 tw-py-3  tw-border-b">
+      <div class="tw-flex tw-flex-col tw-px-5 tw-py-3  tw-border-b lg:tw-border-b-0 lg:!tw-ml-5">
         <div class="tw-text-p tw-font-extrabold tw-text-[20px]">Indo para</div>
         <div class="tw-flex tw-items-center tw-text-p tw-text-[14px]">
           <v-autocomplete
@@ -40,7 +40,14 @@ import { VDateInput } from 'vuetify/labs/VDateInput'
           </v-autocomplete>
         </div>
       </div>
-      <div class="tw-flex tw-flex-col tw-px-5 tw-py-3 tw-border-r ">
+
+      <div class="tw-absolute tw-inset-0 tw-flex tw-justify-center lg:tw-justify-start lg:tw-left-[18%] tw-top-[50%] -tw-translate-y-1/2">
+        <v-btn variant="flat" color="secondary"  icon>
+          <Icon icon="flowbite:arrows-repeat-outline" class="tw-text-[30px]" />
+        </v-btn>
+      </div>
+
+      <div class="tw-flex tw-flex-col tw-px-5 tw-py-3 tw-border-r lg:tw-border-x">
         <div class="tw-text-p tw-font-extrabold tw-text-[20px]">Ida</div>
         <div class="tw-flex tw-items-center tw-text-p tw-text-[14px]">
           <v-date-input
@@ -72,8 +79,8 @@ import { VDateInput } from 'vuetify/labs/VDateInput'
           </v-date-input>
         </div>
       </div>
-      <div class="tw-col-span-2 tw-w-full  ">
-        <v-btn class="tw-w-full !tw-h-auto " variant="flat" color="secondary" rounded="0" >
+      <div class="tw-flex tw-flex-col tw-col-span-2 lg:tw-col-span-1 tw-w-full tw-h-full ">
+        <v-btn class="tw-w-full !tw-h-full " variant="flat" color="secondary" rounded="0" >
          <div class="tw-text-[20px] tw-flex tw-items-center tw-text-white tw-font-[900] tw-my-3 tw-normal-case">
            <Icon icon="majesticons:search-line" class="tw-text-[30px] tw-text-black tw-mr-1 " />Buscar
          </div>
