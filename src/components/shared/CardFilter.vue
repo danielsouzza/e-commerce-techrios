@@ -41,7 +41,7 @@ import { VDateInput } from 'vuetify/labs/VDateInput'
         </div>
       </div>
 
-      <div class="tw-absolute tw-inset-0 tw-flex tw-justify-center lg:tw-justify-start lg:tw-left-[18%] tw-top-[50%] -tw-translate-y-1/2">
+      <div class="tw-absolute tw-inset-0 tw-flex tw-justify-center lg:tw-justify-start lg:tw-left-[18%] tw-top-[53%] -tw-translate-y-1/2">
         <v-btn variant="flat" color="secondary"  icon>
           <Icon icon="flowbite:arrows-repeat-outline" class="tw-text-[30px]" />
         </v-btn>

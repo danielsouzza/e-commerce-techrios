@@ -15,7 +15,7 @@ const config = {
   breakpoints: {
     // 300px and up
     300: {
-      itemsToShow: 2,
+      itemsToShow: 1.5,
       snapAlign: 'center',
     },
     // 400px and up
@@ -43,18 +43,18 @@ const gallery = [
 
 <template>
   <div class=" tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between !tw-mt-5">
-   <div class="tw-flex tw-flex-col tw-items-center  tw-justify-center">
+   <div class="tw-flex tw-flex-col tw-items-center lg:tw-items-start  ">
      <div class=" tw-text-[25px] lg:tw-text-[40px] lg:tw-w-[250px] tw-font-extrabold tw-text-center lg:tw-text-start tw-text-primary " >
        Rios de ofertas para<br>
        você navegar!
      </div>
      <v-btn color="secondary" class="my-5" variant="outlined" rounded>
-       <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs lg:!tw-text-lg" >VER MAIS OFERTAS
+       <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs" >VER MAIS VIAGENS
          <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>
        </div>
      </v-btn>
    </div>
-    <div class="lg:!tw-w-[66%] ">
+    <div class="lg:!tw-w-[75%] ">
       <Carousel v-bind="config" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-mb-4 my-carrousel">
         <Slide v-for="n in gallery" :key="n.id" >
           <CardTicket :active="currentSlide === n.id -1"/>
@@ -68,14 +68,19 @@ const gallery = [
 </template>
 
 <style scoped>
+
+.my-carrousel::v-deep(.carousel__viewport){
+  @apply !tw-rounded-xl
+}
+
 .my-carrousel::v-deep(.carousel__pagination-button::after){
   height: 10px !important;
   width: 10px !important;
   border-radius: 50% !important;
   @apply tw-bg-gray-400 !important;
 }
+
 .my-carrousel::v-deep(.carousel__pagination-button--active::after){
   @apply tw-bg-secondary !important;
 }
-
 </style>

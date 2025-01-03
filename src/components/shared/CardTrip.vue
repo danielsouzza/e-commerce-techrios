@@ -11,7 +11,7 @@ defineProps({
 </script>
 
 <template>
-  <v-card  :color="active ? 'secondary':''" flat class="!tw-rounded-xl  " :class="active ? '!tw-border-2' : '' "  width="250">
+  <v-card  :color="active ? 'secondary':''" flat class="!tw-rounded-xl !tw-w-[250px]  lg:!tw-w-[270px] " :class="active ? '!tw-border-2' : '' " >
     <v-img
         cover
         class="bg-grey-lighten-2"
