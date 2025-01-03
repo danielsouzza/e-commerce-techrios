@@ -4,9 +4,9 @@ import SuperOfferStamp from "../ui-components/SuperOfferStamp.vue";
 </script>
 
 <template>
-  <div class="tw-relative tw-w-[343px] lg:tw-w-full tw-h-full tw-rounded-xl tw-overflow-hidden tw-shadow-lg">
+  <div class="tw-relative tw-w-[100vw] lg:tw-w-full tw-h-full tw-rounded-xl tw-overflow-hidden tw-shadow-lg">
     <div
-        class="tw-w-full tw-h-64 lg:tw-h-[405px] !tw-rounded-xl tw-bg-cover tw-bg-center "
+        class="tw-w-full tw-h-[300px] md:tw-h-[500px] lg:tw-h-[405px] !tw-rounded-xl tw-bg-cover tw-bg-center "
         style="background-image: url('./src/_mockData/banners/banner-primary-1.png');">
     </div>
 

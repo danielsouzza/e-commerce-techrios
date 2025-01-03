@@ -15,7 +15,7 @@ const config = {
     // 400px and up
     400: {
       itemsToShow: 2,
-      snapAlign: 'start',
+      snapAlign: 'center',
     },
     // 500px and up
     500: {

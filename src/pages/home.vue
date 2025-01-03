@@ -36,7 +36,7 @@ const bannerSecondaryItems = [
   <div class="maxWidth tw-flex tw-flex-col ">
     <CardFilter class=" tw-top-[-30px]  !tw-mb-[-30px] lg:tw-top-[-70px] lg:!tw-mb-[-70px] !tw-mx-5 lg:!tw-mx-0"/>
     <RiversOfOffers class="!tw-my-5"/>
-    <div class="tw-grid lg:tw-grid-cols-2 tw-gap-2  tw-py-2">
+    <div class="tw-grid md:tw-grid-cols-2 tw-gap-2  tw-py-2 tw-px-5 lg:tw-px-0">
       <Banner2 v-for="i in bannerSecondaryItems" :key="i" :src="i.src" :title="i.title" :link="i.link"/>
     </div>
     <FeaturedTrip/>

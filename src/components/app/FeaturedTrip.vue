@@ -46,12 +46,13 @@ const config_2 = {
     // 400px and up
     400: {
       itemsToShow: 2,
-      snapAlign: 'start',
+      snapAlign: 'center',
     },
     // 500px and up
     500: {
       itemsToShow: 2,
       snapAlign: 'start',
+      gap:10,
     },
   },
 };
@@ -81,9 +82,9 @@ const gallery = [
     </div>
     <div class="tw-flex tw-flex-col tw-gap-5 lg:tw-flex-row tw-h-full  tw-justify-between !tw-mt-5 tw-w-full">
 
-      <div class="lg:!tw-w-[50%] !tw-rounded-xl">
+      <div class="lg:!tw-w-[50%] !tw-w-full !tw-rounded-xl ">
         <Carousel v-bind="config_1" class="tw-w-[100vw] !tw-rounded-xl lg:tw-w-full tw-mb-4 my-carrousel my-carrousel">
-          <Slide v-for="n in 4" :key="n" >
+          <Slide v-for="n in 4" :key="n"  class="tw-px-5">
             <CardTripFull/>
           </Slide>
           <template #addons>
@@ -91,7 +92,7 @@ const gallery = [
           </template>
         </Carousel>
       </div>
-      <div class="lg:!tw-w-[50%] tw-h-full">
+      <div class="lg:!tw-w-[50%] tw-h-full tw-hidden lg:tw-block">
         <Carousel v-bind="config_2" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-h-full tw-mb-4 my-carrousel">
           <Slide v-for="n in gallery" :key="n.id" >
             <CardTicket :active="currentSlide === n.id -1"/>

@@ -23,7 +23,7 @@ import { VDateInput } from 'vuetify/labs/VDateInput'
           </v-autocomplete>
         </div>
       </div>
-      <div class="tw-flex tw-flex-col tw-px-5 tw-py-3  tw-border-b lg:tw-border-b-0 lg:!tw-ml-5">
+      <div class="tw-flex tw-flex-col tw-px-5 tw-py-3 !tw-z-[1] tw-border-b lg:tw-border-b-0 lg:!tw-ml-5">
         <div class="tw-text-p tw-font-extrabold tw-text-[20px]">Indo para</div>
         <div class="tw-flex tw-items-center tw-text-p tw-text-[14px]">
           <v-autocomplete
@@ -41,7 +41,7 @@ import { VDateInput } from 'vuetify/labs/VDateInput'
         </div>
       </div>
 
-      <div class="tw-absolute tw-inset-0 tw-flex tw-justify-center lg:tw-justify-start lg:tw-left-[18%] tw-top-[53%] -tw-translate-y-1/2">
+      <div class="tw-absolute tw-inset-0 tw-flex !tw-z-[0]  tw-justify-center lg:tw-justify-start lg:tw-left-[18%] tw-top-[50%] -tw-translate-y-1/2">
         <v-btn variant="flat" color="secondary"  icon>
           <Icon icon="flowbite:arrows-repeat-outline" class="tw-text-[30px]" />
         </v-btn>
