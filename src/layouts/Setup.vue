@@ -7,7 +7,7 @@ import Header from "./Header.vue";
 </script>
 
 <template>
-  <div class="lp-wraper">
+  <div class="lp-wraper tw-bg-gray-50">
     <Header class="mb-auto border-t-lg  !tw-border-secondary" />
     <slot/>
     <Footer class="mt-auto"/>

@@ -43,7 +43,7 @@ const gallery = [
 
 <template>
   <div class=" tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between !tw-mt-5">
-   <div class="tw-flex tw-flex-col tw-items-center lg:tw-items-start  ">
+   <div class="tw-flex tw-flex-col tw-items-center lg:tw-items-start">
      <div class=" tw-text-[25px] lg:tw-text-[40px] lg:tw-w-[250px] tw-font-extrabold tw-text-center lg:tw-text-start tw-text-primary " >
        Rios de ofertas para<br>
        você navegar!
