@@ -16,16 +16,20 @@ const props = defineProps({
 const emit = defineEmits(['continue'])
 
 const rooms = ref([]);
+const roomsFree = ref([]);
 const roomsSelected = ref([]);
 const matrizRooms = ref([]);
 const openRooms = ref(false)
 const windowWidth = ref(window.innerWidth);
 const isLargeScreen = computed(()=> windowWidth.value >= 1024)
-
-const updateWidth = () => {
-  windowWidth.value = window.innerWidth;
-  matrizRooms.value = allRooms.value;
-};
+const hasCamarotesAndRede = computed(() => {
+  return props.data.tipos_comodos.some((item)=> item.id >= 2 && item.id <=4)
+})
+const quantityRoomsFree = computed(() => {
+  return roomsFree.value?.reduce((acc, room) => {
+    return acc + room.quantidade
+  },0)
+})
 
 const allRooms = computed(() => {
   const totalSpaces = props.data.linhas * props.data.colunas;
@@ -47,15 +51,39 @@ const allRooms = computed(() => {
   return linearRooms;
 });
 
+const updateWidth = () => {
+  windowWidth.value = window.innerWidth;
+  matrizRooms.value = allRooms.value;
+};
+
+function getQuantityRoomsFree() {
+  const params = new URLSearchParams();
+  params.append('trecho_id', props.data.id);
+  params.append('viagem_id', props.data.id_viagem);
+
+  routes['rooms.free'](params).then((response) => {
+    roomsFree.value = response.data.data;
+  });
+
+}
 function getRoomsByTrecho() {
   const params = new URLSearchParams();
   params.append('trecho_id', props.data.id);
   params.append('viagem_id', props.data.id_viagem);
 
-  routes['rooms.poltronas'](params).then((response) => {
-    rooms.value = response.data.data;
-    matrizRooms.value = allRooms.value; // Atualiza matriz completa
-  });
+  const tipoComodos = props.data.tipos_comodos.map(tipoComodo => tipoComodo.id)
+
+  if (tipoComodos.includes(1)){
+    routes['rooms.poltronas'](params).then((response) => {
+      rooms.value = response.data.data;
+      matrizRooms.value = allRooms.value;
+    });
+  }else if(tipoComodos.includes(4)){
+    routes['rooms.camarotes'](params).then((response) => {
+      rooms.value = response.data.data;
+    })
+  }
+
 }
 
 function onClickRoom(room) {
@@ -66,7 +94,7 @@ function onClickRoom(room) {
   }
 }
 
-function onClickSelect(){
+function onClickBtnSelect(){
   openRooms.value = !openRooms.value;
   if(openRooms.value){
     getRoomsByTrecho()
@@ -81,6 +109,44 @@ function onContinue() {
     rooms: roomsSelected.value,
   });
 }
+
+function formatarTempoViagem(tempo_viagem) {
+  if (typeof tempo_viagem === "number" || /^\d+$/.test(tempo_viagem)) {
+    const horas = parseInt(tempo_viagem, 10);
+    return `${String(horas).padStart(2, '0')}H00`;
+  }
+
+  if (typeof tempo_viagem === "string" && tempo_viagem.includes(':')) {
+    const [horas, minutos] = tempo_viagem.split(':');
+    const horasFormatadas = String(parseInt(horas, 10)).padStart(2, '0');
+    const minutosFormatados = String(parseInt(minutos, 10)).padStart(2, '0');
+    return `${horasFormatadas}H${minutosFormatados}`;
+  }
+
+  return "00H00";
+}
+
+function formatarHora(dataHora) {
+  if (typeof dataHora === "string" && dataHora.includes(' ')) {
+    const [data, hora] = dataHora.split(' ');
+    if (hora) {
+      const [horas, minutos] = hora.split(':');
+      const horasFormatadas = String(parseInt(horas, 10)).padStart(2, '0');
+      const minutosFormatados = String(parseInt(minutos, 10)).padStart(2, '0');
+      return `${horasFormatadas}H${minutosFormatados}`;
+    }
+  }
+  return "00H00";
+}
+
+
+function gerarStringTiposComodos(tiposComodos) {
+  if (Array.isArray(tiposComodos)) {
+    return tiposComodos.map(comodo => comodo.nome).join(" | ");
+  }
+  return "";
+}
+
 
 function generateLayout() {
   if (isLargeScreen.value) {
@@ -99,9 +165,9 @@ function generateLayout() {
 }
 
 
-
 onMounted(() => {
   window.addEventListener('resize', updateWidth);
+  getQuantityRoomsFree()
 });
 
 onBeforeUnmount(() => {
@@ -125,13 +191,13 @@ onBeforeUnmount(() => {
         </div>
         <div class="tw-flex lg:tw-ml-5 tw-text-[10px] tw-gap-4 lg:tw-gap-6 lg:tw-text-sm">
           <div>
-            Saída <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">13H00</span>
+            Saída <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{formatarHora(data.horario)}}</span>
           </div>
           <div>
-            Duração <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">07H00</span>
+            Duração <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{formatarTempoViagem(data.tempo_viagem)}}</span>
           </div>
           <div>
-            Tipo <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">POLTRONA</span>
+            Tipo <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{gerarStringTiposComodos(data.tipos_comodos)}}</span>
           </div>
         </div>
       </div>
@@ -143,7 +209,7 @@ onBeforeUnmount(() => {
           <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{data.valor}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
           <p class="tw-text-[10px] tw-text-gray-500">ou a partir de R$ 65,92 no cartão</p>
         </div>
-        <v-btn :variant="!openRooms ? 'flat': 'outlined'" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 py-1" size="xs" @click="onClickSelect">
+        <v-btn :variant="!openRooms ? 'flat': 'outlined'" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 py-1" size="xs" @click="onClickBtnSelect">
           <Icon icon="icon-park-outline:ticket" width="20"  class="mr-1 " :class="!openRooms ? 'tw-text-white' : ''" /><span class=" !tw-text-xs " :class="!openRooms ? 'tw-text-white' : ''" >{{!openRooms ? 'Selecionar' : 'Cancelar'}}</span>
         </v-btn>
       </div>
@@ -173,7 +239,7 @@ onBeforeUnmount(() => {
             </v-col>
           </v-row>
           <v-container class="tw-max-w-[350px]  tw-flex ">
-            <Boat>
+            <Boat v-if="matrizRooms.length > 0">
               <div :style="generateLayout()" class="tw-h-full">
                 <div
                     v-for="(comodo, index) in matrizRooms"
@@ -190,6 +256,33 @@ onBeforeUnmount(() => {
                 <div class="tw-text-p tw-text-sm">selecione outro lugar.</div>
               </div>
             </Boat>
+            <v-container v-if="hasCamarotesAndRede">
+              <v-row>
+                <v-col v-for="item in rooms[4]" cols="12">
+                  <v-card
+                      flat
+                      @click="!item.is_ocupado ? onClickRoom(item) : ''"
+                      :class="(item.is_ocupado ? '!tw-bg-secondary tw-cursor-not-allowed' : roomsSelected.includes(item) ? '!tw-bg-yellow-400' : '!tw-bg-green-400')"
+                  >
+                    <v-row class="tw-p-3 !tw-text-white">
+                      <v-col cols="9" class=" tw-text-xs">
+                        {{item.nome}}
+                      </v-col>
+                      <v-col cols="3" class=" tw-text-sm tw-flex tw-items-center  tw-justify-end">
+                        <Icon icon="el:person" width="15"  class="mr-1 "/>{{item.quantidade}}
+                      </v-col>
+                      <v-col cols="6" class=" tw-text-xs !tw-pt-0 ">
+                        Valor
+                      </v-col>
+                      <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
+                        {{formatCurrency(item.comodo_trechos.valor)}}
+                      </v-col>
+                    </v-row>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-container>
+
           </v-container>
         </div>
         <v-divider  :thickness="1" class="border-opacity-100 tw-my-2 tw-hidden lg:tw-block mt-5 " ></v-divider>
@@ -237,7 +330,7 @@ onBeforeUnmount(() => {
     </div>
     <div class="lg:tw-flex tw-justify-between tw-items-center lg:tw-flex-row-reverse">
       <div class="tw-flex tw-justify-between tw-items-center  py-2 lg:tw-gap-3">
-        <div class="tw-text-[12px] lg:tw-text-sm">Restam <strong class="tw-font-extrabold">3 LUGARES</strong> com esse preço</div>
+        <div class="tw-text-[12px] lg:tw-text-sm">Restam <strong class="tw-font-extrabold">{{quantityRoomsFree}} LUGARES</strong> com esse preço</div>
         <SuperOfferStampTwo v-if="false"/>
       </div>
       <v-divider  :thickness="1" class="border-opacity-100 tw-my-2 lg:!tw-hidden" ></v-divider>
