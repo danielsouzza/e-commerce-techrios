@@ -6,6 +6,7 @@ import App from './App.vue'
 import { createVuetify } from 'vuetify'
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
+import VueTheMask from 'vue-the-mask'
 import '@mdi/font/css/materialdesignicons.css';
 
 import router from './routes'
@@ -23,4 +24,4 @@ const vuetify = createVuetify({
     },
 })
 
-createApp(App).use(router).use(vuetify).mount('#app')
+createApp(App).use(VueTheMask).use(router).use(vuetify).mount('#app')

@@ -13,10 +13,10 @@ import { VDateInput } from 'vuetify/labs/VDateInput'
         <v-card-title class="tw-text-wrap !tw-whitespace-normal !tw-px-2 !tw-pb-0 ">Cadastre seu e-mail e telefone para receber ofertas e descontos</v-card-title>
         <v-row class="tw-w-full lg:tw-items-center ">
           <v-col cols="12" lg="6" md="6">
-            <v-text-field class="my-class px-2 " hide-details="auto" flat variant="solo" placeholder="DIGITE SEU E-MAIL"></v-text-field>
+            <v-text-field :autofocus="false" class="my-class px-2 " hide-details="auto" flat variant="solo" placeholder="DIGITE SEU E-MAIL"></v-text-field>
           </v-col>
           <v-col  cols="12" lg="6" md="6">
-            <v-text-field class="my-class px-2 " hide-details="auto" flat variant="solo" placeholder="DIGITE SEU WHATSAPP"></v-text-field>
+            <v-text-field  :autofocus="false" class="my-class px-2 " hide-details="auto" flat variant="solo" placeholder="DIGITE SEU WHATSAPP"></v-text-field>
           </v-col>
         </v-row>
 

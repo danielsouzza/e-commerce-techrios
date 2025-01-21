@@ -7,7 +7,6 @@ import FeaturedTrip from "../components/app/FeaturedTrip.vue";
 import TravelAtUnbeatablePrices from "../components/app/TravelAtUnbeatablePrices.vue";
 import {routes} from "../services/fetch.js";
 import {onMounted, ref} from "vue";
-import { useDate } from 'vuetify'
 import router from "../routes/index.js";
 
 const filtersData = ref([])

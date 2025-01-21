@@ -1,11 +1,24 @@
 <script setup>
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import AppLogo from "../components/ui-components/AppLogo.vue";
 import Navigation from "./Navigation.vue";
 import {Icon} from "@iconify/vue";
 import MobileSidebar from "./MobileSidebar.vue";
+import {routes} from "../services/fetch.js";
 
 const appsdrawer = ref(false);
+const auth = ref(null)
+
+function getUser() {
+  routes['user.me']().then((res) => {
+    console.log(res)
+    auth.value = res.data.data;
+  })
+}
+
+onMounted(()=>{
+  getUser()
+})
 
 </script>
 
@@ -28,9 +41,12 @@ const appsdrawer = ref(false);
                 <div class="navigation d-lg-flex d-none">
                   <Navigation />
                 </div>
-                <v-btn variant="outlined" color="secondary" rounded class=" d-lg-flex d-none !tw-font-extrabold ">
-                  <Icon icon="mdi:account-circle-outline" width="25"  class="mr-2"/> MINHA CONTA
-                </v-btn>
+                <RouterLink  :to="{name: 'login'}">
+                  <v-btn variant="outlined" color="secondary" rounded class=" d-lg-flex d-none !tw-font-extrabold ">
+                    <Icon icon="mdi:account-circle-outline" width="25"  class="mr-2"/> {{auth?.name ?? 'MINHA CONTA'}}
+                  </v-btn>
+                </RouterLink>
+
                 <v-btn variant="flat" color="success" rounded  class="d-lg-flex d-none !tw-font-extrabold  ">
                   <Icon icon="ic:baseline-whatsapp" width="25"  class="mr-2 tw-text-white" /><span class="tw-text-white ">ATENDIMENTO</span>
                 </v-btn>
