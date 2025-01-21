@@ -22,7 +22,7 @@ import CardPayment from "../components/shared/CardPayment.vue";
 import CopyToClipboard from "../components/shared/CopyToClipboard.vue";
 
 
-
+const auth = ref(null)
 const route = useRoute();
 const ticketSelected = ref([])
 const filtersData = ref([])
@@ -61,7 +61,7 @@ const formSale = reactive({
     telefone:'',
     tipo_doc:null,
     data_nascimento:null,
-    document:'',
+    document:"",
   },
   dataComodos:[],
   dataVolta:null,
@@ -262,11 +262,21 @@ function addCompradorComoPassageiro(){
   console.log(formSale)
 }
 
-
+function getUser() {
+  routes['user.me']().then((res) => {
+    auth.value = res.data.data;
+    formSale.contato.nome = auth.value.name
+    formSale.contato.email = auth.value.email
+    formSale.contato.nascimento = new Date(auth.value.comprador.nascimento)
+    formSale.contato.telefone = auth.value.comprador.telefone
+    formSale.contato.document = auth.value.comprador.cpf_cnpj
+  })
+}
 
 onMounted(() => {
-  updateFilters();
+  updateFilters()
   getFilterItems()
+  getUser()
   getTrechosWithTravels()
 });
 

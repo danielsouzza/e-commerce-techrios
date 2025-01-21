@@ -11,7 +11,6 @@ const auth = ref(null)
 
 function getUser() {
   routes['user.me']().then((res) => {
-    console.log(res)
     auth.value = res.data.data;
   })
 }
