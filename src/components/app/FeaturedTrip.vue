@@ -4,11 +4,12 @@ import {Icon} from "@iconify/vue";
 import CardTicket from "../shared/CardTrip.vue";
 import {Carousel, Pagination, Slide} from "vue3-carousel";
 import CardTripFull from "../shared/CardTripFull.vue";
-import {ref} from "vue";
+import {computed, onMounted, ref} from "vue";
+import {routes} from "../../services/fetch.js";
 'vue3-carousel/dist/carousel.css'
 
 
-
+const isDragging = ref(false);
 const config_1 = {
   itemsToShow: 1,
   gap:5,
@@ -38,18 +39,16 @@ const config_2 = {
   gap:5,
   wrapAround: true,
   breakpoints: {
-    // 300px and up
     300: {
       itemsToShow: 1.5,
       snapAlign: 'center',
     },
-    // 400px and up
     400: {
       itemsToShow: 2,
       snapAlign: 'center',
     },
-    // 500px and up
     500: {
+      mouseDrag:false,
       itemsToShow: 2,
       snapAlign: 'start',
       gap:10,
@@ -57,14 +56,32 @@ const config_2 = {
   },
 };
 
+const trechosWithTravels = ref([])
 const currentSlide = ref(0);
 
-const gallery = [
-  {id:1},
-  {id:2},
-  {id:3},
-  {id:4},
-]
+
+const travels_more_important = computed(()=>{
+  return trechosWithTravels.value.data?.trechos?.data.slice(0,3)
+})
+
+const travels_les_important = computed(()=>{
+  return trechosWithTravels.value.data?.trechos?.data.slice(3,5)
+})
+
+
+function getTrechosWithTravels() {
+  const params = new URLSearchParams()
+  params.append('quantia', 5)
+
+  routes["trechos-viagem"](params).then(response => {
+    trechosWithTravels.value = response.data
+  })
+}
+
+
+onMounted(()=>{
+  getTrechosWithTravels()
+})
 
 </script>
 
@@ -84,8 +101,8 @@ const gallery = [
 
       <div class="lg:!tw-w-[50%] !tw-w-full !tw-rounded-xl ">
         <Carousel v-bind="config_1" class="tw-w-[100vw] !tw-rounded-xl lg:tw-w-full tw-mb-4 my-carrousel my-carrousel">
-          <Slide v-for="n in 4" :key="n"  class="tw-px-5">
-            <CardTripFull/>
+          <Slide v-for="(item,n) in travels_more_important" :key="item.id"  class="tw-px-5 lg:tw-px-0">
+            <CardTripFull :data="item"/>
           </Slide>
           <template #addons>
             <Pagination class=" "/>
@@ -93,9 +110,9 @@ const gallery = [
         </Carousel>
       </div>
       <div class="lg:!tw-w-[50%] tw-h-full tw-hidden lg:tw-block">
-        <Carousel v-bind="config_2" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-h-full tw-mb-4 my-carrousel">
-          <Slide v-for="n in gallery" :key="n.id" >
-            <CardTicket :active="currentSlide === n.id -1"/>
+        <Carousel @drag="isDragging=true" @slideEnd="isDragging=false" v-bind="config_2" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-h-full tw-mb-4 my-carrousel">
+          <Slide v-for="(item,n) in travels_les_important" :key="item.id" >
+            <CardTicket :dragging="isDragging" :data="item" :active="currentSlide === n -1"/>
           </Slide>
         </Carousel>
       </div>

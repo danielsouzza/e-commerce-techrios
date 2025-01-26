@@ -4,9 +4,14 @@ import 'vue3-carousel/dist/carousel.css'
 import CardTicket from "../shared/CardTrip.vue";
 import { Carousel, Slide, Pagination } from 'vue3-carousel'
 import IconsBoat from "../ui-components/IconsBoat.vue";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
+import {routes} from "../../services/fetch.js";
+import {municipioLabel} from "../../Helper/Ultis.js";
 
+const origem = ref(null)
+const municipios = ref([]);
 const currentSlide = ref(0);
+const trechosWithTravels = ref([])
 
 
 const config = {
@@ -28,6 +33,7 @@ const config = {
     500: {
       itemsToShow: 3,
       gap:10,
+      mouseDrag:false,
       snapAlign: 'start',
     },
   },
@@ -39,6 +45,30 @@ const gallery = [
   {id:3},
   {id:4},
 ]
+
+function getMunicipios(search='') {
+  routes['municipios']({search:search}).then((response) => {
+    console.log(response);
+    municipios.value = response.data.data;
+  })
+}
+
+function getTrechosWithTravels() {
+  const params = new URLSearchParams()
+  params.append('com_desconto', 1)
+  params.append('origem', origem.value?.codigo || '')
+  params.append('quantia', 3)
+
+  routes["trechos-viagem"](params).then(response => {
+    trechosWithTravels.value = response.data
+    getMunicipios()
+  })
+}
+
+onMounted(()=>{
+  getTrechosWithTravels()
+  getMunicipios()
+})
 
 </script>
 
@@ -57,21 +87,27 @@ const gallery = [
        </v-btn>
      </div>
      <div class="tw-mb-3 ">
-       <div class="tw-flex tw-text-p   "><IconsBoat/> <span  class="tw-ml-3 tw-flex tw-flex-wrap">Viagens saindo de &nbsp;<span class="tw-text-primary tw-font-black" > {{'Santarém, PA'}}</span></span></div>
+       <div class="tw-flex tw-text-p   "><IconsBoat/> <span  class="tw-ml-3 tw-flex tw-flex-wrap">Viagens saindo de &nbsp;<span class="tw-text-primary tw-font-black" > {{municipioLabel(origem)}}</span></span></div>
        <v-autocomplete
            flat
            hide-details
            variant="solo"
+           v-model="origem"
+           item-value="codigo"
+           item-title="nome"
+           return-object
            placeholder="Alterar ponto de partida"
            class="my-select mt-1"
-           :items="['California', 'Colorado', 'Florida', 'Georgia', 'Texas', 'Wyoming']">
+           @update:search="getMunicipios"
+           @update:modelValue="getTrechosWithTravels"
+           :items="municipios">
        </v-autocomplete>
      </div>
    </div>
     <div class="lg:!tw-w-[75%] ">
       <Carousel v-bind="config" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-mb-4 my-carrousel">
-        <Slide v-for="n in gallery" :key="n.id" >
-          <CardTicket :active="currentSlide === n.id -1"/>
+        <Slide v-for="(item, n) in trechosWithTravels.data?.trechos?.data" :key="item.id">
+          <CardTicket :data="item" :active="currentSlide === n -1"/>
         </Slide>
         <template #addons>
           <Pagination class="!tw-bottom-[-30px] "/>
@@ -91,6 +127,9 @@ const gallery = [
   min-height: 42px !important;
   padding-top: 0!important;
   padding-bottom: 0!important;
+}
+.my-select::v-deep(.v-field__input.v-autocomplete__selection) {
+  @apply !tw-text-center !tw-w-full
 }
 
 .my-select::v-deep(input) {

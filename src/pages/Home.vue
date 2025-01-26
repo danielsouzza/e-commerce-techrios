@@ -52,7 +52,6 @@ onMounted(() => {
 <template>
   <Banner1 />
   <div class="maxWidth tw-flex tw-flex-col ">
-
     <CardFilter
         v-model="filtersSelected"
         @update:modelValue="goToSalePage"

@@ -3,7 +3,6 @@ import {Icon} from "@iconify/vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
 
 
-
 const props = defineProps({
   modelValue: Object,
   options:Object,
@@ -13,6 +12,13 @@ const emit = defineEmits(['update:modelValue'])
 
 function updateFilters(){
   emit('update:modelValue',props.modelValue);
+}
+
+function invertFilter(){
+  const temp = props.modelValue.origem;
+  props.modelValue.origem = props.modelValue.destino;
+  props.modelValue.destino = temp;
+  updateFilters()
 }
 
 </script>
@@ -63,8 +69,8 @@ function updateFilters(){
       </div>
 
       <div
-          class="tw-absolute tw-w-[50px] tw-h-[50px] tw-flex tw-justify-center lg:tw-justify-start lg:tw-left-[18%] lg:tw-top-[50%] tw-left-[46%] tw-top-[40%] -tw-translate-y-1/2 !tw-z-[0]">
-        <v-btn variant="flat" color="secondary" icon>
+          class="tw-absolute tw-w-[50px] tw-h-[50px] tw-flex tw-justify-center lg:tw-justify-start lg:tw-left-[18%] lg:tw-top-[50%] tw-left-[43%] tw-top-[37%] -tw-translate-y-1/2 !tw-z-[0]">
+        <v-btn @click="invertFilter" variant="flat" color="secondary" icon>
           <Icon icon="flowbite:arrows-repeat-outline" class="tw-text-[30px]" />
         </v-btn>
       </div>
@@ -104,8 +110,8 @@ function updateFilters(){
         </div>
       </div>
       <div class="tw-flex tw-flex-col tw-col-span-2 lg:tw-col-span-1 tw-w-full tw-h-full ">
-        <v-btn class="tw-w-full !tw-h-full " variant="flat" color="secondary" rounded="0">
-          <div @click="updateFilters" class="tw-text-[20px] tw-flex tw-items-center tw-text-white tw-font-[900] tw-my-3 tw-normal-case">
+        <v-btn @click="updateFilters" class="tw-w-full !tw-h-full " variant="flat" color="secondary" rounded="0">
+          <div  class="tw-text-[20px] tw-flex tw-items-center tw-text-white tw-font-[900] tw-my-3 tw-normal-case">
             <Icon icon="majesticons:search-line" class="tw-text-[30px] tw-text-black tw-mr-1 " />Buscar
           </div>
         </v-btn>

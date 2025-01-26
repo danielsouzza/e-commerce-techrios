@@ -1,10 +1,34 @@
 <script setup>
 import Setup from "./layouts/Setup.vue";
+import {onMounted, ref} from "vue";
+
+const isLoading = ref(true);
+
+onMounted(() => {
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 500);
+});
+
 </script>
 
 <template>
   <Setup>
-    <router-view></router-view>
+    <v-overlay
+        v-model="isLoading"
+        persistent
+        contained
+        opacity="90%"
+        class="align-center justify-center"
+    >
+      <v-progress-circular
+          width="2"
+          color="white"
+          size="90"
+          indeterminate
+      ></v-progress-circular>
+    </v-overlay>
+    <router-view ></router-view>
   </Setup>
 </template>
 

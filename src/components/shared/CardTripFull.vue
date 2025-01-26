@@ -1,10 +1,27 @@
 <script setup>
 
 import SuperOfferStamp from "../ui-components/SuperOfferStamp.vue";
+import {municipioLabel} from "../../Helper/Ultis.js";
+import router from "../../routes/index.js";
+
+const props = defineProps({
+  data: Object,
+  dragging:Boolean,
+})
+
+function goToSalePage(){
+  if(props.dragging)return;
+  router.push({name: "sale",query: {
+      destino: props.data?.municipio_destiino.codigo,
+      origem: props.data?.municipio_origem.codig,
+      dataIda: props.data?.data_embarque,
+    }})
+}
+
 </script>
 
 <template>
-  <div class="tw-relative tw-w-[100vw] lg:tw-w-full tw-h-full tw-rounded-xl tw-overflow-hidden tw-shadow-lg">
+  <div  @click="goToSalePage" class="tw-relative tw-w-[100vw] lg:tw-w-full tw-h-full tw-rounded-xl tw-overflow-hidden tw-shadow-lg tw-cursor-pointer">
     <div
         class="tw-w-full tw-h-[300px] md:tw-h-[500px] lg:tw-h-[405px] !tw-rounded-xl tw-bg-cover tw-bg-center "
         style="background-image: url('./src/_mockData/banners/banner-primary-1.png');">
@@ -17,12 +34,12 @@ import SuperOfferStamp from "../ui-components/SuperOfferStamp.vue";
 
       <div class="tw-flex tw-justify-between tw-mb-5 tw-items-end">
         <div class="tw-font-extrabold">
-          <p class="tw-mt-2 tw-text-gray-200 tw-text-sm ">Santa Cruz, PA</p>
-          <p class="tw-text-gray-200 tw-text-sm ">Santarém, PA</p>
+          <p class="tw-mt-2 tw-text-gray-200 tw-text-sm "> {{municipioLabel(data?.municipio_origem)}}</p>
+          <p class="tw-text-gray-200 tw-text-sm ">{{ municipioLabel(data?.municipio_destiino)}}</p>
         </div>
         <div>
           <div class="tw-flex tw-items-baseline tw-mt-2">
-            <span class="tw-text-3xl tw-font-black tw-text-secondary">R$90,00</span>
+            <span class="tw-text-3xl tw-font-black tw-text-secondary">{{data?.valor}}</span>
             <span class="tw-text-gray-300 tw-text-sm tw-ml-2">no PIX</span>
           </div>
           <p class="tw-text-gray-300 tw-text-xs">

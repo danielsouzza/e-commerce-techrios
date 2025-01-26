@@ -17,13 +17,14 @@ import {
 } from "../Helper/Ultis.js";
 import PassegerForm from "../components/app/PassegerForm.vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
-import router from "../routes/index.js";
 import CardPayment from "../components/shared/CardPayment.vue";
 import CopyToClipboard from "../components/shared/CopyToClipboard.vue";
 
 
-const auth = ref(null)
 const route = useRoute();
+const windowWidth = ref(window.innerWidth);
+const menu = ref(false)
+const auth = ref(null)
 const ticketSelected = ref([])
 const filtersData = ref([])
 const stepSale = ref(1)
@@ -31,7 +32,7 @@ const orderResponse = ref(null)
 const orderPending = ref(null)
 const orderConfirmation = ref(null)
 const trechosWithTravels = ref([])
-const waitPayment = ref(false)
+const waitServe = ref(false)
 const formPayment = reactive({
   order_id:null,
   payment_method_id:null,
@@ -40,7 +41,7 @@ const formPayment = reactive({
     card_number:null,
     expiration_date:'',
     security_code:null,
-    installment_quantity:null,
+    installment_quantity:1,
   }
 })
 const filtersSelected = ref({
@@ -48,6 +49,9 @@ const filtersSelected = ref({
   destino:null,
   dataIda:null,
   dataVolta:null,
+  intervalo:null,
+  tipo_comodidade_id:null,
+  quantia:8
 })
 const formSale = reactive({
   trecho:null,
@@ -73,27 +77,57 @@ const tiposDoc = [
   { id:4, nome: 'CNH', tamanho: 11, mask: '###########' },
   { id:5, nome: 'CPF', tamanho: 0, mask: '###.###.###-##' }
 ];
-const months = ["01","02","03","04","05","06","07","08","09","10","11","12"]
+const nextDays = ref([])
 const years = computed(() => {
       const currentYear = new Date().getFullYear();
       return  Array.from({ length: 21 }, (_, i) => `${currentYear + i}`);
     })
+const isLargeScreen = computed(()=> windowWidth.value >= 1024)
+const months = ["01","02","03","04","05","06","07","08","09","10","11","12"]
+const updateWidth = () => {
+  windowWidth.value = window.innerWidth;
+  generateNextDays()
+};
 
 const updateFilters = () => {
   filtersSelected.value.origem = parseInt(route.query.origem) || null;
   filtersSelected.value.destino = parseInt(route.query.destino) || null;
   filtersSelected.value.dataIda = new Date(route.query.dataIda) || '';
   filtersSelected.value.dataVolta = route.query.dataVolta || null;
+  generateNextDays()
 };
+
+function generateNextDays() {
+  if(filtersSelected.value.dataIda){
+    let date = filtersSelected.value.dataIda
+    let futureDates = [];
+    const start = isLargeScreen.value ? -3 : -1;
+    const end = isLargeScreen.value ? 4 : 2;
+    for (let i = start; i < end; i++) {
+      let futureDate = new Date(date);
+      futureDate.setDate(date.getDate() + i);
+      futureDates.push(futureDate);
+    }
+    nextDays.value =  futureDates;
+  }
+}
 
 function getTrechosWithTravels() {
   const params = new URLSearchParams()
   params.append('origem', filtersSelected.value.origem || '')
   params.append('destino', filtersSelected.value.destino || '')
   params.append('data_hora', formatDate(filtersSelected.value.dataIda) || '')
+  params.append('intervalo', filtersSelected.value.intervalo || '')
+  params.append('tipo_comodidade_id', filtersSelected.value.tipo_comodidade_id || '')
+  params.append('quantia', filtersSelected.value.quantia || '')
   routes["trechos-viagem"](params).then(response => {
     trechosWithTravels.value = response.data
-    console.log(trechosWithTravels.value)
+    const date = filtersSelected.value.dataIda.getDate()
+    const first = nextDays.value[0].getDate()
+    const last = nextDays.value[nextDays.value.length -1 ].getDate()
+    if(date == first || date == last){
+      generateNextDays();
+    }
   })
 }
 
@@ -103,6 +137,13 @@ function getFilterItems(){
       filtersData.value = res.data.data;
     }
   })
+}
+
+function formatDates(date) {
+  const daysOfWeek = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  let dayOfWeek = daysOfWeek[date.getDay()];
+  let day = date.getDate();
+  return `${dayOfWeek} ${day}`;
 }
 
 function nextStep(){
@@ -187,23 +228,28 @@ function checkStatusPayment(){
     console.log(res.data)
     if(res.data.success){
       orderConfirmation.value = res.data.data;
+      stepSale.value = 5
     }
+    waitServe.value = false
+  }).catch(err=>{
+    waitServe.value = false
   })
 }
 
 function submitPaymentCredit(){
   formPayment.payment_method_id = 3
-
+  waitServe.value = true
   routes["payment.credito"](formPayment).then(res => {
     console.log(res.data)
     if(res.data.success){
-      orderPending.value = res.data.data;
-      waitPayment.value = true
-      nextStep()
-      setTimeout(()=>{
-        checkStatusPayment()
-      },5000)
+      orderConfirmation.value = res.data.data;
+      stepSale.value = 5
     }
+    waitServe.value = false
+  }).catch(error=>{
+    stepSale.value = 3
+    waitServe.value = false
+    console.log(error)
   })
 }
 
@@ -213,7 +259,7 @@ function submitPaymentPix(){
     console.log(res.data)
     if(res.data.success){
       orderPending.value = res.data.data;
-      waitPayment.value = true
+      waitServe.value = true
       nextStep()
       setTimeout(()=>{
         checkStatusPayment()
@@ -273,11 +319,17 @@ function getUser() {
   })
 }
 
+function showMoreticket(){
+  filtersSelected.value.quantia += 5
+  getTrechosWithTravels()
+}
+
 onMounted(() => {
   updateFilters()
   getFilterItems()
   getUser()
   getTrechosWithTravels()
+  window.addEventListener('resize', updateWidth);
 });
 
 
@@ -286,13 +338,9 @@ onMounted(() => {
 <template>
   <v-card  color="primary" rounded="0"  class="!tw-py-6">
     <div class="maxWidth tw-flex lg:!tw-mb-[50px] !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
-      <div class="text-center lg:tw-text-start tw-py-4 px-5 lg:tw-text-lg">Passagem de <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem',filtersData)}}</strong> para <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}</strong></div>
-      <v-btn color="secondary" class="mb-3 lg:!tw-hidden" variant="outlined" rounded >
-        <div class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
-          <Icon icon="flowbite:arrows-repeat-outline" class="mr-2 tw-text-xl"/>
-          INVERTER
-        </div>
-      </v-btn>
+      <div class="text-center lg:tw-text-start tw-py-4 px-5 lg:tw-text-lg">
+        Passagem de <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem',filtersData)}}</strong> para <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}</strong>
+      </div>
     </div>
   </v-card>
 
@@ -301,19 +349,86 @@ onMounted(() => {
         v-model="filtersSelected"
         @update:modelValue="getTrechosWithTravels()"
         :options="filtersData"
-        class=" tw-top-[-30px]  !tw-mb-[-30px] lg:tw-top-[-70px] lg:!tw-mb-[-70px] !tw-mx-5 lg:!tw-mx-0 !tw-hidden lg:!tw-block" />
-    <v-card flat  class=" my-3 !tw-px-3 !tw-py-2 !tw-hidden">
-      <div class="tw-flex tw-justify-between tw-items-center tw-p-2 tw-text-[12px] tw-rounded-lg">
-        <div class="tw-text-p tw-font-semibold ">Dom, 28 abr</div>
-        <div class="tw-text-p tw-flex tw-items-center tw-font-semibold">Alterar data Viagem <Icon icon="uis:calendar" class="ml-2"/></div>
-      </div>
-    </v-card>
+        class=" tw-top-[-30px]  !tw-mb-[-30px] lg:tw-top-[-70px] lg:!tw-mb-[-70px] !tw-mx-5 lg:!tw-mx-0  lg:!tw-block" />
     <div v-if="stepSale == 1" class="tw-flex tw-justify-between tw-items-center  tw-px-3 mt-5 lg:!tw-hidden">
       <div class="tw-font-bold  ">
         Selecionar sua viagem
       </div>
       <div class="tw-flex tw-justify-between tw-text-sm tw-items-center tw-text-p/50 tw-font-semibold">
-        Filtrar  <Icon icon="mage:filter-fill" class="ml-2 tw-text-xl tw-text-p"/>
+        <v-menu
+            v-model="menu"
+            :close-on-content-click="false"
+        >
+          <template v-slot:activator="{ props }">
+            <v-btn flat v-bind="props">
+              Filtrar  <Icon icon="mage:filter-fill" class="ml-2 tw-text-xl tw-text-p"/>
+            </v-btn>
+          </template>
+
+          <v-card min-width="300" class="mt-3">
+
+            <v-card rounded="lg" flat class=" tw-h-full">
+              <v-container fluid>
+                <p class="tw-font-semibold tw-px-3">Horário de Saída</p>
+                <div>
+                  <v-checkbox
+                      v-model="filtersSelected.intervalo"
+                      label="Manhã(6h - 11h59)"
+                      hide-details
+                      value="06:00 11:59"
+                  ></v-checkbox>
+                  <v-checkbox
+                      v-model="filtersSelected.intervalo"
+                      label="Tarde(12h - 17h59)"
+                      hide-details
+                      value="12:00 17:59"
+                  ></v-checkbox>
+                  <v-checkbox
+                      v-model="filtersSelected.intervalo"
+                      label="Noite(18h -23h59)"
+                      hide-details
+                      value="18:00 23:59"
+                  ></v-checkbox>
+                  <v-checkbox
+                      v-model="filtersSelected.intervalo"
+                      label="Madrugada(00h - 5h59)"
+                      hide-details
+                      value="00:00 05:59"
+                  ></v-checkbox>
+                </div>
+
+                <p class="tw-font-semibold tw-px-3 mt-1">Tipo de Assento</p>
+                <div>
+                  <v-checkbox
+                      v-for="item in trechosWithTravels.data?.tiposComodidade"
+                      v-model="filtersSelected.tipo_comodidade_id"
+                      :label="item.nome"
+                      hide-details
+                      :value="item.id"
+                  ></v-checkbox>
+                </div>
+              </v-container>
+            </v-card>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+
+              <v-btn
+                  variant="text"
+                  @click="menu = false"
+              >
+                Fechar
+              </v-btn>
+              <v-btn
+                  color="primary"
+                  variant="text"
+                  @click="getTrechosWithTravels();menu = false"
+              >
+                Buscar
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-menu>
       </div>
     </div>
     <div class="lg:tw-flex tw-items-center !tw-my-10  tw-hidden">
@@ -338,61 +453,55 @@ onMounted(() => {
 
       <v-divider  :thickness="1" class="border-opacity-100  " ></v-divider>
 
-      <v-btn variant="outlined" :color=" stepSale == 4 ? 'secondary' : 'grey100'" rounded>
+      <v-btn variant="outlined" :color="stepSale > 4 ? 'success' : stepSale == 4 ? 'secondary' : 'grey100'" rounded>
         <Icon icon="icon-park-outline:ticket" class="ml-2 tw-text-xl"/>
         CONFIRMAÇÃO DA VIAGEM
       </v-btn>
     </div>
-    <div v-if="stepSale == 1" class="tw-flex tw-justify-between my-3 tw-gap-10">
-      <v-card width="30%" rounded="lg" flat class="lg:!tw-block !tw-hidden tw-h-full">
+    <div v-if="stepSale == 1" class="tw-flex tw-justify-between my-3 tw-gap-10 !tw-w-full">
+      <v-card width="30%" rounded="lg" flat class="xl:!tw-block !tw-hidden tw-h-full">
         <v-container fluid>
           <p class="tw-font-semibold tw-px-3">Horário de Saída</p>
           <div>
             <v-checkbox
-                v-model="selected"
-                label="Manhã(6h - 1h59)"
+                v-model="filtersSelected.intervalo"
+                @update:modelValue="getTrechosWithTravels"
+                label="Manhã(6h - 11h59)"
                 hide-details
-                value="John"
+                value="06:00 11:59"
             ></v-checkbox>
             <v-checkbox
-                v-model="selected"
+               v-model="filtersSelected.intervalo"
+               @update:modelValue="getTrechosWithTravels"
                 label="Tarde(12h - 17h59)"
                 hide-details
-                value="Jacob"
+                value="12:00 17:59"
             ></v-checkbox>
             <v-checkbox
-                v-model="selected"
+               v-model="filtersSelected.intervalo"
+               @update:modelValue="getTrechosWithTravels"
                 label="Noite(18h -23h59)"
                 hide-details
-                value="Jacob"
+                value="18:00 23:59"
             ></v-checkbox>
             <v-checkbox
-                v-model="selected"
+               v-model="filtersSelected.intervalo"
+               @update:modelValue="getTrechosWithTravels"
                 label="Madrugada(00h - 5h59)"
                 hide-details
-                value="Jacob"
+                value="00:00 05:59"
             ></v-checkbox>
           </div>
 
           <p class="tw-font-semibold tw-px-3 mt-1">Tipo de Assento</p>
           <div>
             <v-checkbox
-                v-model="selected"
-                label="Assento/Poltrona"
+                v-for="item in trechosWithTravels.data?.tiposComodidade"
+                v-model="filtersSelected.tipo_comodidade_id"
+                :label="item.nome"
+                @update:modelValue="getTrechosWithTravels"
                 hide-details
-                value="John"
-            ></v-checkbox>
-            <v-checkbox
-                v-model="selected"
-                label="Rede"
-                hide-details
-                value="Jacob"
-            ></v-checkbox>
-            <v-checkbox
-                v-model="selected"
-                label="Camarote"
-                hide-details
-                value="Jacob"
+                :value="item.id"
             ></v-checkbox>
           </div>
 
@@ -419,14 +528,34 @@ onMounted(() => {
           </div>
         </v-container>
       </v-card>
-      <div class="tw-flex tw-flex-col tw-gap-3 tw-w-full">
-        <v-card  flat  class=" my-3 !tw-px-3 !tw-py-2">
-          <div class="tw-flex tw-justify-between tw-items-center tw-p-2 tw-text-[12px]">
-            <div class="tw-text-p tw-font-semibold ">Dom, 28 abr</div>
-            <div class="tw-text-p tw-flex tw-items-center tw-font-semibold">Alterar data Viagem <Icon icon="uis:calendar" class="ml-2"/></div>
+      <div class="tw-flex tw-flex-col tw-gap-3 !tw-w-full">
+        <v-card  flat  class=" mb-3 !tw-px-3 !tw-py-2  lg:!tw-block">
+          <div class="tw-flex tw-gap-10 tw-items-center tw-justify-center tw-p-2 tw-text-[12px]">
+            <v-btn
+                   flat
+                   v-for="date in nextDays"
+                   :key="date.getDate()"
+                   :active="filtersSelected.dataIda.getDate() == date.getDate()"
+                   @click="filtersSelected.dataIda = date; getTrechosWithTravels()"
+            >
+              <span class="tw-text-p tw-font-semibold tw-text-xs">{{ formatDates(date) }}</span>
+            </v-btn>
           </div>
         </v-card>
-        <CardTicket v-for="item in trechosWithTravels.data?.trechos?.data" :data="item" class="!tw-h-fit" @continue="saveTicket"></CardTicket>
+
+        <div class="tw-w-full tw-flex tw-flex-col tw-gap-3 tw-items-center ">
+          <CardTicket
+              v-for="item in trechosWithTravels.data?.trechos?.data"
+              :data="item"
+              class=" !tw-w-full !tw-h-fit "
+              @continue="saveTicket"
+          ></CardTicket>
+        </div>
+
+        <v-btn @click="showMoreticket" v-if="filtersSelected.quantia <= trechosWithTravels.data?.trechos.total" flat variant="plain" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+          <Icon icon="line-md:arrow-down" class="mr-2 tw-text-xl"/>
+          Mostrar mais
+        </v-btn>
       </div>
     </div>
 
@@ -442,7 +571,7 @@ onMounted(() => {
 
               <v-row class="!tw-text-gray-500 tw-font-semibold tw-text-xs">
                 <v-col cols="6" lg="12" class="tw-flex tw-items-center  ">
-                  <Icon icon="uis:calendar" class="mr-2" width="15"/>{{ticketSelected.trecho.horario}}
+                  <Icon  icon="uis:calendar" class="mr-2" width="15"/>{{ticketSelected.trecho.horario}}
                 </v-col>
                 <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
                   <Icon icon="iconamoon:clock-fill" class="mr-2" width="15"/>{{formatarTempoViagem(ticketSelected.trecho.tempo_viagem)}}
@@ -463,7 +592,7 @@ onMounted(() => {
               <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
               <v-row class="!tw-text-gray-500 tw-font-semibold tw-text-xs">
                 <v-col cols="6" class="tw-flex tw-items-center !tw-py-2  tw-text-xs">
-                  <Icon icon="icon-park-outline:ticket" class="mr-2" width="15"/>{{getQuantityTicket()}} {{getQuantityTicket() > 1 ? 'passagens' : 'passagens'}}
+                  <Icon icon="icon-park-outline:ticket" class="mr-2" width="15"/>{{getQuantityTicket()}} {{getQuantityTicket() > 1 ? 'passagens' : 'passagem'}}
                 </v-col>
                 <v-col cols="6" class="tw-flex tw-items-center !tw-py-2 !tw-font-black tw-text-sm !tw-text-primary tw-justify-end">
                   {{ formatCurrency(formSale.total_passagems) }}
@@ -705,13 +834,28 @@ onMounted(() => {
                           label="Mês"
                       ></v-select>
                     </v-col>
-                    <v-col cols="12"  md="6">
+                    <v-col cols="12"  md="6" >
                       <v-select
                           variant="plain"
                           @update:modelValue="(args)=>updateFormattedDate(args, 'year')"
                           :items="years"
                           label="Ano"
                       ></v-select>
+                    </v-col>
+                    <v-col cols="12"  md="6">
+                      <v-select
+                          variant="plain"
+                          v-model="formPayment.credit_card.installment_quantity"
+                          :items="[1,2,3,4,5,6]"
+                          label="Parcelas"
+                      ></v-select>
+                    </v-col>
+                    <v-col cols="12"  md="6" >
+                      <v-text-field
+                          variant="plain"
+                          v-model="formPayment.credit_card.security_code"
+                          label="CV"
+                      ></v-text-field>
                     </v-col>
                   </v-row>
                 </v-col>
@@ -732,8 +876,8 @@ onMounted(() => {
         <v-col cols="12" v-if="formPayment.payment_method_id === 6" >
           <BaseCard title="Confirmação da compra"  class="mt-3">
             <v-progress-linear
-                :active="waitPayment"
-                :indeterminate="waitPayment"
+                :active="waitServe"
+                :indeterminate="waitServe"
                 color="secondary"
                 absolute
                 bottom
@@ -769,9 +913,7 @@ onMounted(() => {
         <v-col cols="12" v-if="formPayment.payment_method_id === 6" >
           <BaseCard title="Confirmação da compra"  class="mt-3">
             <div class="tw-flex tw-justify-center tw-flex-col tw-items-center tw-text-center">
-
               <Icon icon="icon-park-outline:ticket"  class="mr-2 tw-text-secondary !tw-text-[80px]"  />
-
               <p class="tw-text-xl tw-text-secondary tw-font-bold my-2">Compra realizada com sucesso!</p>
               <p> Olá, {{orderConfirmation.nome}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
               <p><strong>Pedido {{orderConfirmation.pedido.id}}</strong></p>
@@ -783,10 +925,48 @@ onMounted(() => {
             </div>
           </BaseCard>
         </v-col>
+
+        <v-col cols="12" v-if="formPayment.payment_method_id === 3" >
+          <BaseCard title="Confirmação da compra"  class="mt-3">
+            <div class="tw-flex tw-justify-center tw-flex-col tw-items-center tw-text-center">
+              <Icon icon="icon-park-outline:ticket"  class="mr-2 tw-text-secondary !tw-text-[80px]"  />
+              <p class="tw-text-xl tw-text-secondary tw-font-bold my-2">Compra realizada com sucesso!</p>
+              <p> Olá, {{orderConfirmation.nome}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
+              <p><strong> {{orderConfirmation.description}}</strong></p>
+              <p><strong> {{formatCurrency(orderConfirmation.amount)}}</strong></p>
+              <p><strong> {{orderConfirmation.installments}}x  {{orderConfirmation.payment_method}}</strong></p>
+              <p>Para consultar seu pedido é só <a href="#" class="tw-text-secondary tw-underline tw-font-semibold">clicar aqui</a></p>
+              <div class="tw-flex tw-justify-center tw-items-center tw-gap-1  py-2">
+                <div class="!tw-rounded-[3px] !tw-text-[10px] tw-text-secondary tw-bg-secondary/10 tw-flex tw-p-2 tw-items-center tw-font-bold"><Icon icon="lets-icons:print" width="15"  class="mr-1 tw-text-black" />PASSAGEM IMPRESSA</div>
+                <div class="!tw-rounded-[3px] !tw-text-[10px] tw-text-secondary tw-bg-secondary/10 tw-flex tw-p-2 tw-items-center tw-font-bold"><Icon icon="tdesign:qrcode" width="15"  class="mr-1 tw-text-black" />PASSAGEM NO CELULAR</div>
+              </div>
+            </div>
+          </BaseCard>
+        </v-col>
+
+        <v-col cols="12" class="tw-flex tw-justify-center tw-items-center tw-gap-1  py-2" >
+          <RouterLink :to="{name:'area-do-cliente',params:{tab:'pedidos'}}">
+            <v-btn  flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+              <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/>  Ver pedidos</span>
+            </v-btn>
+          </RouterLink>
+        </v-col>
       </v-row>
     </v-expand-x-transition>
-
   </div>
+  <v-overlay
+      :model-value="waitServe"
+      persistent
+      opacity="50%"
+      class="align-center justify-center"
+  >
+    <v-progress-circular
+        width="2"
+        color="white"
+        size="90"
+        indeterminate
+    ></v-progress-circular>
+  </v-overlay>
 </template>
 
 <style scoped>
@@ -794,5 +974,7 @@ onMounted(() => {
   --v-input-control-height: auto !important;
   --v-input-padding-top: 16px;
 }
+
+
 
 </style>

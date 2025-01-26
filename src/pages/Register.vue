@@ -59,7 +59,6 @@ onMounted(()=>{
     <v-card
         class="mx-auto pa-8 pb-8 my-4"
         elevation="8"
-
         rounded="lg"
     >
       <div class="tw-flex tw-items-center  my-5">

@@ -7,6 +7,7 @@ import MobileSidebar from "./MobileSidebar.vue";
 import {routes} from "../services/fetch.js";
 
 const appsdrawer = ref(false);
+const menu = ref(false);
 const auth = ref(null)
 
 function getUser() {
@@ -40,16 +41,43 @@ onMounted(()=>{
                 <div class="navigation d-lg-flex d-none">
                   <Navigation />
                 </div>
-                <RouterLink  :to="{name: 'login'}">
-                  <v-btn variant="outlined" color="secondary" rounded class=" d-lg-flex d-none !tw-font-extrabold ">
-                    <Icon icon="mdi:account-circle-outline" width="25"  class="mr-2"/> {{auth?.name ?? 'MINHA CONTA'}}
-                  </v-btn>
-                </RouterLink>
+                <v-menu
+                    transition="slide-x-transition"
+                    v-model="menu"
+                >
+                  <template v-slot:activator="{ props }">
+                    <v-btn  v-bind="props" variant="outlined" color="secondary" rounded class=" d-lg-flex d-none !tw-font-extrabold ">
+                      <Icon icon="mdi:account-circle-outline" width="25"  class="mr-2"/> {{auth?.name ?? 'MINHA CONTA'}}
+                    </v-btn>
+                  </template>
+
+                  <v-card class="mt-1">
+
+
+                    <v-list>
+                      <v-list-item>
+                        <RouterLink  :to="{name: 'area-do-cliente',params:{tab:'perfil'}}">
+                          Meu perfil
+                        </RouterLink>
+                      </v-list-item>
+
+                      <v-list-item>
+                        <RouterLink  :to="{name: 'area-do-cliente',params:{tab:'pedidos'}}">
+                          Meus pedidos
+                        </RouterLink>
+                      </v-list-item>
+                    </v-list>
+                  </v-card>
+                </v-menu>
+
 
                 <v-btn variant="flat" color="success" rounded  class="d-lg-flex d-none !tw-font-extrabold  ">
                   <Icon icon="ic:baseline-whatsapp" width="25"  class="mr-2 tw-text-white" /><span class="tw-text-white ">ATENDIMENTO</span>
                 </v-btn>
               </div>
+              <v-menu>
+
+              </v-menu>
               <v-btn variant="text" class="hidden-lg-and-up " icon >
                 <Icon icon="mdi:user-circle-outline"  width="35"/>
               </v-btn>

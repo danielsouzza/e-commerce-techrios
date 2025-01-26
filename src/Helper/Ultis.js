@@ -42,6 +42,10 @@ function getMonicipioLabel(codigo, municipios, filtersData) {
     const municipioList = filtersData[municipios];
     if (!municipioList || !Array.isArray(municipioList)) return '';
     const municipio = municipioList.find(it => it.codigo == codigo);
+    return municipioLabel(municipio);
+}
+
+function municipioLabel(municipio) {
     return municipio ? `${municipio.nome},${municipio.uf}` : '';
 }
 
@@ -49,4 +53,4 @@ function formatMoney(money) {
     return money.replace("R$ ","").replace(".","").replace(" ","").replace(",",".")
 }
 
-export {formatCurrency, formatMoney, getMonicipioLabel, formatDate, formatarTempoViagem, gerarStringTiposComodos};
+export {formatCurrency, formatMoney, getMonicipioLabel, formatDate, formatarTempoViagem, gerarStringTiposComodos,municipioLabel};

@@ -24,7 +24,7 @@ function getApiBaseUrl() {
 
 const api = axios.create({
     baseURL: getApiBaseUrl(),
-    timeout: 5000,
+    timeout: 15000,
 })
 
 api.interceptors.request.use(
