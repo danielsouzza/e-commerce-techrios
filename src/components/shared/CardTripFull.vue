@@ -11,8 +11,8 @@ const props = defineProps({
 
 function goToSalePage(){
   if(props.dragging)return;
-  router.push({name: "sale",query: {
-      destino: props.data?.municipio_destiino.codigo,
+  router.push({name: "sale",params:{tab:'escolher-passagem'}, query: {
+      destino: props.data?.municipio_destino.codigo,
       origem: props.data?.municipio_origem.codig,
       dataIda: props.data?.data_embarque,
     }})
@@ -35,7 +35,7 @@ function goToSalePage(){
       <div class="tw-flex tw-justify-between tw-mb-5 tw-items-end">
         <div class="tw-font-extrabold">
           <p class="tw-mt-2 tw-text-gray-200 tw-text-sm "> {{municipioLabel(data?.municipio_origem)}}</p>
-          <p class="tw-text-gray-200 tw-text-sm ">{{ municipioLabel(data?.municipio_destiino)}}</p>
+          <p class="tw-text-gray-200 tw-text-sm ">{{ municipioLabel(data?.municipio_destino)}}</p>
         </div>
         <div>
           <div class="tw-flex tw-items-baseline tw-mt-2">

@@ -5,6 +5,7 @@ import {Icon} from "@iconify/vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
 import axios from "axios";
 import {routes} from "../services/fetch.js";
+import router from "../routes/index.js";
 
 const visible1 = ref(false);
 const visible2 = ref(false);
@@ -19,6 +20,7 @@ const form = reactive({
   nascimento:null,
   comprador:{
     cpf_cnpj:"",
+    xnome:"",
     estrangeiro:false,
     xlgr:"",
     nro:"",
@@ -36,9 +38,17 @@ function getMunicipios(){
   })
 }
 
+function goToLoginPage(){
+  router.push({name: "login"})
+}
+
 function handleSubmit() {
+  form.comprador.xnome = form.name
+  form.comprador.telefone = form.telefone
   routes['user.register'](form).then((response) => {
-    console.log(response);
+    goToLoginPage()
+  }).catch((error) => {
+    console.log(error)
   })
 }
 

@@ -1,24 +1,47 @@
 <script setup>
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref, watch} from "vue";
 import AppLogo from "../components/ui-components/AppLogo.vue";
 import Navigation from "./Navigation.vue";
 import {Icon} from "@iconify/vue";
 import MobileSidebar from "./MobileSidebar.vue";
 import {routes} from "../services/fetch.js";
+import Cart from "../components/app/Cart/Cart.vue";
+import {userAuthStore} from "../store/AuthStore.js";
+import router from "../routes/index.js";
 
+const authStore = userAuthStore()
 const appsdrawer = ref(false);
 const menu = ref(false);
-const auth = ref(null)
+const showCart = ref(false);
 
-function getUser() {
-  routes['user.me']().then((res) => {
-    auth.value = res.data.data;
+
+function goToSalePage(){
+  router.push({name: "home"})
+}
+
+function goToLoginPage(){
+  router.push({name: "login"})
+}
+
+function logout() {
+  routes['user.logout']().then((res) => {
+    authStore.logout()
+    goToSalePage()
   })
 }
 
-onMounted(()=>{
-  getUser()
+watch(()=>showCart.value, ()=>{
+  if (showCart.value) {
+    document.documentElement.style.overflowY  = "hidden";
+  } else {
+    document.documentElement.style.overflowY  = "scroll";
+  }
 })
+
+onMounted(()=>{
+  authStore.loadUser()
+})
+
 
 </script>
 
@@ -27,6 +50,7 @@ onMounted(()=>{
   <div>
     <div>
       <v-layout>
+
         <v-app-bar height="70" class="my-app !tw-border-t-4 !tw-border-secondary" flat>
           <v-container class="maxWidth py-sm-4 py-0">
 
@@ -34,20 +58,23 @@ onMounted(()=>{
               <v-btn variant="text" class="hidden-lg-and-up " icon @click.stop="appsdrawer = !appsdrawer">
                 <Icon icon="fluent:line-horizontal-3-16-filled" width="25"/>
               </v-btn>
-              <div>
+              <RouterLink  :to="{name: 'home'}">
                 <AppLogo />
-              </div>
+              </RouterLink>
               <div class="d-flex align-center justify-end tw-gap-3">
                 <div class="navigation d-lg-flex d-none">
                   <Navigation />
                 </div>
+                <v-btn variant="outlined" color="secondary"  icon  size="small"   class="d-lg-flex d-none !tw-font-extrabold" @click="showCart = true">
+                  <Icon icon="solar:cart-3-broken" width="20"  class=" " />
+                </v-btn>
                 <v-menu
                     transition="slide-x-transition"
                     v-model="menu"
                 >
                   <template v-slot:activator="{ props }">
                     <v-btn  v-bind="props" variant="outlined" color="secondary" rounded class=" d-lg-flex d-none !tw-font-extrabold ">
-                      <Icon icon="mdi:account-circle-outline" width="25"  class="mr-2"/> {{auth?.name ?? 'MINHA CONTA'}}
+                      <Icon icon="mdi:account-circle-outline" width="25"  class="mr-2"/> {{authStore.user?.name ?? 'MINHA CONTA'}}
                     </v-btn>
                   </template>
 
@@ -66,14 +93,20 @@ onMounted(()=>{
                           Meus pedidos
                         </RouterLink>
                       </v-list-item>
+
+                      <v-list-item v-if="authStore.isAuthenticated()" @click="logout" color="secondary" class="tw-cursor-pointer">
+                          Sair
+                      </v-list-item>
+                      <v-list-item v-else @click="goToLoginPage" color="secondary" class="tw-cursor-pointer">
+                        Entrar
+                      </v-list-item>
                     </v-list>
                   </v-card>
                 </v-menu>
-
-
                 <v-btn variant="flat" color="success" rounded  class="d-lg-flex d-none !tw-font-extrabold  ">
                   <Icon icon="ic:baseline-whatsapp" width="25"  class="mr-2 tw-text-white" /><span class="tw-text-white ">ATENDIMENTO</span>
                 </v-btn>
+
               </div>
               <v-menu>
 
@@ -84,10 +117,14 @@ onMounted(()=>{
             </v-toolbar>
           </v-container>
         </v-app-bar>
+
       </v-layout>
     </div>
 
     <v-layout>
+      <v-navigation-drawer elevation="10" location="right" v-model="showCart"  width="600" temporary >
+        <Cart :auth="authStore.user"/>
+      </v-navigation-drawer>
       <v-navigation-drawer class="lp-drawer" v-model="appsdrawer" location="left" temporary>
         <MobileSidebar />
       </v-navigation-drawer>
@@ -99,6 +136,9 @@ onMounted(()=>{
 
 <style scoped>
 
+.v-navigation-drawer__scrim{
+  position: fixed !important;
+}
 
 .my-toolbar::v-deep(.v-toolbar__content) {
   padding: 0;

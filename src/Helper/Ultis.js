@@ -1,4 +1,7 @@
 const formatCurrency = (number) => {
+    if(!number){
+        return '';
+    }
     const formatter = new Intl.NumberFormat("pt-BR", {
         style: "currency",
         currency: "BRL",
@@ -23,6 +26,8 @@ function formatarTempoViagem(tempo_viagem) {
     return "00H00";
 }
 
+
+
 function gerarStringTiposComodos(tiposComodos) {
     if (Array.isArray(tiposComodos)) {
         return tiposComodos.map(comodo => comodo.nome).join(" | ");
@@ -37,6 +42,17 @@ function formatDate(dateString) {
     const day = String(date.getDate()).padStart(2, "0");
     return `${day}/${month}/${year}`;
 }
+
+function formatDateToServe(inputDate) {
+    if(!inputDate) return inputDate
+    const date = new Date(inputDate);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
 
 function getMonicipioLabel(codigo, municipios, filtersData) {
     const municipioList = filtersData[municipios];
@@ -53,4 +69,6 @@ function formatMoney(money) {
     return money.replace("R$ ","").replace(".","").replace(" ","").replace(",",".")
 }
 
-export {formatCurrency, formatMoney, getMonicipioLabel, formatDate, formatarTempoViagem, gerarStringTiposComodos,municipioLabel};
+export {formatCurrency, formatMoney,formatDateToServe,
+    getMonicipioLabel, formatDate, formatarTempoViagem,
+    gerarStringTiposComodos,municipioLabel};

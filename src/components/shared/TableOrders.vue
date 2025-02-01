@@ -24,29 +24,14 @@ const  headers = [
   { title: 'Data', value: 'data' },
   { title: 'Status', value: 'status' },
 ]
-const pedidos= [
-  {
-    codigo: '040815162343',
-    viagem: 'Santarém/PA - Manaus/AM',
-    data: '01/05/2024',
-    status: 'Pago',
-    detalhes: { lancha: 'Lancha Lady Luiza', passagens: 'R$ 146,00', taxa: 'R$ 14,60' }
-  },
-  {
-    codigo: '040815162342',
-    viagem: 'Manaus/AM - Belém/PA',
-    data: '01/05/2024',
-    status: 'Cancelado',
-    detalhes: { lancha: 'Lancha Lady Luiza', passagens: 'R$ 200,00', taxa: 'R$ 20,00' }
-  }
-]
+
 
 const orders = computed(()=>{
   const items = []
   myOrders.value.data?.forEach((item,index)=>{
     item.passagens_agrupadas.forEach( passage=>{
       items.push({
-        codigo: item.id,
+        codigo: item.id+passage.viagem.id,
         viagem: passage.trecho.municipio_origem.nome +" - "+ passage.trecho.municipio_destino.nome,
         data:passage.viagem.saida,
         status: item.status,
@@ -80,14 +65,14 @@ onMounted(()=>{
 
 <template>
   <v-container class=" !tw-p-0 !tw-mx-0">
-    <v-card variant="flat" elevation="0" class="  " rounded="lg" color="secondary"  >
+    <v-card variant="flat" elevation="0" rounded="lg" color="secondary"  >
       <v-data-table
           :headers="headers"
           :items="orders"
           expand-on-click
           show-expand
-          hide-default-footer
-          class="!tw-bg-transparent my-table tw-text-white"
+
+          class="!tw-bg-transparent my-table tw-text-white "
           item-value="codigo">
 
 
@@ -136,6 +121,10 @@ onMounted(()=>{
 .my-table::v-deep(tbody tr td) {
   background-color: #f9f9f9;
   text-wrap: nowrap !important;
+}
+
+.my-table::v-deep(.v-data-table-footer){
+  color: #f9f9f9;
 }
 
 .my-table::v-deep(  thead  tr  th) {

@@ -3,7 +3,7 @@
 import {Icon} from "@iconify/vue";
 import IconsBoat from "../ui-components/IconsBoat.vue";
 import SuperOfferStamp from "../ui-components/SuperOfferStamp.vue";
-import { municipioLabel} from "../../Helper/Ultis.js";
+import {formatDateToServe, municipioLabel} from "../../Helper/Ultis.js";
 import router from "../../routes/index.js";
 
 const props = defineProps({
@@ -14,10 +14,10 @@ const props = defineProps({
 
 function goToSalePage(){
   if(props.dragging)return;
-  router.push({name: "sale",query: {
-      destino: props.data?.municipio_destiino.codigo,
+  router.push({name: "sale",params:{tab:'escolher-passagem'},query: {
+      destino: props.data?.municipio_destino.codigo,
       origem: props.data?.municipio_origem.codig,
-      dataIda: props.data?.data_embarque,
+      dataIda: formatDateToServe(new Date(props.data?.data_embarque)),
     }})
 }
 
@@ -41,7 +41,7 @@ function goToSalePage(){
         </p>
         <p class="tw-text-p tw-font-bold tw-flex tw-items-center">
           <Icon icon="material-symbols-light:arrow-circle-left" class="mr-2 tw-text-[25px]"/>
-          {{ municipioLabel(data?.municipio_destiino)}}
+          {{ municipioLabel(data?.municipio_destino)}}
         </p>
       </div>
       <div class="tw-flex tw-items-center tw-gap-3 tw-text-p tw-text-sm">

@@ -8,6 +8,9 @@ export default defineConfig({
     vue(),
     svgLoader()
   ],
+  optimizeDeps: {
+    include: ['qrcode-svg']
+  },
   resolve: {
     alias: {
       "@": "/src/"

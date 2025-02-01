@@ -3,7 +3,10 @@
 import {reactive, ref} from "vue";
 import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
+import {userAuthStore} from "../store/AuthStore.js";
 
+
+const authStore = userAuthStore()
 const visible = ref(false);
 const form = reactive({
   email: "",
@@ -36,7 +39,8 @@ function handleSubmit() {
     routes['user.login'](form).then((response) => {
       console.log(response.data);
       if (response.data.success) {
-        localStorage.setItem('auth_token',  response.data.data.token);
+        authStore.setToken(response.data.data.token);
+        authStore.loadUser();
         goToSalePage()
       }
     })

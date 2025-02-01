@@ -2,7 +2,7 @@
 
 import {Icon} from "@iconify/vue";
 import SuperOfferStampTwo from "../ui-components/SuperOfferStampTwo.vue";
-import {computed, onBeforeUnmount, onMounted, ref} from "vue";
+import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {routes} from "../../services/fetch.js";
 import Boat from "./Boat.vue";
 import BaseCard from "./BaseCard.vue";
@@ -15,15 +15,15 @@ const props = defineProps({
 
 const emit = defineEmits(['continue'])
 
-const rooms = ref([]);
-const roomsFree = ref([]);
+const rooms = ref([])
+const roomsFree = ref([])
 const roomsSelected = ref({
   selectedsById:[],
   selectedsByType:[],
-});
-const matrizRooms = ref([]);
+})
+const matrizRooms = ref([])
 const openRooms = ref(false)
-const windowWidth = ref(window.innerWidth);
+const windowWidth = ref(window.innerWidth)
 const isLargeScreen = computed(()=> windowWidth.value >= 1024)
 const hasCamarotesAndRede = computed(() => {
   return props.data.tipos_comodos.some((item)=> item.id >= 2 && item.id <=4)
@@ -51,7 +51,7 @@ const allRooms = computed(() => {
   }
 
   return linearRooms;
-});
+})
 
 const updateWidth = () => {
   windowWidth.value = window.innerWidth;
@@ -103,9 +103,8 @@ function onClickRoom(room, type) {
     }
   }else{
     if(roomsSelected.value.selectedsById.includes(room)){
-      roomsSelected.value.selectedsById.splice(roomsSelected.value.selectedsById.indexOf(room), 1)
+      deleteReserva(room)
     }else{
-      roomsSelected.value.selectedsById.push(room)
       postReserva(room)
     }
   }
@@ -137,7 +136,25 @@ function postReserva(room){
   params.append('viagem_id', props.data.id_viagem);
   params.append('comodo_id', room.id);
   routes['rooms.reservas'](params).then((response) => {
-    console.log(response)
+    if(response.data.success){
+      roomsSelected.value.selectedsById.push(room)
+    }
+  }).catch(error => {
+    roomsSelected.value.selectedsById.splice(roomsSelected.value.selectedsById.indexOf(room), 1)
+  })
+}
+
+function deleteReserva(room){
+  routes['rooms.reservas.delete']({
+    data:{
+      trecho_id:props.data.id,
+      viagem_id:props.data.id_viagem,
+      comodo_ids:[room.id]
+    }
+  }).then((response) => {
+    if(response.data.success){
+      roomsSelected.value.selectedsById.splice(roomsSelected.value.selectedsById.indexOf(room), 1)
+    }
   }).catch(error => {
     roomsSelected.value.selectedsById.splice(roomsSelected.value.selectedsById.indexOf(room), 1)
   })
@@ -156,11 +173,8 @@ function initSale(){
     'tiposComodoEscolhidos': tiposComodoEscolhidos,
     'comodosAssentosEscolhidos': roomsSelected.value.selectedsById.map(item => item.id),
   };
-
-
   routes['rooms.init-vendas'](params).then((response) => {
     const data = response.data.data;
-    console.log(data)
     if(response.data.success){
       emit('continue', {
         trecho: data.data.trecho,
@@ -172,6 +186,7 @@ function initSale(){
     console.log(error)
   })
 }
+
 
 function onClickBtnSelect(){
   openRooms.value = !openRooms.value;
@@ -214,6 +229,15 @@ function generateLayout() {
   }
 }
 
+
+watch(()=>props.data.id_viagem,()=>{
+  openRooms.value=false
+  roomsSelected.value = {
+    selectedsById:[],
+    selectedsByType:[],
+  }
+})
+
 onMounted(() => {
   window.addEventListener('resize', updateWidth);
   getQuantityRoomsFree()
@@ -226,7 +250,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <BaseCard :active="openRooms" >
+  <BaseCard :active="openRooms">
     <div class="lg:tw-flex tw-justify-between tw-items-center ">
       <div class="tw-flex tw-justify-between tw-items-center  mt-3 tw-w-full mr-10">
         <div>
@@ -288,14 +312,14 @@ onBeforeUnmount(() => {
               </div>
             </v-col>
           </v-row>
-          <v-container class="tw-max-w-[350px]  tw-flex ">
+          <v-container class=" lg:!tw-max-w-[800px] tw-max-w-[350px]  tw-flex ">
             <Boat v-if="matrizRooms.length > 0">
               <div :style="generateLayout()" class="tw-h-full">
                 <div
                     v-for="(comodo, index) in matrizRooms"
                     :key="index"
                     :class="comodo?.id ? (comodo.is_ocupado ? '!tw-bg-secondary tw-cursor-not-allowed' : roomsSelected.selectedsById?.includes(comodo) ? '!tw-bg-yellow-400' : 'tw-bg-green-400') : 'tw-bg-gray-200'"
-                    class="text-center tw-rounded-[5px] !tw-text-white tw-font-black tw-px-1 tw-py-[2px] tw-text-xs tw-h-[24px] tw-cursor-pointer"
+                    class="text-center tw-rounded-[5px] !tw-text-white tw-font-black tw-px-1 tw-py-[2px] tw-text-xs tw-h-[24px] tw-min-w-[30px] tw-cursor-pointer "
                     @click="comodo?.id && !comodo.is_ocupado ? onClickRoom(comodo,null) : ''"
                 >
                   {{ comodo?.id ? (comodo.numeracao < 10 ? '0' + comodo.numeracao : comodo.numeracao) : '' }}
@@ -318,10 +342,10 @@ onBeforeUnmount(() => {
                             "
                     >
                       <v-row class="tw-p-3 !tw-text-white">
-                        <v-col cols="9" class=" tw-text-xs">
+                        <v-col cols="8" class=" tw-text-xs">
                           {{item.nome}}
                         </v-col>
-                        <v-col cols="3" class=" tw-text-sm tw-flex tw-items-center  tw-justify-end">
+                        <v-col cols="4" class=" tw-text-sm tw-flex tw-items-center  tw-justify-end">
                           <Icon icon="el:person" width="15"  class="mr-1 "/>{{roomsFree.find(it=>it.tipo_comodidade_id === item.id).quantidade}}
                         </v-col>
                         <v-col cols="6" class=" tw-text-xs !tw-pt-0 ">
@@ -392,12 +416,6 @@ onBeforeUnmount(() => {
                 <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end ">  <Icon @click="incrementComodo(room.type_comodo_id )" icon="ph:plus-fill"  width="15"  class="mr-3" /> {{ room.quantidade}} <Icon @click="decrementComodo(room.type_comodo_id )" icon="ph:minus-fill"  width="15"  class="ml-3" /></v-col>
                 <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">   {{ data.valor}} <Icon @click="onClickRoom(null,room.type_comodo_id)" icon="mdi:close-box"  width="15"  class="ml-3" /> </v-col>
               </v-row>
-              <v-row class="tw-flex tw-justify-center tw-items-center tw-gap-1 tw-text-xs tw-font-bold  !tw-m-0" >
-<!--                <v-col cols="8" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 !tw-pl-6">-->
-<!--                  Total a pagar-->
-<!--                </v-col>-->
-<!--                <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0">{{formatCurrency(roomsSelected.selectedsByType.length * parseInt(formatMoney(data.valor)))}}</v-col>-->
-              </v-row>
             </div>
             <div v-if="roomsSelected.selectedsByType?.length === 0 && roomsSelected.selectedsById?.length === 0" class="tw-flex  tw-items-center tw-gap-1 tw-text-xs tw-text-p  !tw-m-0">
               Nenhum lugar selecionado
@@ -420,6 +438,7 @@ onBeforeUnmount(() => {
       <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 py-1" size="xs" @click="initSale">
         <span class=" !tw-text-xs tw-text-white"  >Avançar</span><Icon icon="mdi:navigate-next" width="20"  class="ml-1 tw-text-white"  />
       </v-btn>
+
     </div>
     <div class="lg:tw-flex tw-justify-between tw-items-center lg:tw-flex-row-reverse">
       <div class="tw-flex tw-justify-between tw-items-center  py-2 lg:tw-gap-3">

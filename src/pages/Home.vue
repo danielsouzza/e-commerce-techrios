@@ -8,12 +8,13 @@ import TravelAtUnbeatablePrices from "../components/app/TravelAtUnbeatablePrices
 import {routes} from "../services/fetch.js";
 import {onMounted, ref} from "vue";
 import router from "../routes/index.js";
+import {formatDateToServe} from "../Helper/Ultis.js";
 
 const filtersData = ref([])
 const filtersSelected = ref({
   origem:null,
   destino:null,
-  dataIda:null,
+  dataIda:new Date(),
   dataVolta:null,
 })
 const bannerSecondaryItems = [
@@ -39,7 +40,8 @@ function getFilterItems(){
 
 function goToSalePage(query){
   filtersSelected.value = query;
-  router.push({name: "sale",query: filtersSelected.value})
+  filtersSelected.value.dataIda = formatDateToServe(query.dataIda);
+  router.push({name: "sale",params:{tab:'escolher-passagem'},query: filtersSelected.value})
 }
 
 onMounted(() => {
