@@ -14,6 +14,7 @@ export const routes = {
     'rooms.init-vendas': (params= {}) => api.post('/reservas/comecar-venda',params),
     'rooms.reservas': (params= {}) => api.post('/reservas/comodo',params),
     'rooms.reservas.delete': (params= {}) => api.delete('/reservas/comodo',params),
+    'ticket.print': (ticket_id) => api.get(`/passagens/imprimir/${ticket_id}/pdf`),
 
     'order.my': (params= {}) => api.get('/pedidos'),
     'order.open': (params= {}) => api.get('/pedidos/ultimo-aberto/dados'),

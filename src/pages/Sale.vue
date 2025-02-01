@@ -401,8 +401,34 @@ function showMoreticket(){
   getTrechosWithTravels()
 }
 
+const downloadFile = async (url, filename) => {
+  const link = document.createElement('a');
+  link.href = url;
+  link.target = '_blank'; // Abre em nova aba
+  link.download = filename;
+  link.click()
+}
 
 function getTicketPdf(){
+  const baseUrl = "http://localhost";
+  const pathToReplace = "/var/www/storage/app/public/";
+  const newPathPrefix = `${baseUrl}/storage/`;
+
+  orderConfirmation.value.passagens_agrupadas?.forEach(passage => {
+    passage.passagem_pedidos.forEach(it => {
+      routes["ticket.print"](it.passageiro_viagem_id).then(response => {
+        if(response.data.success){
+          downloadFile(
+              response.data.data.replace(pathToReplace, newPathPrefix),
+              it.passageiro?.nome
+          );
+        }
+      }).catch(error => {
+        console.log(error)
+      })
+    })
+
+  })
 
 }
 
@@ -1008,12 +1034,10 @@ watch(()=>props.tab,()=>{
               </v-btn>
             </RouterLink>
           </v-col>
-          <v-col v-else cols="12" class="tw-flex tw-justify-center tw-items-center tw-gap-1  py-2" >
-            <RouterLink :to="{name:'area-do-cliente',params:{tab:'pedidos'}}">
-              <v-btn  flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
-                <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/>  Ver pedidos</span>
-              </v-btn>
-            </RouterLink>
+          <v-col  cols="12" class="tw-flex tw-justify-center tw-items-center tw-gap-1  py-2" >
+            <v-btn @click="getTicketPdf()" flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+              <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/> Baixar bilhete</span>
+            </v-btn>
           </v-col>
         </v-row>
       </v-tabs-window-item>
