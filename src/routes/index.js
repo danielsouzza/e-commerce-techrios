@@ -38,7 +38,7 @@ router.beforeEach(async (to, from, next) => {
     const userStore = userAuthStore()
     await cartStore.loadCart()
 
-    if (to.meta.requiresAuth && userStore.isAuthenticated()) {
+    if (to.meta.requiresAuth && !userStore.isAuthenticated()) {
         return next({name: 'login'})
     }
 

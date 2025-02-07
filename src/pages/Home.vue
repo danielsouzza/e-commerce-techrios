@@ -16,6 +16,7 @@ const filtersSelected = ref({
   destino:null,
   dataIda:new Date(),
   dataVolta:null,
+  type:"ida-e-volta"
 })
 const bannerSecondaryItems = [
   {
@@ -41,6 +42,7 @@ function getFilterItems(){
 function goToSalePage(query){
   filtersSelected.value = query;
   filtersSelected.value.dataIda = formatDateToServe(query.dataIda);
+  filtersSelected.value.dataVolta = query.dataVolta ? formatDateToServe(query.dataVolta) : null;
   router.push({name: "sale",params:{tab:'escolher-passagem'},query: filtersSelected.value})
 }
 
@@ -58,7 +60,7 @@ onMounted(() => {
         v-model="filtersSelected"
         @update:modelValue="goToSalePage"
         :options="filtersData"
-        class=" tw-top-[-30px]  !tw-mb-[-30px] lg:tw-top-[-70px] lg:!tw-mb-[-70px] !tw-mx-5 lg:!tw-mx-0"/>
+        class=" tw-top-[-30px]  !tw-mb-[-30px] lg:tw-top-[-110px] lg:!tw-mb-[-80px] !tw-mx-5 lg:!tw-mx-0"/>
     <RiversOfOffers class="!tw-my-5"/>
     <div class="tw-grid md:tw-grid-cols-2 tw-gap-2  tw-py-2 tw-px-5 lg:tw-px-0">
       <Banner2 v-for="i in bannerSecondaryItems" :key="i" :src="i.src" :title="i.title" :link="i.link"/>

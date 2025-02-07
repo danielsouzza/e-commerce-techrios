@@ -33,11 +33,12 @@ const props = defineProps({
 
 const cartStore = useCartStore()
 const authStore = userAuthStore()
+const chooseBack = ref(true)
+const currentState = ref('ida')
 const route = useRoute();
 const whatPayment = ref(false)
 const windowWidth = ref(window.innerWidth);
 const menu = ref(false)
-const ticketSelected = ref([])
 const filtersData = ref([])
 const orderResponse = ref(null)
 const paymentPending = ref(null)
@@ -60,6 +61,7 @@ const filtersSelected = ref({
   destino:null,
   dataIda:new Date(),
   dataVolta:null,
+  type:null,
   intervalo:null,
   tipo_comodidade_id:null,
   quantia:8
@@ -114,11 +116,9 @@ const tabs = [
   }
 ]
 const stepSale = ref(tabs.find(it=>it.value == props.tab).step)
-
 const cart = computed(()=>{
   return cartStore
 })
-
 const qrcode = computed(()=>{
   if(!paymentPending.value.pix_copia_cola ) return ""
   const qr = new QRCode({
@@ -143,14 +143,18 @@ const updateWidth = () => {
 const updateFilters = () => {
   filtersSelected.value.origem = parseInt(route.query.origem) || null;
   filtersSelected.value.destino = parseInt(route.query.destino) || null;
+  filtersSelected.value.type = route.query.type;
   filtersSelected.value.dataIda = new Date(route.query.dataIda + 'T00:00:00') || new Date().toISOString().split('T')[0];
-  filtersSelected.value.dataVolta = route.query.dataVolta || null;
+  filtersSelected.value.dataVolta = route.query.dataVolta ? new Date(route.query.dataVolta + 'T00:00:00') : null;
+  console.log(filtersSelected.value.dataVolta)
+  chooseBack.value = filtersSelected.value.type == "ida-e-volta"
   generateNextDays()
 };
 
-function generateNextDays() {
-  if(filtersSelected.value.dataIda){
-    let date = filtersSelected.value.dataIda
+function generateNextDays(data_hora) {
+  const dateCurrent = data_hora ?? filtersSelected.value.dataIda
+  if(dateCurrent){
+    let date = dateCurrent
     let futureDates = [];
     const start = isLargeScreen.value ? -3 : -1;
     const end = isLargeScreen.value ? 4 : 2;
@@ -163,12 +167,12 @@ function generateNextDays() {
   }
 }
 
-function getTrechosWithTravels() {
-  resetFormSale()
+function getTrechos(){
   const params = new URLSearchParams()
   params.append('origem', filtersSelected.value.origem || '')
   params.append('destino', filtersSelected.value.destino || '')
   params.append('data_hora', formatDate(filtersSelected.value.dataIda) || '')
+  params.append('data_hora_volta', formatDate(filtersSelected.value.dataVolta) || '')
   params.append('intervalo', filtersSelected.value.intervalo || '')
   params.append('tipo_comodidade_id', filtersSelected.value.tipo_comodidade_id || '')
   params.append('quantia', filtersSelected.value.quantia || '')
@@ -178,16 +182,28 @@ function getTrechosWithTravels() {
     const first = nextDays.value[0].getDate()
     const last = nextDays.value[nextDays.value.length - 1].getDate()
     if(date === first || date === last){
-      generateNextDays();
+      generateNextDays(data_hora);
     }
+    chooseBack.value = filtersSelected.value.type == "ida-e-volta"
     router.push(
         {
           name: "sale",
           params:{tab:'escolher-passagem'},
-          query: {...filtersSelected.value, dataIda:formatDateToServe(filtersSelected.value.dataIda) }
+          query: {
+            ...filtersSelected.value,
+            dataIda:formatDateToServe(filtersSelected.value.dataIda),
+            dataVolta:formatDateToServe(filtersSelected.value.dataVolta)
+          }
         }
     );
   })
+}
+
+function getTrechosWithTravels() {
+  if(currentState.value == 'ida'){
+    resetFormSale()
+  }
+  getTrechos()
 }
 
 function getFilterItems(){
@@ -217,39 +233,68 @@ function prevStep(){
 }
 
 function saveTicket(items){
-  ticketSelected.value = items;
-  const total = calculateTotal();
-  formSale.trecho = ticketSelected.value.trecho.id;
-  formSale.viagem = ticketSelected.value.trecho.id_viagem;
-  formSale.total_passagems = total.passagens;
-  formSale.total_taxas = total.taxa;
-  formSale.data_hora = ticketSelected.value.trecho.data_embarque;
-  ticketSelected.value.rooms.forEach(item => {
-    formSale.dataComodos.push({
-      tipo_doc:1,
-      nome:'',
-      document:'',
-      nascimento:null,
-      comodo:item.id,
-      embarque:parseInt(formatMoney(ticketSelected.value.trecho.taxa_de_embarque)),
-      valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(ticketSelected.value.trecho.valor)),
-      comodo_relacionado:'',
-      telefone:''
+  const total = calculateTotal(items);
+  formSale.total_passagems = total.passagens + formSale.total_passagems;
+  formSale.total_taxas = total.taxa + formSale.total_taxas;
+
+  if(currentState.value == 'volta'){
+    formSale.dataVolta = {
+      trecho: null,
+      viagem: null,
+      dataComodos: []
+    };
+
+    formSale.dataVolta.trecho = items.trecho;
+    formSale.dataVolta.viagem = items.trecho.id_viagem;
+    items.rooms.forEach(item => {
+      formSale.dataVolta.dataComodos.push({
+        tipo_doc:1,
+        nome:'',
+        document:'',
+        nascimento:null,
+        comodo:item.id,
+        tipo_comodidade:item.tipo_comodidade,
+        embarque:parseInt(formatMoney(items.trecho.taxa_de_embarque)),
+        valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.trecho.valor)),
+        comodo_relacionado:'',
+        telefone:''
+      })
     })
-  })
-  nextStep();
+    nextStep();
+  }else{
+    formSale.trecho = items.trecho;
+    formSale.viagem = items.trecho.id_viagem;
+    formSale.data_hora = items.trecho.data_embarque;
+    items.rooms.forEach(item => {
+      formSale.dataComodos.push({
+        tipo_doc:1,
+        nome:'',
+        document:'',
+        nascimento:null,
+        comodo:item.id,
+        tipo_comodidade:item.tipo_comodidade,
+        embarque:parseInt(formatMoney(items.trecho.taxa_de_embarque)),
+        valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.trecho.valor)),
+        comodo_relacionado:'',
+        telefone:''
+      })
+    })
+    if(chooseBack.value){
+      currentState.value = 'volta'
+      getTrechos()
+    }else{
+      nextStep();
+    }
+  }
 }
 
-function getQuantityTicket(){
-  return ticketSelected.value.rooms.length
-}
-
-function calculateTotal(){
-  const valor = ticketSelected.value.rooms.reduce((acc,item)=>{
-    return acc + (item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(ticketSelected.value.trecho.valor)))
+function calculateTotal(items){
+  const valor = items.rooms.reduce((acc,item)=>{
+    return acc + (item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.trecho.valor)))
   },0)
 
-  const taxa = getQuantityTicket() * parseInt(formatMoney(ticketSelected.value.trecho.taxa_de_embarque))
+  const length = items.rooms.length;
+  const taxa = length * parseInt(formatMoney(items.trecho.taxa_de_embarque))
   return {
     passagens: valor,
     taxa:taxa,
@@ -261,10 +306,18 @@ function submitOrder(){
   formSale.dataComodos.forEach(item => {
     item.data_nascimento = formatDate(item.nascimento)
   })
-
+  formSale.dataVolta.dataComodos.forEach(item => {
+    item.data_nascimento = formatDate(item.nascimento)
+  })
   formSale.total = formSale.total_passagems + formSale.total_taxas;
-  routes["order"](formSale).then(res => {
-    console.log(res.data)
+
+  const params = {
+    ...formSale,
+    trecho:formSale.trecho.id,
+    dataVolta:{...formSale.dataVolta,trecho:formSale.dataVolta.trecho.id}
+  }
+
+  routes["order"](params).then(res => {
     if(res.data.success){
       orderResponse.value = res.data.data;
       cartStore.addItem(orderResponse.value)
@@ -365,7 +418,6 @@ function resetFormSale() {
   };
   formSale.dataComodos = [];
   formSale.dataVolta = null;
-  ticketSelected.value = []
   stepSale.value = 1
   generateNextDays()
 }
@@ -386,6 +438,13 @@ function addCompradorComoPassageiro(){
   formSale.dataComodos[0].document = contato.document;
   formSale.dataComodos[0].nascimento = contato.nascimento;
   formSale.dataComodos[0].telefone = contato.telefone;
+  if(chooseBack.value){
+    formSale.dataVolta.dataComodos[0].tipo_doc = contato.tipo_doc;
+    formSale.dataVolta.dataComodos[0].nome = contato.nome;
+    formSale.dataVolta.dataComodos[0].document = contato.document;
+    formSale.dataVolta.dataComodos[0].nascimento = contato.nascimento;
+    formSale.dataVolta.dataComodos[0].telefone = contato.telefone;
+  }
 }
 
 function removerCompradorComoPassageiro(){
@@ -394,6 +453,13 @@ function removerCompradorComoPassageiro(){
   formSale.dataComodos[0].document = null;
   formSale.dataComodos[0].nascimento = null;
   formSale.dataComodos[0].telefone = null;
+  if(chooseBack.value){
+    formSale.dataVolta.dataComodos[0].tipo_doc = null;
+    formSale.dataVolta.dataComodos[0].nome = null;
+    formSale.dataVolta.dataComodos[0].document = null;
+    formSale.dataVolta.dataComodos[0].nascimento = null;
+    formSale.dataVolta.dataComodos[0].telefone = null;
+  }
 }
 
 function showMoreticket(){
@@ -455,7 +521,7 @@ watch(()=>props.tab,()=>{
 
 <template>
   <v-card  color="primary" rounded="0"  class="!tw-py-6">
-    <div class="maxWidth tw-flex lg:!tw-mb-[50px] !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
+    <div class="maxWidth tw-flex lg:!tw-mb-[70px] !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
       <div class="text-center lg:tw-text-start tw-py-4 px-5 lg:tw-text-lg">
         Passagem de <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem',filtersData)}} </strong> para <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}</strong>
       </div>
@@ -466,7 +532,7 @@ watch(()=>props.tab,()=>{
         v-model="filtersSelected"
         @update:modelValue="getTrechosWithTravels()"
         :options="filtersData"
-        class=" tw-top-[-30px]  !tw-mb-[-30px] lg:tw-top-[-70px] lg:!tw-mb-[-70px] !tw-mx-5 lg:!tw-mx-0  lg:!tw-block" />
+        class=" tw-top-[-30px]  !tw-mb-[-30px] lg:tw-top-[-100px] lg:!tw-mb-[-90px] !tw-mx-5 lg:!tw-mx-0  lg:!tw-block" />
 
     <div class="lg:tw-flex tw-items-center !tw-my-10  tw-hidden">
       <v-btn variant="outlined" :color="stepSale > 1 ? 'success': 'secondary'" rounded @click="prevStep">
@@ -641,12 +707,21 @@ watch(()=>props.tab,()=>{
                 </v-btn>
               </div>
             </v-card>
+<!--            <div class="tw-flex   tw-gap-2 mb-1" v-if="chooseBack">-->
+<!--              <v-btn variant="outlined"  :active="currentState == 'ida'"  color="secondary" rounded>-->
+<!--                <span class="tw-text-xs">Ida</span>-->
+<!--              </v-btn>-->
+<!--              <v-btn variant="outlined" :active="currentState == 'volta'" color="secondary" rounded>-->
+<!--                <span class="tw-text-xs">Volta</span>-->
+<!--              </v-btn>-->
+<!--            </div>-->
 
-            <div class="tw-w-full tw-flex tw-flex-col tw-gap-3 tw-items-center ">
+            <div class="tw-w-full tw-flex tw-flex-col tw-gap-3  ">
               <CardTicket
                   v-for="item in trechosWithTravels.data?.trechos?.data"
-                  :key="item.id_viagem"
-                  :data="item"
+                  :key="item.id_viagem + (item.volta?.id_viagem ?? 0)"
+                  :dataIda="item"
+                  :dataVolta="item.volta"
                   class=" !tw-w-full !tw-h-fit "
                   @continue="saveTicket"
               ></CardTicket>
@@ -662,7 +737,7 @@ watch(()=>props.tab,()=>{
       <v-tabs-window-item :value="2">
         <v-row   class="!tw-flex-row-reverse">
           <v-col cols="12" md="3">
-            <BaseCard title="Pague no pix com desconto" v-if="!!ticketSelected.trecho">
+            <BaseCard title="Pague no pix com desconto" v-if="!!formSale.trecho">
               <div class="tw-flex tw-flex-col tw-px-4 tw-py-2">
                 <div class=" tw-font-bold tw-text-gray-800 ">Resumo da viagem</div>
                 <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
@@ -671,28 +746,54 @@ watch(()=>props.tab,()=>{
 
                 <v-row  class="!tw-text-gray-500 tw-font-semibold tw-text-xs">
                   <v-col cols="6" lg="12" class="tw-flex tw-items-center  ">
-                    <Icon  icon="uis:calendar" class="mr-2" width="15"/>{{ticketSelected.trecho?.horario}}
+                    <Icon  icon="uis:calendar" class="mr-2" width="15"/>{{formSale.trecho?.horario}}
                   </v-col>
                   <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
-                    <Icon icon="iconamoon:clock-fill" class="mr-2" width="15"/>{{formatarTempoViagem(ticketSelected.trecho.tempo_viagem)}}
+                    <Icon icon="iconamoon:clock-fill" class="mr-2" width="15"/>{{formatarTempoViagem(formSale.trecho.tempo_viagem)}}
                   </v-col>
                   <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
                     <Icon icon="solar:map-arrow-up-bold" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}}
                   </v-col>
                   <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
-                    <Icon icon="solar:armchair-bold" class="mr-2" width="15"/>{{gerarStringTiposComodos(ticketSelected.rooms.map(it=>it.tipo_comodidade))}}
+                    <Icon icon="solar:armchair-bold" class="mr-2" width="15"/>{{gerarStringTiposComodos(formSale.dataComodos.map(it=>it.tipo_comodidade))}}
                   </v-col>
                   <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
                     <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}
                   </v-col>
                   <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
-                    <Icon icon="mingcute:ship-fill" width="15" class="mr-2" />{{ticketSelected.trecho.embarcacao}}
+                    <Icon icon="mingcute:ship-fill" width="15" class="mr-2" />{{formSale.trecho.embarcacao}}
                   </v-col>
                 </v-row>
+                <div v-if="chooseBack" class="tw-flex tw-flex-col">
+                  <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
+                  <div class=" tw-font-bold tw-text-gray-800 tw-text-xs mb-1">VOLTA</div>
+
+                  <v-row  class="!tw-text-gray-500 tw-font-semibold tw-text-xs">
+                    <v-col cols="6" lg="12" class="tw-flex tw-items-center  ">
+                      <Icon  icon="uis:calendar" class="mr-2" width="15"/>{{formSale.dataVolta.trecho?.horario}}
+                    </v-col>
+                    <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
+                      <Icon icon="iconamoon:clock-fill" class="mr-2" width="15"/>{{formatarTempoViagem(formSale.dataVolta.trecho.tempo_viagem)}}
+                    </v-col>
+                    <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
+                      <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}
+                    </v-col>
+                    <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
+                      <Icon icon="solar:armchair-bold" class="mr-2" width="15"/>{{gerarStringTiposComodos(formSale.dataComodos.map(it=>it.tipo_comodidade))}}
+                    </v-col>
+                    <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
+                      <Icon icon="solar:map-arrow-up-bold" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}}
+                    </v-col>
+                    <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
+                      <Icon icon="mingcute:ship-fill" width="15" class="mr-2" />{{formSale.trecho.embarcacao}}
+                    </v-col>
+                  </v-row>
+                </div>
+
                 <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
                 <v-row class="!tw-text-gray-500 tw-font-semibold tw-text-xs">
                   <v-col cols="6" class="tw-flex tw-items-center !tw-py-2  tw-text-xs">
-                    <Icon icon="icon-park-outline:ticket" class="mr-2" width="15"/>{{getQuantityTicket()}} {{getQuantityTicket() > 1 ? 'passagens' : 'passagem'}}
+                    <Icon icon="icon-park-outline:ticket" class="mr-2" width="15"/>{{formSale.dataComodos.length + (formSale.dataVolta?.dataComodos.length ?? 0)}} {{formSale.dataComodos.length + (formSale.dataVolta?.dataComodos.length ?? 0) > 1 ? 'passagens' : 'passagem'}}
                   </v-col>
                   <v-col cols="6" class="tw-flex tw-items-center !tw-py-2 !tw-font-black tw-text-sm !tw-text-primary tw-justify-end">
                     {{ formatCurrency(formSale.total_passagems) }}
@@ -810,8 +911,11 @@ watch(()=>props.tab,()=>{
               >
               </v-checkbox>
             </BaseCard>
-            <BaseCard title="Dados de quem irá viajar" color="secondary" class="mt-3">
+            <BaseCard title="Dados de quem irá viajar (IDA)" color="secondary" class="mt-3">
               <PassegerForm v-for="(item,index) in formSale.dataComodos" :form="item" :key="index" :index="index"/>
+            </BaseCard>
+            <BaseCard v-if="chooseBack" title="Dados de quem irá viajar (VOLTA)" color="secondary" class="mt-3">
+              <PassegerForm v-for="(item,index) in formSale?.dataVolta.dataComodos" :form="item" :key="index" :index="index"/>
             </BaseCard>
             <v-col cols="12"  class="tw-flex tw-justify-between mt-3">
               <v-btn variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="prevStep">

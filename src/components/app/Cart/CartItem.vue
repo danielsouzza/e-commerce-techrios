@@ -76,7 +76,7 @@ function removerRoom(params){
               {{item.comodo.numeracao}} -  {{item.passageiro?.nome}}
               <Icon
                   v-if="!item.deleted_at"
-                  @click="removerRoom({pedido:item.pedido_id,comodo_id:item.comodo.id,})"
+                  @click="removerRoom({pedido:item.pedido_id,comodos_ids:[item.comodo.id],})"
                   icon="mdi:close-box" width="25"  class="mr-1 "/>
               <span v-else >Removido</span>
             </div>

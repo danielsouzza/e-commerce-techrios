@@ -41,8 +41,25 @@ export const useCartStore = defineStore('cart', {
         },
 
 
-        clearCart() {
-            this.order = {};
+        async clearCart() {
+            const authStore = userAuthStore()
+            if (authStore.user) {
+                const passagens  = []
+                this.order.passagens_agrupadas.forEach(p =>{
+                    p.passagem_pedidos.forEach(p => {
+                        passagens.push(p.comodo.id)
+                    })
+                })
+                console.log(passagens)
+                const params = {pedido_id:this.order.id,comodos_ids:passagens};
+                await routes['order.delete'](this.order.id,params).then((response) => {
+                    console.log(response)
+                }).catch((error) => {
+                    console.log(error);
+                })
+            }
+
+            this.order = null;
             localStorage.removeItem('cart');
         },
     },
