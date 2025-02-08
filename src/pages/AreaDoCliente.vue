@@ -336,7 +336,7 @@ onMounted(()=>{
             >
               <div class="tw-flex tw-items-center  mb-5">
                 <v-btn variant="outlined" color="secondary" rounded >
-                  <span class="tw-text-xs"> </span>
+                  <span class="tw-text-xs">Alterar senha </span>
                 </v-btn>
                 <v-divider  :thickness="1" class="border-opacity-100  " ></v-divider>
               </div>

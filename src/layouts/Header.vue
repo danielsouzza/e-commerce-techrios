@@ -30,6 +30,13 @@ function logout() {
   })
 }
 
+function getTheme(){
+  console.log(window.subdomain)
+  routes['empresa.theme']({subdomain:window.subdomain}).then((res) => {
+    console.log(res)
+  })
+}
+
 watch(()=>showCart.value, ()=>{
   if (showCart.value) {
     document.documentElement.style.overflowY  = "hidden";
@@ -40,6 +47,7 @@ watch(()=>showCart.value, ()=>{
 
 onMounted(()=>{
   authStore.loadUser()
+  getTheme()
 })
 
 

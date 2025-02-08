@@ -33,8 +33,6 @@ const props = defineProps({
 
 const cartStore = useCartStore()
 const authStore = userAuthStore()
-const chooseBack = ref(true)
-const currentState = ref('ida')
 const route = useRoute();
 const whatPayment = ref(false)
 const windowWidth = ref(window.innerWidth);
@@ -135,6 +133,14 @@ const qrcode = computed(()=>{
 
   return  URL.createObjectURL(blob);
 })
+
+const downloadFile = async (url, filename) => {
+  const link = document.createElement('a');
+  link.href = url;
+  link.target = '_blank'; // Abre em nova aba
+  link.download = filename;
+  link.click()
+}
 const updateWidth = () => {
   windowWidth.value = window.innerWidth;
   generateNextDays()
@@ -146,8 +152,6 @@ const updateFilters = () => {
   filtersSelected.value.type = route.query.type;
   filtersSelected.value.dataIda = new Date(route.query.dataIda + 'T00:00:00') || new Date().toISOString().split('T')[0];
   filtersSelected.value.dataVolta = route.query.dataVolta ? new Date(route.query.dataVolta + 'T00:00:00') : null;
-  console.log(filtersSelected.value.dataVolta)
-  chooseBack.value = filtersSelected.value.type == "ida-e-volta"
   generateNextDays()
 };
 
@@ -184,7 +188,6 @@ function getTrechos(){
     if(date === first || date === last){
       generateNextDays(data_hora);
     }
-    chooseBack.value = filtersSelected.value.type == "ida-e-volta"
     router.push(
         {
           name: "sale",
@@ -200,9 +203,7 @@ function getTrechos(){
 }
 
 function getTrechosWithTravels() {
-  if(currentState.value == 'ida'){
-    resetFormSale()
-  }
+  resetFormSale()
   getTrechos()
 }
 
@@ -233,20 +234,23 @@ function prevStep(){
 }
 
 function saveTicket(items){
-  const total = calculateTotal(items);
-  formSale.total_passagems = total.passagens + formSale.total_passagems;
-  formSale.total_taxas = total.taxa + formSale.total_taxas;
+  const totalIda =  calculateTotal(items.dataIda)
 
-  if(currentState.value == 'volta'){
+  formSale.total_passagems = totalIda.passagens
+  formSale.total_taxas = totalIda.taxa
+
+  if(filtersSelected.value.type == "ida-e-volta"){
+    const totalVolta =  calculateTotal(items.dataVolta)
+    formSale.total_passagems += totalVolta.passagens
+    formSale.total_taxas += totalVolta.taxa
     formSale.dataVolta = {
       trecho: null,
       viagem: null,
       dataComodos: []
     };
-
-    formSale.dataVolta.trecho = items.trecho;
-    formSale.dataVolta.viagem = items.trecho.id_viagem;
-    items.rooms.forEach(item => {
+    formSale.dataVolta.trecho = items.dataVolta.trecho;
+    formSale.dataVolta.viagem = items.dataVolta.trecho.id_viagem;
+    items.dataVolta.rooms.forEach(item => {
       formSale.dataVolta.dataComodos.push({
         tipo_doc:1,
         nome:'',
@@ -254,38 +258,32 @@ function saveTicket(items){
         nascimento:null,
         comodo:item.id,
         tipo_comodidade:item.tipo_comodidade,
-        embarque:parseInt(formatMoney(items.trecho.taxa_de_embarque)),
-        valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.trecho.valor)),
+        embarque:parseInt(formatMoney(items.dataVolta.trecho.taxa_de_embarque)),
+        valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.dataVolta.trecho.valor)),
         comodo_relacionado:'',
         telefone:''
       })
     })
-    nextStep();
-  }else{
-    formSale.trecho = items.trecho;
-    formSale.viagem = items.trecho.id_viagem;
-    formSale.data_hora = items.trecho.data_embarque;
-    items.rooms.forEach(item => {
-      formSale.dataComodos.push({
-        tipo_doc:1,
-        nome:'',
-        document:'',
-        nascimento:null,
-        comodo:item.id,
-        tipo_comodidade:item.tipo_comodidade,
-        embarque:parseInt(formatMoney(items.trecho.taxa_de_embarque)),
-        valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.trecho.valor)),
-        comodo_relacionado:'',
-        telefone:''
-      })
-    })
-    if(chooseBack.value){
-      currentState.value = 'volta'
-      getTrechos()
-    }else{
-      nextStep();
-    }
   }
+
+  formSale.trecho = items.dataIda.trecho;
+  formSale.viagem = items.dataIda.trecho.id_viagem;
+  formSale.data_hora = items.dataIda.trecho.data_embarque;
+  items.dataIda.rooms.forEach(item => {
+    formSale.dataComodos.push({
+      tipo_doc:1,
+      nome:'',
+      document:'',
+      nascimento:null,
+      comodo:item.id,
+      tipo_comodidade:item.tipo_comodidade,
+      embarque:parseInt(formatMoney(items.dataIda.trecho.taxa_de_embarque)),
+      valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.dataIda.trecho.valor)),
+      comodo_relacionado:'',
+      telefone:''
+    })
+  })
+  nextStep()
 }
 
 function calculateTotal(items){
@@ -306,15 +304,21 @@ function submitOrder(){
   formSale.dataComodos.forEach(item => {
     item.data_nascimento = formatDate(item.nascimento)
   })
-  formSale.dataVolta.dataComodos.forEach(item => {
-    item.data_nascimento = formatDate(item.nascimento)
-  })
+
+
   formSale.total = formSale.total_passagems + formSale.total_taxas;
 
   const params = {
     ...formSale,
     trecho:formSale.trecho.id,
-    dataVolta:{...formSale.dataVolta,trecho:formSale.dataVolta.trecho.id}
+
+  }
+
+  if(formSale.dataVolta){
+    formSale.dataVolta.dataComodos.forEach(item => {
+      item.data_nascimento = formatDate(item.nascimento)
+    })
+    params.dataVolta = {...formSale.dataVolta,trecho:formSale.dataVolta.trecho.id}
   }
 
   routes["order"](params).then(res => {
@@ -333,10 +337,19 @@ function addCart(){
   formSale.dataComodos.forEach(item => {
     item.data_nascimento = formatDate(item.nascimento)
   })
+  formSale.dataVolta.dataComodos.forEach(item => {
+    item.data_nascimento = formatDate(item.nascimento)
+  })
+  formSale.total = formSale.total_passagems + formSale.total_taxas;
+
+  const params = {
+    ...formSale,
+    trecho:formSale.trecho.id,
+    dataVolta:{...formSale.dataVolta,trecho:formSale.dataVolta.trecho.id}
+  }
 
   formSale.total = formSale.total_passagems + formSale.total_taxas;
-  routes["order"](formSale).then(res => {
-    console.log(res.data)
+  routes["order"](params).then(res => {
     if(res.data.success){
       orderResponse.value = res.data.data;
       cartStore.addItem(orderResponse.value)
@@ -353,7 +366,7 @@ function checkStatusPayment(){
       if(orderConfirmation.value.status == "Pago"){
         stepSale.value = 5
         whatPayment.value = false
-        cartStore.clearCart()
+        cartStore.clearCartLocal()
       }else{
         setTimeout(()=>checkStatusPayment(),10000)
       }
@@ -438,7 +451,7 @@ function addCompradorComoPassageiro(){
   formSale.dataComodos[0].document = contato.document;
   formSale.dataComodos[0].nascimento = contato.nascimento;
   formSale.dataComodos[0].telefone = contato.telefone;
-  if(chooseBack.value){
+  if(filtersSelected.value.type == 'ida-e-volta'){
     formSale.dataVolta.dataComodos[0].tipo_doc = contato.tipo_doc;
     formSale.dataVolta.dataComodos[0].nome = contato.nome;
     formSale.dataVolta.dataComodos[0].document = contato.document;
@@ -453,7 +466,7 @@ function removerCompradorComoPassageiro(){
   formSale.dataComodos[0].document = null;
   formSale.dataComodos[0].nascimento = null;
   formSale.dataComodos[0].telefone = null;
-  if(chooseBack.value){
+  if(filtersSelected.value.type == 'ida-e-volta'){
     formSale.dataVolta.dataComodos[0].tipo_doc = null;
     formSale.dataVolta.dataComodos[0].nome = null;
     formSale.dataVolta.dataComodos[0].document = null;
@@ -465,14 +478,6 @@ function removerCompradorComoPassageiro(){
 function showMoreticket(){
   filtersSelected.value.quantia += 5
   getTrechosWithTravels()
-}
-
-const downloadFile = async (url, filename) => {
-  const link = document.createElement('a');
-  link.href = url;
-  link.target = '_blank'; // Abre em nova aba
-  link.download = filename;
-  link.click()
 }
 
 function getTicketPdf(){
@@ -501,6 +506,7 @@ function getTicketPdf(){
 function loadData(){
   if(stepSale.value === 1){
     updateFilters()
+    generateNextDays()
     getTrechosWithTravels()
   }
 }
@@ -707,16 +713,8 @@ watch(()=>props.tab,()=>{
                 </v-btn>
               </div>
             </v-card>
-<!--            <div class="tw-flex   tw-gap-2 mb-1" v-if="chooseBack">-->
-<!--              <v-btn variant="outlined"  :active="currentState == 'ida'"  color="secondary" rounded>-->
-<!--                <span class="tw-text-xs">Ida</span>-->
-<!--              </v-btn>-->
-<!--              <v-btn variant="outlined" :active="currentState == 'volta'" color="secondary" rounded>-->
-<!--                <span class="tw-text-xs">Volta</span>-->
-<!--              </v-btn>-->
-<!--            </div>-->
 
-            <div class="tw-w-full tw-flex tw-flex-col tw-gap-3  ">
+            <div class="tw-w-full tw-flex tw-flex-col tw-gap-3 " v-if="trechosWithTravels.data?.trechos?.data.length > 0">
               <CardTicket
                   v-for="item in trechosWithTravels.data?.trechos?.data"
                   :key="item.id_viagem + (item.volta?.id_viagem ?? 0)"
@@ -725,6 +723,10 @@ watch(()=>props.tab,()=>{
                   class=" !tw-w-full !tw-h-fit "
                   @continue="saveTicket"
               ></CardTicket>
+            </div>
+            <div v-else class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
+              <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
+              <p class="tw-text-p mt-1">Nenhuma passagem encontrada</p>
             </div>
 
             <v-btn @click="showMoreticket" v-if="filtersSelected.quantia <= trechosWithTravels.data?.trechos.total" flat variant="plain" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
@@ -737,7 +739,7 @@ watch(()=>props.tab,()=>{
       <v-tabs-window-item :value="2">
         <v-row   class="!tw-flex-row-reverse">
           <v-col cols="12" md="3">
-            <BaseCard title="Pague no pix com desconto" v-if="!!formSale.trecho">
+            <BaseCard title="Pague no pix com desconto" v-if="formSale.trecho">
               <div class="tw-flex tw-flex-col tw-px-4 tw-py-2">
                 <div class=" tw-font-bold tw-text-gray-800 ">Resumo da viagem</div>
                 <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
@@ -764,13 +766,13 @@ watch(()=>props.tab,()=>{
                     <Icon icon="mingcute:ship-fill" width="15" class="mr-2" />{{formSale.trecho.embarcacao}}
                   </v-col>
                 </v-row>
-                <div v-if="chooseBack" class="tw-flex tw-flex-col">
+                <div v-if="formSale.dataVolta" class="tw-flex tw-flex-col">
                   <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
                   <div class=" tw-font-bold tw-text-gray-800 tw-text-xs mb-1">VOLTA</div>
 
                   <v-row  class="!tw-text-gray-500 tw-font-semibold tw-text-xs">
                     <v-col cols="6" lg="12" class="tw-flex tw-items-center  ">
-                      <Icon  icon="uis:calendar" class="mr-2" width="15"/>{{formSale.dataVolta.trecho?.horario}}
+                      <Icon  icon="uis:calendar" class="mr-2" width="15"/>{{formSale.dataVolta?.trecho.horario}}
                     </v-col>
                     <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
                       <Icon icon="iconamoon:clock-fill" class="mr-2" width="15"/>{{formatarTempoViagem(formSale.dataVolta.trecho.tempo_viagem)}}
@@ -914,8 +916,8 @@ watch(()=>props.tab,()=>{
             <BaseCard title="Dados de quem irá viajar (IDA)" color="secondary" class="mt-3">
               <PassegerForm v-for="(item,index) in formSale.dataComodos" :form="item" :key="index" :index="index"/>
             </BaseCard>
-            <BaseCard v-if="chooseBack" title="Dados de quem irá viajar (VOLTA)" color="secondary" class="mt-3">
-              <PassegerForm v-for="(item,index) in formSale?.dataVolta.dataComodos" :form="item" :key="index" :index="index"/>
+            <BaseCard v-if="filtersSelected.type == 'ida-e-volta'" title="Dados de quem irá viajar (VOLTA)" color="secondary" class="mt-3">
+              <PassegerForm v-for="(item,index) in formSale.dataVolta?.dataComodos" :form="item" :key="index" :index="index"/>
             </BaseCard>
             <v-col cols="12"  class="tw-flex tw-justify-between mt-3">
               <v-btn variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="prevStep">
@@ -1004,52 +1006,64 @@ watch(()=>props.tab,()=>{
                 <template #icon>
                   <Icon icon="heroicons:credit-card-20-solid"  class="mr-2 " width="26"/>
                 </template>
-                <v-row class="mt-3">
-                  <v-col cols="12" >
-                    <v-text-field variant="plain" v-model="formPayment.credit_card.holder" label="Nome no cartão"/>
-                  </v-col>
-                  <v-col cols="12" >
-                    <v-text-field  variant="plain" v-model="formPayment.credit_card.card_number" label="Numero do cartão"/>
-                  </v-col>
-                  <v-col>
-                    <v-row justify="center">
-                      <v-col cols="12" md="6" >
-                        <v-select
-                            variant="plain"
-                            :items="months"
-                            @update:modelValue="(args)=>updateFormattedDate(args, 'month')"
-                            label="Mês"
-                        ></v-select>
-                      </v-col>
-                      <v-col cols="12"  md="6" >
-                        <v-select
-                            variant="plain"
-                            @update:modelValue="(args)=>updateFormattedDate(args, 'year')"
-                            :items="years"
-                            label="Ano"
-                        ></v-select>
-                      </v-col>
-                      <v-col cols="12"  md="6">
-                        <v-select
-                            variant="plain"
-                            v-model="formPayment.credit_card.installment_quantity"
-                            :items="[1,2,3,4,5,6]"
-                            label="Parcelas"
-                        ></v-select>
-                      </v-col>
-                      <v-col cols="12"  md="6" >
-                        <v-text-field
-                            variant="plain"
-                            v-model="formPayment.credit_card.security_code"
-                            label="CV"
-                        ></v-text-field>
-                      </v-col>
-                    </v-row>
-                  </v-col>
-                </v-row>
-                <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2  mt-3 lg:!tw-py-5"  @click="submitPaymentCredit">
-                  <Icon icon="heroicons:credit-card-20-solid"  class="mr-2 tw-text-white" width="26"/><span class=" !tw-text-xs lg:!tw-text-sm tw-text-white ml-1"  >REALIZAR PAGAMENTO</span>
-                </v-btn>
+                <div v-if="userAuthStore().isAuthenticated()" class="tw-w-full tw-flex tw-flex-col">
+                  <v-row class="mt-3" >
+                    <v-col cols="12" >
+                      <v-text-field variant="plain" v-model="formPayment.credit_card.holder" label="Nome no cartão"/>
+                    </v-col>
+                    <v-col cols="12" >
+                      <v-text-field  variant="plain" v-model="formPayment.credit_card.card_number" label="Numero do cartão"/>
+                    </v-col>
+                    <v-col>
+                      <v-row justify="center">
+                        <v-col cols="12" md="6" >
+                          <v-select
+                              variant="plain"
+                              :items="months"
+                              @update:modelValue="(args)=>updateFormattedDate(args, 'month')"
+                              label="Mês"
+                          ></v-select>
+                        </v-col>
+                        <v-col cols="12"  md="6" >
+                          <v-select
+                              variant="plain"
+                              @update:modelValue="(args)=>updateFormattedDate(args, 'year')"
+                              :items="years"
+                              label="Ano"
+                          ></v-select>
+                        </v-col>
+                        <v-col cols="12"  md="6">
+                          <v-select
+                              variant="plain"
+                              v-model="formPayment.credit_card.installment_quantity"
+                              :items="[1,2,3,4,5,6]"
+                              label="Parcelas"
+                          ></v-select>
+                        </v-col>
+                        <v-col cols="12"  md="6" >
+                          <v-text-field
+                              variant="plain"
+                              v-model="formPayment.credit_card.security_code"
+                              label="CV"
+                          ></v-text-field>
+                        </v-col>
+                      </v-row>
+                    </v-col>
+                  </v-row>
+                  <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2  mt-3 lg:!tw-py-5"  @click="submitPaymentCredit">
+                    <Icon icon="heroicons:credit-card-20-solid"  class="mr-2 tw-text-white" width="26"/><span class=" !tw-text-xs lg:!tw-text-sm tw-text-white ml-1"  >REALIZAR PAGAMENTO</span>
+                  </v-btn>
+                </div>
+                <div v-else class="tw-flex tw-flex-col tw-w-full">
+                  <p class="tw-text-p my-3"> Para realizar pagamento com cartão de credito é nescessário realizar o login.</p>
+
+                  <RouterLink :to="{name:'login'}">
+                    <v-btn  flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+                      <span class="tw-text-white tw-flex"><Icon icon="solar:login-linear" class="mr-2 tw-text-xl"/>Login</span>
+                    </v-btn>
+                  </RouterLink>
+                </div>
+
               </CardPayment>
             </BaseCard>
             <v-btn variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 mt-3"  @click="prevStep">

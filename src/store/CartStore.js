@@ -28,6 +28,16 @@ export const useCartStore = defineStore('cart', {
             }
         },
 
+        async syncCart() {
+            if(this.order){
+                await routes['order.sync'](this.order.id).then((response) => {
+                    this.loadCart()
+                }).catch((error) => {
+                    console.log(error);
+                })
+            }
+        },
+
         isEmptyCart() {
             return !(!!this.order);
         },
@@ -40,6 +50,11 @@ export const useCartStore = defineStore('cart', {
             },0)
         },
 
+        clearCartLocal() {
+            this.order = null;
+            localStorage.removeItem('cart');
+        },
+
 
         async clearCart() {
             const authStore = userAuthStore()
@@ -50,17 +65,15 @@ export const useCartStore = defineStore('cart', {
                         passagens.push(p.comodo.id)
                     })
                 })
-                console.log(passagens)
+
                 const params = {pedido_id:this.order.id,comodos_ids:passagens};
                 await routes['order.delete'](this.order.id,params).then((response) => {
-                    console.log(response)
+
                 }).catch((error) => {
                     console.log(error);
                 })
             }
-
-            this.order = null;
-            localStorage.removeItem('cart');
+            this.clearCartLocal()
         },
     },
 });

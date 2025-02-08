@@ -24,7 +24,6 @@ function onOpenRooms(){
 
 
 function removerRoom(params){
-  console.log(params)
   routes["order.delete"](params.pedido,params).then(response => {
     console.log(response)
   })

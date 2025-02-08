@@ -1,4 +1,4 @@
-import { createApp } from 'vue'
+import {createApp, reactive} from 'vue'
 
 import 'vuetify/styles'
 import './assets/style.css';
@@ -12,22 +12,74 @@ import '@mdi/font/css/materialdesignicons.css';
 
 import router from './routes'
 import {DEFAULT_THEME} from "./themes/DefaultTheme.js";
+import {routes} from "./services/fetch.js";
+
+const hostname = window.location.hostname;
+const parts = hostname.split(".");
+const subdomain = parts.length > 1 ? parts[0] : null;
+window.subdomain = subdomain;
+
+const themeConfig = reactive({
+    primaryColor: '#00579d',
+    secondaryColor: '#3dccfd',
+    logo: '/default-logo.png'
+});
+
+async function fetchTheme() {
+    if (subdomain) {
+        try {
+            const response = await  routes['empresa.theme']({subdomain:window.subdomain})
+            console.log(response.data.data)
+            const { theme, image_path } = response.data.data;
+
+
+            themeConfig.primaryColor = theme.primary_color || themeConfig.primaryColor;
+            themeConfig.secondaryColor = theme.secondary_color || themeConfig.secondaryColor;
+            themeConfig.logo = 'http://localhost/' + image_path
+
+            document.documentElement.style.setProperty('--color-primary', themeConfig.primaryColor);
+            document.documentElement.style.setProperty('--color-secondary', themeConfig.secondaryColor);
+        } catch (error) {
+            console.error("Erro ao buscar tema da loja:", error);
+        }
+    }
+}
+
+await fetchTheme();
+
+const customTheme = {
+    ...DEFAULT_THEME,
+    name: 'customTheme',
+    colors: {
+        ...DEFAULT_THEME.colors,
+        primary: themeConfig.primaryColor,
+        secondary: themeConfig.secondaryColor,
+    }
+}
 
 const vuetify = createVuetify({
     ssr: true,
     components,
     directives,
     theme: {
-        defaultTheme: 'DEFAULT_THEME',
+        defaultTheme: 'customTheme',
         themes: {
-            DEFAULT_THEME,
-        }
+            customTheme
+        },
     },
 })
 
-createApp(App)
-    .use(createPinia())
-    .use(VueTheMask)
-    .use(router)
-    .use(vuetify)
-    .mount('#app')
+
+
+
+
+const app = createApp(App);
+
+app.use(createPinia());
+app.use(VueTheMask);
+app.use(router);
+app.use(vuetify);
+
+app.provide('themeConfig', themeConfig);
+
+app.mount('#app');

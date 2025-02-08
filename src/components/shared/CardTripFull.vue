@@ -39,7 +39,7 @@ function goToSalePage(){
         </div>
         <div>
           <div class="tw-flex tw-items-baseline tw-mt-2">
-            <span class="tw-text-3xl tw-font-black tw-text-secondary">{{data?.valor}}</span>
+            <span class="tw-text-3xl tw-font-black text-secondary">{{data?.valor}}</span>
             <span class="tw-text-gray-300 tw-text-sm tw-ml-2">no PIX</span>
           </div>
           <p class="tw-text-gray-300 tw-text-xs">

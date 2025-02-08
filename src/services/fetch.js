@@ -3,6 +3,7 @@ import api from './api';
 
 export const routes = {
     'banners': () => api.get('/banners'),
+    'empresa.theme': (params={}) => api.get('/empresa/tema',{ params: params}),
     'filtros': () => api.get('/filtros'),
     'municipios': (params={}) => api.get('/municipios',{ params: params}),
     'destinos-procurados': (params={}) => api.get('/destinos-procurados',{ params: params}),
@@ -17,8 +18,9 @@ export const routes = {
     'ticket.print': (ticket_id) => api.get(`/passagens/imprimir/${ticket_id}/pdf`),
 
     'order.my': (params= {}) => api.get('/pedidos'),
-    'order.open': (params= {}) => api.get('/pedidos/ultimo-aberto/dados'),
     'order': (params= {}) => api.post('/pedidos',params),
+    'order.sync': (order_id) => api.patch(`/pedidos/${order_id}/associar`),
+    'order.open': (params= {}) => api.get('/pedidos/ultimo-aberto/dados'),
     'order.delete': (order_id,params= {}) => api.delete(`/pedidos/${order_id}/remover-comodo`,{data:params}),
     'order.confirm': (order_id,params= {}) => api.post(`/pedidos/${order_id}/gerar-passagens`,params),
     'payment.pix': (params= {}) => api.post('/pagamentos/pix',params),

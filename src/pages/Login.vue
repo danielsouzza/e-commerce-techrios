@@ -4,6 +4,8 @@ import {reactive, ref} from "vue";
 import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
 import {userAuthStore} from "../store/AuthStore.js";
+import {useCartStore} from "../store/CartStore.js";
+import {showErrorNotification} from "../event-bus.js";
 
 
 const authStore = userAuthStore()
@@ -41,13 +43,16 @@ function handleSubmit() {
       if (response.data.success) {
         authStore.setToken(response.data.data.token);
         authStore.loadUser();
-        goToSalePage()
+        useCartStore().syncCart()
+        goToHomePage()
       }
+    }).catch(error => {
+      showErrorNotification('Credenciais inválidas. Verifique seus dados e tente novamente.');
     })
   }
 }
 
-function goToSalePage(){
+function goToHomePage(){
   router.push({name: "home"})
 }
 

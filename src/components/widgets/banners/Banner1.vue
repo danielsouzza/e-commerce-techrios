@@ -9,6 +9,7 @@ const slides = ref([])
 function getSlides(){
   routes["banners"]().then(res => {
     slides.value = res.data.data;
+    console.log(res);
     loading.value = false;
   })
 }

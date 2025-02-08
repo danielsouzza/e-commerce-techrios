@@ -10,16 +10,17 @@ const props = defineProps({
   },
   color: {
     type: String,
-    default: 'green-400',
+    default: "green-400",
 
   },
 })
 
 const classes = computed(()=>{
+  const borderColor =  '!tw-border-' + props.color
   return [
+    borderColor,
     props.active ? '!tw-border-2' : '',
     props.title ? '-tw-top-4' : '',
-    `!tw-border-${props.color}`
   ]
 })
 
@@ -30,9 +31,11 @@ const classes = computed(()=>{
     <v-card flat  rounded="lg"  >
       <div v-if="title" :class="'!tw-bg-'+color" class="tw-text-xs tw-font-extrabold  !tw-text-white tw-px-4 tw-py-2 pb-5 tw-uppercase" >{{title}}</div>
       <v-card
-          :variant="active ? 'outlined': 'flat' "
           :class="classes"
-          elevation="0" class=" !tw-bg-white   pa-3" rounded="lg"  >
+          :variant="active ? 'outlined': 'flat' "
+          elevation="0"
+          class=" !tw-bg-white pa-3"
+          rounded="lg"  >
         <slot></slot>
       </v-card>
     </v-card>
