@@ -7,6 +7,7 @@ import {routes} from "../services/fetch.js";
 import {VDateInput} from 'vuetify/labs/VDateInput'
 import axios from "axios";
 import router from "../routes/index.js";
+import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
 
 const props = defineProps({
   tab:String,
@@ -48,9 +49,6 @@ const tabs = [
 const form = reactive({
   name:"",
   email: "",
-  email_confirmation: "",
-  password: "",
-  password_confirmation: "",
   telefone:"",
   nascimento:null,
   comprador:{
@@ -65,13 +63,50 @@ const form = reactive({
   }
 })
 
+function fillFormDataUser(){
+  form.name = auth.value.name;
+  form.email = auth.value.email
+  form.telefone = auth.value.comprador.telefone
+  form.comprador.telefone = auth.value.comprador.telefone
+  form.nascimento = auth.value.nascimento
+  form.comprador.telefone = auth.value.comprador.telefone
+  form.comprador.estrangeiro = auth.value.comprador.estrangeiro
+  form.comprador.bairro = auth.value.comprador.bairro
+  form.comprador.nro = auth.value.comprador.nro
+  form.comprador.xlgr = auth.value.comprador.xlgr
+  form.comprador.cmun = auth.value.comprador.cmun
+  form.comprador.cep = auth.value.comprador.cep
+  form.comprador.cpf_cnpj = auth.value.comprador.cpf_cnpj
+}
+
 const windowWidth = ref(window.innerWidth);
 const titlePage = computed(()=>{
   return tabs.find(item=>item.value===tab.value).title;
 })
+
+function handleSubmit() {
+  form.comprador.xnome = form.name
+  form.comprador.telefone = form.telefone
+  routes['user.register'](form).then((response) => {
+    showSuccessNotification('Usuário atualizado com sucesso!')
+  }).catch((error) => {
+    console.log(error)
+  })
+}
+
+function deleteAccount() {
+  routes['user.delete'](form).then((response) => {
+    showSuccessNotification('Usuário deletado com sucesso!')
+  }).catch((error) => {
+    console.log(error)
+    showErrorNotification('Erro ao deletar o usuário')
+  })
+}
+
 function getUser() {
   routes['user.me']().then((res) => {
     auth.value = res.data.data;
+    fillFormDataUser()
   })
 }
 const updateWidth = () => {
@@ -82,12 +117,6 @@ function getMunicipios(){
   axios.get("https://yjaraviagens.com/municipios/PA").then((response) => {
     console.log(response)
     municipios.value = response.data
-  })
-}
-
-function handleSubmit() {
-  routes['user.register'](form).then((response) => {
-    console.log(response);
   })
 }
 
@@ -386,6 +415,37 @@ onMounted(()=>{
                       variant="outlined"
                       @click:append-inner="visible3 = !visible3"
                   ></v-text-field>
+                </v-col>
+              </v-row>
+
+            </v-card>
+          </v-tabs-window-item>
+          <v-tabs-window-item value="excluir-conta">
+            <v-card
+                class="mx-auto pa-8  "
+                elevation="0"
+                rounded="lg"
+            >
+              <div class="tw-flex tw-items-center  mb-5">
+                <v-btn variant="outlined" color="error" rounded >
+                  <span class="tw-text-xs">Deletar Contar Pemanentemente</span>
+                </v-btn>
+                <v-divider  :thickness="1" class="border-opacity-100  " ></v-divider>
+              </div>
+              <v-row class="my-5">
+                <v-col cols="12">
+                  Depois que você excluir sua conta, não há como voltar atrás. Por favor, tenha certeza.
+                </v-col >
+                <v-col cols="12" >
+                  <v-btn
+                      color="error"
+                      size="large"
+                      rounded
+                      variant="outlined"
+                      block
+                  >
+                    Deletar sua conta
+                  </v-btn>
                 </v-col>
               </v-row>
 

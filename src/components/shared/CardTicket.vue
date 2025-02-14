@@ -1,12 +1,13 @@
 <script setup>
 
 import {Icon} from "@iconify/vue";
-import SuperOfferStampTwo from "../ui-components/SuperOfferStampTwo.vue";
 import {computed, onBeforeUnmount, onMounted, ref, watch} from "vue";
 import {routes} from "../../services/fetch.js";
 import Boat from "./Boat.vue";
 import BaseCard from "./BaseCard.vue";
 import {
+  calcularValorParcelado,
+  formatarHora,
   formatarTempoViagem,
   formatCurrency,
   formatDate,
@@ -101,6 +102,8 @@ const updateWidth = () => {
 
 function getQuantityRoomsFree() {
   const params = new URLSearchParams();
+  params.append('subdomain', window.subdomain || '')
+
   if(step.value === 1){
     params.append('trecho_id', props.dataIda.id);
     params.append('viagem_id', props.dataIda.id_viagem);
@@ -120,6 +123,7 @@ function getQuantityRoomsFree() {
 }
 function getRoomsByTrecho() {
   const params = new URLSearchParams();
+  params.append('subdomain', window.subdomain || '')
   let tipoComodos = []
   if(step.value === 1){
     params.append('trecho_id', props.dataIda.id);
@@ -152,26 +156,63 @@ function getRoomsByTrecho() {
   }
 }
 
+function qunatidadeTotalPassagens(typeTravel='dataIda'){
+
+  const totalByType = roomsSelected.value[typeTravel].selectedsByType.reduce((i,j)=>{
+    return i + j.quantidade
+  },0)
+
+  console.log(roomsSelected.value[typeTravel].selectedsById)
+  const totalById = roomsSelected.value[typeTravel].selectedsById.reduce((i,j)=>{
+    return i + j.quantidade
+  },0)
+
+  return totalByType + totalById
+}
+
 function onClickRoom(room, type,typeTravel='dataIda') {
-  if(type){
-    const selectedsByType = roomsSelected.value[typeTravel].selectedsByType
-    const type_comodo = selectedsByType.find(it=>it.type_comodo_id === type)
-    if(type_comodo){
-      if( type_comodo.quantidade > 0){
-        roomsSelected.value[typeTravel].selectedsByType.splice(roomsSelected.value[typeTravel].selectedsByType.indexOf(type_comodo), 1)
+  try {
+    if(type){
+      const selectedsByType = roomsSelected.value[typeTravel].selectedsByType
+      const type_comodo = selectedsByType.find(it=>it.type_comodo_id === type)
+      if(type_comodo){
+        if(typeTravel == 'dataVolta'){
+          const totalIda = qunatidadeTotalPassagens()
+          const totalVolta = qunatidadeTotalPassagens('dataVolta') + type_comodo.quantidade
+          if (totalVolta > totalIda) {
+            throw new Error('Número de passagens de volta não pode ser maior que as de ida.');
+          }
+        }
+        if( type_comodo.quantidade > 0){
+          roomsSelected.value[typeTravel].selectedsByType.splice(roomsSelected.value[typeTravel].selectedsByType.indexOf(type_comodo), 1)
+        }else{
+          roomsSelected.value[typeTravel].selectedsByType.push({ quantidade: 1, type_comodo_id: type })
+        }
       }else{
         roomsSelected.value[typeTravel].selectedsByType.push({ quantidade: 1, type_comodo_id: type })
       }
     }else{
-      roomsSelected.value[typeTravel].selectedsByType.push({ quantidade: 1, type_comodo_id: type })
+      const comodo = roomsSelected.value[typeTravel].selectedsById.find(it=>it.id == room.id)
+
+      if(typeTravel == 'dataVolta'){
+        const totalIda = qunatidadeTotalPassagens()
+        console.log(comodo)
+        const totalVolta = qunatidadeTotalPassagens('dataVolta') + room.quantidade
+        if (totalVolta > totalIda) {
+          throw new Error('Número de passagens de volta não pode ser maior que as de ida.');
+        }
+
+      }
+      if(comodo){
+        deleteReserva(room)
+      }else{
+        postReserva(room)
+      }
     }
-  }else{
-    if(roomsSelected.value[typeTravel].selectedsById.includes(room)){
-      deleteReserva(room)
-    }else{
-      postReserva(room)
-    }
+  }catch (error){
+    showErrorNotification(error.message)
   }
+
 }
 
 function incrementComodo(type,typeTravel='dataIda') {
@@ -199,6 +240,8 @@ function postReserva(room){
   const params = new URLSearchParams();
   params.append('trecho_id', step.value === 1 ? props.dataIda.id : props.dataVolta.id);
   params.append('viagem_id', step.value === 1 ? props.dataIda.id_viagem : props.dataVolta.id_viagem);
+  params.append('subdomain', window.subdomain || '')
+
   params.append('comodo_id', room.id);
   routes['rooms.reservas'](params).then((response) => {
     if(response.data.success){
@@ -223,8 +266,10 @@ function deleteReserva(room){
   routes['rooms.reservas.delete']({
     data:{
       trecho_id: step.value === 1 ? props.dataIda.id : props.dataVolta.id,
-      viagem_id: step.value === 1 ? props.dataIda.id : props.dataVolta.id,
-      comodo_ids:[room.id]
+      viagem_id: step.value === 1 ? props.dataIda.id_viagem : props.dataVolta.id_viagem,
+      comodo_ids:[room.id],
+      subdomain: window.subdomain || null
+
     }
   }).then((response) => {
     if(response.data.success){
@@ -258,6 +303,8 @@ async  function initSale(){
     'viagem_id': props.dataIda.id_viagem,
     'tiposComodoEscolhidos': tiposComodoEscolhidosIda,
     'comodosAssentosEscolhidos': roomsSelected.value.dataIda.selectedsById.map(item => item.id),
+     subdomain:  window.subdomain || ''
+
   };
 
   await routes['rooms.init-vendas'](params).then((response) => {
@@ -284,6 +331,7 @@ async  function initSale(){
       'viagem_id': props.dataVolta.id_viagem,
       'tiposComodoEscolhidos': tiposComodoEscolhidosVolta,
       'comodosAssentosEscolhidos': roomsSelected.value.dataVolta.selectedsById.map(item => item.id),
+      subdomain:  window.subdomain || ''
     };
 
     await routes['rooms.init-vendas'](params).then((response) => {
@@ -320,18 +368,6 @@ function onClickBtnSelect(){
   }
 }
 
-function formatarHora(dataHora) {
-  if (typeof dataHora === "string" && dataHora.includes(' ')) {
-    const [data, hora] = dataHora.split(' ');
-    if (hora) {
-      const [horas, minutos] = hora.split(':');
-      const horasFormatadas = String(parseInt(horas, 10)).padStart(2, '0');
-      const minutosFormatados = String(parseInt(minutos, 10)).padStart(2, '0');
-      return `${horasFormatadas}H${minutosFormatados}`;
-    }
-  }
-  return "00H00";
-}
 
 function generateLayout() {
   const linhas = step.value === 1 ? props.dataIda.linhas : props.dataVolta.linhas
@@ -425,9 +461,9 @@ onBeforeUnmount(() => {
 
         <div class="tw-flex tw-justify-end tw-items-center tw-w-full  md:tw-w-1/2  lg:tw-ml-10 lg:tw-mr-5">
           <div class="tw-mt-4 tw-text-right ">
-            <p class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">R$ 83,00</span> por</p>
-            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{dataIda.valor}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
-            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de R$ 65,92 no cartão</p>
+            <p v-if="dataIda?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(dataIda.valor))}}</span> por</p>
+            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{dataIda?.desconto ? formatCurrency(formatMoney(dataIda.valor) - dataIda.desconto.desconto) : dataIda.valor}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
+            <p class="tw-text-[10px] tw-text-gray-500">ou a até 6x de {{calcularValorParcelado(dataIda)}}  no cartão</p>
           </div>
         </div>
       </div>
@@ -437,7 +473,7 @@ onBeforeUnmount(() => {
 
     <div class="tw-flex tw-flex-col" v-if="dataVolta">
       <div class="tw-flex  tw-text-primary tw-justify-between tw-px-2 tw-rounded-lg tw-font-bold lg:tw-mr-5">
-        <span>Ida</span>
+        <span>Volta</span>
         {{formatDate(dataVolta.saida)}}
       </div>
       <div class="lg:tw-flex tw-justify-between tw-items-center " >
@@ -466,8 +502,8 @@ onBeforeUnmount(() => {
         <v-divider  :thickness="1" class="border-opacity-100 tw-mt-2 lg:!tw-hidden" ></v-divider>
         <div class="tw-flex tw-justify-end tw-items-center tw-w-full  md:tw-w-1/2 lg:tw-ml-10 lg:tw-mr-5">
           <div class="tw-mt-4 tw-text-right">
-            <p class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">R$ 83,00</span> por</p>
-            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{dataVolta.valor}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
+            <p v-if="dataVolta?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(dataVolta.valor))}}</span> por</p>
+            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{dataVolta?.desconto ? formatCurrency(formatMoney(dataVolta.valor) - dataVolta.desconto.desconto) :dataVolta.valor}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
             <p class="tw-text-[10px] tw-text-gray-500">ou a partir de R$ 65,92 no cartão</p>
           </div>
         </div>
@@ -480,9 +516,9 @@ onBeforeUnmount(() => {
         <v-divider  :thickness="1" class="border-opacity-100 tw-my-2  " v-show="openRooms" ></v-divider>
         <v-expand-transition>
           <div class="tw-flex tw-flex-col my-3 tw-w-full" v-if="openRooms">
-            <div class="lg:tw-flex  tw-items-center justify-center">
-              <div class="tw-flex tw-justify-between tw-items-center   lg:tw-gap-3">
-                <div class="tw-text-[12px] lg:tw-text-sm">Restam <strong class="tw-font-extrabold">{{quantityRoomsFree}} LUGARES</strong> com esse preço</div>
+            <div v-if="dataIda?.desconto" class="lg:tw-flex  tw-items-center justify-end">
+              <div class="tw-flex tw-justify-end tw-items-center   lg:tw-gap-3">
+                <div class="tw-text-[12px] lg:tw-text-sm">Restam <strong class="tw-font-extrabold">{{dataIda?.desconto?.restante}} LUGARES</strong> com esse preço</div>
               </div>
             </div>
             <div class="tw-flex tw-flex-col lg:tw-flex-col-reverse tw-justify-center tw-items-center ">
@@ -680,7 +716,7 @@ onBeforeUnmount(() => {
                         :key="index"
                         :class="comodo?.id ? (comodo.is_ocupado ? '!tw-bg-secondary tw-cursor-not-allowed' : roomsSelected.dataVolta.selectedsById?.includes(comodo) ? '!tw-bg-yellow-400' : 'tw-bg-green-400') : 'tw-bg-gray-200'"
                         class="text-center tw-rounded-[5px] !tw-text-white tw-font-black tw-px-1 tw-py-[2px] tw-text-xs tw-h-[24px] tw-min-w-[30px] tw-cursor-pointer "
-                        @click="comodo?.id && !comodo.is_ocupado ? onClickRoom(comodo,null) : ''"
+                        @click="comodo?.id && !comodo.is_ocupado ? onClickRoom(comodo,null,'dataVolta') : ''"
                     >
                       {{ comodo?.id ? (comodo.numeracao < 10 ? '0' + comodo.numeracao : comodo.numeracao) : '' }}
                     </div>
@@ -763,7 +799,7 @@ onBeforeUnmount(() => {
                         </div>
                       </div>
                     </v-col>
-                    <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? formatCurrency(room.comodo_trechos?.valor) : dataVolta.valor}} <Icon @click="onClickRoom(room, null)" icon="mdi:close-box"  width="15"  class="ml-3" /></v-col>
+                    <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? formatCurrency(room.comodo_trechos?.valor) : dataVolta.valor}} <Icon @click="onClickRoom(room, null,'dataVolta')" icon="mdi:close-box"  width="15"  class="ml-3" /></v-col>
                   </v-row>
                 </div>
                 <div class=" mt-3" v-if="roomsSelected.dataVolta.selectedsByType?.length > 0">

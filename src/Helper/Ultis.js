@@ -26,7 +26,18 @@ function formatarTempoViagem(tempo_viagem) {
     return "00H00";
 }
 
-
+function formatarHora(dataHora) {
+    if (typeof dataHora === "string" && dataHora.includes(' ')) {
+        const [data, hora] = dataHora.split(' ');
+        if (hora) {
+            const [horas, minutos] = hora.split(':');
+            const horasFormatadas = String(parseInt(horas, 10)).padStart(2, '0');
+            const minutosFormatados = String(parseInt(minutos, 10)).padStart(2, '0');
+            return `${horasFormatadas}H${minutosFormatados}`;
+        }
+    }
+    return "00H00";
+}
 
 function gerarStringTiposComodos(tiposComodos) {
     if (Array.isArray(tiposComodos)) {
@@ -67,9 +78,19 @@ function municipioLabel(municipio) {
 }
 
 function formatMoney(money) {
-    return money.replace("R$ ","").replace(".","").replace(" ","").replace(",",".")
+    return parseFloat(money.replace("R$ ","").replace(".","").replace(" ","").replace(",","."))
 }
+
+function calcularValorParcelado(data) {
+    let valor = formatMoney(data.valor);
+    let desconto = data?.desconto ? data.desconto.desconto : 0;
+    let valorComDesconto = valor - desconto;
+    let valorFinal = (valorComDesconto + (valorComDesconto * 0.10)) / 6;
+
+    return formatCurrency(valorFinal);
+}
+
 
 export {formatCurrency, formatMoney,formatDateToServe,
     getMonicipioLabel, formatDate, formatarTempoViagem,
-    gerarStringTiposComodos,municipioLabel};
+    gerarStringTiposComodos,municipioLabel,formatarHora,calcularValorParcelado};

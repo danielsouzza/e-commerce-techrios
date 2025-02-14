@@ -56,6 +56,30 @@ function getOrder(){
   })
 }
 
+function getTicketPdf(passagem){
+  const baseUrl = "http://localhost";
+  const pathToReplace = "/var/www/storage/app/public/";
+  const newPathPrefix = `${baseUrl}/storage/`;
+
+  routes["ticket.print"](passagem.passageiro_viagem_id).then(response => {
+    const downloadFile = async (url, filename) => {
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank'; // Abre em nova aba
+      link.download = filename;
+      link.click()
+    }
+    if(response.data.success){
+      downloadFile(
+          response.data.data.replace(pathToReplace, newPathPrefix),
+          passagem.passageiro?.nome
+      );
+    }
+  }).catch(error => {
+    console.log(error)
+  })
+}
+
 onMounted(()=>{
   getOrder()
 })
@@ -101,7 +125,7 @@ onMounted(()=>{
                   <div v-for="(it,i) in item.detalhes.passageiros" class="tw-flex ">
                     <Icon icon="famicons:person-outline"  width="20"/>
                     <div class="ml-3">
-                      <div class="tw-font-bold">Passageiro {{i+1}}</div>
+                      <div class="tw-font-bold tw-flex tw-items-center tw-gap-2">Passageiro {{i+1}} <span @click="getTicketPdf(it)" class="tw-flex tw-text-blue-500 tw-items-center tw-cursor-pointer">Baixar<Icon  icon="icon-park-outline:tickets-checked"  width="20" /></span></div>
                       <div>{{it.passageiro.nome}}</div>
                       <div>Doc: {{it.passageiro.ndoc}}</div>
                     </div>

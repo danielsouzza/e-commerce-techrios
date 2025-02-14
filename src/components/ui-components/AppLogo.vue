@@ -12,20 +12,22 @@ defineProps({
   },
   size: {
     type: String,
-    default: "130"
+    default: "120"
   }
 })
 
 const logo = computed(()=>{
-  return themeConfig.logo || '../../assets/images/logo-techrios.svg'
+  return themeConfig.logo+`?t=${Date.now()}`
 })
 
 </script>
 
 <template>
-
     <img v-if="footer" src="../../assets/images/logo-techrios-black-white.svg" :width="size" alt=""/>
-    <img v-else :src="logo" :width="size" alt=""/>
+    <v-avatar v-else  size="90">
+      <img  :src="logo" :width="size" alt="" />
+    </v-avatar>
+
 </template>
 
 <style>

@@ -72,6 +72,9 @@ const travels_les_important = computed(()=>{
 function getTrechosWithTravels() {
   const params = new URLSearchParams()
   params.append('quantia', 5)
+  params.append('is_destaque', 1)
+  params.append('subdomain', window.subdomain || '')
+  console.log(window.subdomain)
 
   routes["trechos-viagem"](params).then(response => {
     trechosWithTravels.value = response.data
@@ -86,16 +89,19 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div class=" tw-flex tw-flex-col tw-items-center tw-justify-center !tw-my-5">
+  <div class=" tw-flex tw-flex-col tw-items-center tw-justify-center !tw-my-5" v-if="trechosWithTravels.data?.trechos?.data.length > 0">
     <div class="tw-flex tw-flex-col lg:tw-flex-row  tw-items-center tw-justify-center lg:tw-justify-between tw-w-full">
       <div class=" tw-text-[25px] tw-font-extrabold tw-text-center tw-text-primary " style="line-height: 28px">
         Viagens em destaques
       </div>
-      <v-btn color="secondary" class="my-5" variant="outlined" rounded>
-        <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs" >VER MAIS VIAGENS
-          <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>
-        </div>
-      </v-btn>
+      <RouterLink  :to="{name: 'viagems-em-destaques'}">
+        <v-btn color="secondary" class="my-5" variant="outlined" rounded>
+          <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs" >VER MAIS VIAGENS
+            <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>
+          </div>
+        </v-btn>
+      </RouterLink>
+
     </div>
     <div class="tw-flex tw-flex-col tw-gap-5 lg:tw-flex-row tw-h-full  tw-justify-between !tw-mt-5 tw-w-full">
 

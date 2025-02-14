@@ -11,7 +11,7 @@ const props = defineProps({
 const tiposDoc = [
   { id:1, nome: 'RG', tamanho: 15, mask: '###############' },
   { id:2,nome: 'Titulo de Eleitor', tamanho: 12, mask: '#### #### ####' },
-  { id:3,nome: 'Passaporte', tamanho: 20, mask: '******************' },
+  { id:3,nome: 'Passaporte', tamanho: 20, mask: '#################' },
   { id:4,nome: 'CNH', tamanho: 11, mask: '###########' },
   { id:5,nome: 'CPF', tamanho: 0, mask: '###.###.###-##' }
 ];
@@ -63,7 +63,7 @@ const tiposDoc = [
           variant="plain"
           label="Nº do documento"
           hide-details="auto"
-
+          v-mask="tiposDoc[form.tipo_doc-1]?.mask"
       >
         <template v-slot:prepend-inner>
           <Icon icon="material-symbols-light:id-card-outline" width="26"/>

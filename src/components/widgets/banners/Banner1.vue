@@ -6,8 +6,8 @@ import {routes} from "../../../services/fetch.js";
 const loading = ref(true);
 
 const slides = ref([])
-function getSlides(){
-  routes["banners"]().then(res => {
+function getSlides() {
+  routes["banners"]({subdomain:window.subdomain}).then(res => {
     slides.value = res.data.data;
     console.log(res);
     loading.value = false;

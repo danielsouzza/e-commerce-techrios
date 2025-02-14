@@ -7,6 +7,15 @@ const routes = [
         path: '/',
         component: ()=>import('../pages/Home.vue'), name: 'home'},
     {
+        path: '/rios-de-ofertas',
+        component: ()=>import('../pages/RiosDeOfertas.vue'), name: 'rios-de-ofertas'},
+    {
+        path: '/viagems-em-destaques',
+        component: ()=>import('../pages/Destaques.vue'), name: 'viagems-em-destaques'},
+    {
+        path: '/viagems-imbativeis',
+        component: ()=>import('../pages/PrecosEmbativeis.vue'), name: 'viagems-imbativeis'},
+    {
         path: '/login',
         component: ()=>import('../pages/Login.vue'), name: 'login'},
     {

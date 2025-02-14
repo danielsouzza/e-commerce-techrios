@@ -1,6 +1,7 @@
 import {defineStore} from "pinia";
 import {routes} from "../services/fetch.js";
 import {useCartStore} from "./CartStore.js";
+import router from "../routes/index.js";
 
 
 
@@ -28,9 +29,14 @@ export const userAuthStore = defineStore('userAuth', {
             cartStore.clearCart()
         },
         async loadUser() {
-            await routes['user.me']().then((res) => {
-                this.setUser(res.data.data);
-            })
+             if(this.isAuthenticated()){
+                 await routes['user.me']().then((res) => {
+                     this.setUser(res.data.data);
+                 }).catch(error=>{
+                     this.logout()
+                     router.push({name: "login"})
+                 })
+             }
         },
         async getUser() {
              if (!this.user) {

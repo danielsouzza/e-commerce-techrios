@@ -16,11 +16,9 @@ export const useCartStore = defineStore('cart', {
 
         async loadCart() {
             const authStore = userAuthStore()
-            if (authStore.user) {
+            if (authStore.isAuthenticated()) {
                 await routes['order.open']().then((response) => {
                     this.order = response.data.data
-                }).catch((error) => {
-                    console.log(error);
                 })
             } else {
                 const localCart = localStorage.getItem('cart');
@@ -55,8 +53,32 @@ export const useCartStore = defineStore('cart', {
             localStorage.removeItem('cart');
         },
 
+        getOffers(){
+            return this.order?.passagens_agrupadas?.reduce((total, item) => {
+                return total + item.passagem_pedidos.reduce((t, i) => {
+                   return total + (i.desconto?.desconto ?? 0)
+                },0)
+            },0)
+        },
+
+        getTotal(){
+            return this.order?.passagens_agrupadas?.reduce((total, item) => {
+                return total + item.passagem_pedidos.reduce((t, i) => {
+                    return total + ((i.valor + (i.taxa_embarque ?? 0)) - (i.desconto?.desconto ?? 0))
+                },0)
+            },0)
+        },
+
+        getTotalTaxa(){
+            return this.order?.passagens_agrupadas?.reduce((total, item) => {
+                return total + item.passagem_pedidos.reduce((t, i) => {
+                    return total + ( i.taxa_embarque ?? 0)
+                },0)
+            },0)
+        },
 
         async clearCart() {
+            this.clearCartLocal()
             const authStore = userAuthStore()
             if (authStore.user) {
                 const passagens  = []
@@ -73,7 +95,7 @@ export const useCartStore = defineStore('cart', {
                     console.log(error);
                 })
             }
-            this.clearCartLocal()
+
         },
     },
 });

@@ -1,20 +1,27 @@
 <script setup>
 
 import {Icon} from "@iconify/vue";
-import BaseCard from "./BaseCard.vue";
-import {computed, ref} from "vue";
+import {computed, ref, watch} from "vue";
+import {emitter} from "../../event-bus.js";
 
-defineProps({
+const props = defineProps({
   modelValue:String,
   icon: String,
   title: String,
+  value: String,
 })
+
+const emit = defineEmits(['update:modelValue'])
 
 const open = ref(false)
 const iconToggle = computed(()=> open.value ? 'mdi:chevron-up' : 'mdi:chevron-down')
 
+watch(()=>props.modelValue, (value)=> {
+  open.value = props.modelValue == props.value
+})
+
 function toggleOpen(){
-  open.value = !open.value;
+  emit("update:modelValue", props.modelValue == props.value? null : props.value );
 }
 
 </script>

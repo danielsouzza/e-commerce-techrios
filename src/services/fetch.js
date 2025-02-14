@@ -2,7 +2,7 @@ import api from './api';
 
 
 export const routes = {
-    'banners': () => api.get('/banners'),
+    'banners': (params={}) => api.get('/banners',{ params: params}),
     'empresa.theme': (params={}) => api.get('/empresa/tema',{ params: params}),
     'filtros': () => api.get('/filtros'),
     'municipios': (params={}) => api.get('/municipios',{ params: params}),
@@ -31,6 +31,7 @@ export const routes = {
     'user.login':(params= {}) => api.post('/login',params),
     'user.logout':(params= {}) => api.delete('/logout',params),
     'user.register':(params= {}) => api.post('/register',params),
+    'user.delete':() => api.delete('/usuario'),
 
 
 }

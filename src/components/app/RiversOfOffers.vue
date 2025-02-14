@@ -38,8 +38,9 @@ const config = {
 
 function getTrechosWithTravels() {
   const params = new URLSearchParams()
-  // params.append('is_superoferta', 1)
+  params.append('is_superoferta', 1)
   params.append('quantia', 8)
+  params.append('subdomain', window.subdomain || '')
 
   routes["trechos-viagem"](params).then(response => {
     trechosWithTravels.value = response.data
@@ -56,7 +57,7 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div class=" tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between !tw-mt-5">
+  <div class=" tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-between !tw-mt-5" v-if="trechosWithTravels.data?.trechos?.data.length > 0">
     <v-skeleton-loader
         v-if="loading"
         class="!tw-bg-transparent"
@@ -69,11 +70,14 @@ onMounted(()=>{
          Rios de ofertas para<br>
          você navegar!
        </div>
-       <v-btn color="secondary" class="my-5" variant="outlined" rounded>
-         <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs" >VER MAIS VIAGENS
-           <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>
-         </div>
-       </v-btn>
+       <RouterLink  :to="{name: 'rios-de-ofertas'}">
+         <v-btn color="secondary" class="my-5" variant="outlined" rounded>
+           <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs" >VER MAIS VIAGENS
+             <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>
+           </div>
+         </v-btn>
+       </RouterLink>
+
      </div>
     <div class="lg:!tw-w-[75%] ">
      <div  v-if="loading" class="tw-flex tw-gap-3 tw-w-[100vw]">

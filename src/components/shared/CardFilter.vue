@@ -138,7 +138,7 @@ function changeTypeTravel(){
         <div class="tw-flex tw-flex-col tw-col-span-2 lg:tw-col-span-1 tw-w-full tw-h-full ">
           <v-btn @click="updateFilters" class="tw-w-full !tw-h-full " variant="flat" color="secondary" rounded="0">
             <div  class="tw-text-[20px] tw-flex tw-items-center tw-text-white tw-font-[900] tw-my-3 tw-normal-case">
-              <Icon icon="majesticons:search-line" class="tw-text-[30px] tw-text-black tw-mr-1 " />Buscar
+              <Icon icon="majesticons:search-line" class="tw-text-[30px] tw-text-white tw-mr-1 " />Buscar
             </div>
           </v-btn>
         </div>

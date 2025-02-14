@@ -22,13 +22,14 @@ window.subdomain = subdomain;
 const themeConfig = reactive({
     primaryColor: '#00579d',
     secondaryColor: '#3dccfd',
-    logo: '/default-logo.png'
+    logo: '/src/assets/images/logo-techrios.svg'
 });
 
 async function fetchTheme() {
     if (subdomain) {
         try {
             const response = await  routes['empresa.theme']({subdomain:window.subdomain})
+            console.log(response.data.data)
             console.log(response.data.data)
             const { theme, image_path } = response.data.data;
 
@@ -37,12 +38,12 @@ async function fetchTheme() {
             themeConfig.secondaryColor = theme.secondary_color || themeConfig.secondaryColor;
             themeConfig.logo = 'http://localhost/' + image_path
 
-            document.documentElement.style.setProperty('--color-primary', themeConfig.primaryColor);
-            document.documentElement.style.setProperty('--color-secondary', themeConfig.secondaryColor);
         } catch (error) {
             console.error("Erro ao buscar tema da loja:", error);
         }
     }
+    document.documentElement.style.setProperty('--color-primary', themeConfig.primaryColor);
+    document.documentElement.style.setProperty('--color-secondary', themeConfig.secondaryColor);
 }
 
 await fetchTheme();

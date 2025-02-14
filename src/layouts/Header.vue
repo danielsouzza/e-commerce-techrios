@@ -27,15 +27,13 @@ function logout() {
   routes['user.logout']().then((res) => {
     authStore.logout()
     goToSalePage()
+  }).catch((err) => {
+    authStore.logout()
+    goToSalePage()
   })
 }
 
-function getTheme(){
-  console.log(window.subdomain)
-  routes['empresa.theme']({subdomain:window.subdomain}).then((res) => {
-    console.log(res)
-  })
-}
+
 
 watch(()=>showCart.value, ()=>{
   if (showCart.value) {
@@ -47,7 +45,6 @@ watch(()=>showCart.value, ()=>{
 
 onMounted(()=>{
   authStore.loadUser()
-  getTheme()
 })
 
 
@@ -66,6 +63,7 @@ onMounted(()=>{
               <v-btn variant="text" class="hidden-lg-and-up " icon @click.stop="appsdrawer = !appsdrawer">
                 <Icon icon="fluent:line-horizontal-3-16-filled" width="25"/>
               </v-btn>
+
               <RouterLink  :to="{name: 'home'}">
                 <AppLogo />
               </RouterLink>
@@ -103,6 +101,7 @@ onMounted(()=>{
                       </v-list-item>
 
                       <v-list-item v-if="authStore.isAuthenticated()" @click="logout" color="secondary" class="tw-cursor-pointer">
+                        {{authStore.isAuthenticated()}}
                           Sair
                       </v-list-item>
                       <v-list-item v-else @click="goToLoginPage" color="secondary" class="tw-cursor-pointer">

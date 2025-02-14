@@ -10,6 +10,7 @@ import {onMounted, ref} from "vue";
 import router from "../routes/index.js";
 import {formatDateToServe} from "../Helper/Ultis.js";
 
+
 const filtersData = ref([])
 const filtersSelected = ref({
   origem:null,
@@ -61,10 +62,13 @@ onMounted(() => {
         @update:modelValue="goToSalePage"
         :options="filtersData"
         class=" tw-top-[-30px]  !tw-mb-[-30px] lg:tw-top-[-110px] lg:!tw-mb-[-80px] !tw-mx-5 lg:!tw-mx-0"/>
+
     <RiversOfOffers class="!tw-my-5"/>
+
     <div class="tw-grid md:tw-grid-cols-2 tw-gap-2  tw-py-2 tw-px-5 lg:tw-px-0">
       <Banner2 v-for="i in bannerSecondaryItems" :key="i" :src="i.src" :title="i.title" :link="i.link"/>
     </div>
+
     <FeaturedTrip/>
     <TravelAtUnbeatablePrices  class="!tw-my-5 !tw-mb-10"/>
   </div>

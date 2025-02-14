@@ -58,6 +58,8 @@ function getTrechosWithTravels() {
   params.append('com_desconto', 1)
   params.append('origem', origem.value?.codigo || '')
   params.append('quantia', 3)
+  params.append('subdomain', window.subdomain || '')
+
 
   routes["trechos-viagem"](params).then(response => {
     trechosWithTravels.value = response.data
@@ -80,11 +82,14 @@ onMounted(()=>{
          Viagens com preços <br>
          imbatíveis!
        </div>
-       <v-btn color="secondary" class="my-5" variant="outlined" rounded>
-         <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs" >VER MAIS OFERTAS
-           <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>
-         </div>
-       </v-btn>
+       <RouterLink  :to="{name: 'viagems-imbativeis'}">
+         <v-btn color="secondary" class="my-5" variant="outlined" rounded>
+           <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs" >VER MAIS OFERTAS
+             <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>
+           </div>
+         </v-btn>
+       </RouterLink>
+
      </div>
      <div class="tw-mb-3 ">
        <div class="tw-flex tw-text-p   "><IconsBoat/> <span  class="tw-ml-3 tw-flex tw-flex-wrap">Viagens saindo de &nbsp;<span class="tw-text-primary tw-font-black" > {{municipioLabel(origem)}}</span></span></div>
