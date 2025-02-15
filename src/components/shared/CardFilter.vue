@@ -36,7 +36,7 @@ function changeTypeTravel(){
 
 <template>
   <v-card elevation="0" class="my-5 !tw-rounded-xl !tw-bg-transparent">
-    <v-btn-toggle v-model="modelValue.type" @update:modelValue="changeTypeTravel" dense rounded="xl" color="secondary" class="mb-1 "  >
+    <v-btn-toggle v-model="modelValue.type" @update:modelValue="changeTypeTravel" dense rounded="xl" color="secondary" class="mb-1 mx-auto tw-w-full"  >
       <v-btn value="ida-e-volta" class="!tw-font-bold" >
         Ida e volta
       </v-btn>
@@ -118,7 +118,7 @@ function changeTypeTravel(){
           </div>
         </div>
         <div v-if="modelValue.type == 'ida-e-volta'" class="tw-flex tw-flex-col tw-px-5 tw-py-3  !tw-ml-5">
-          <div class="tw-text-p "><span class="tw-font-extrabold tw-text-[20px] ">Volta</span> <span class=" tw-text-[14px]">(opcional)</span></div>
+          <div class="tw-text-p "><span class="tw-font-extrabold tw-text-[20px] ">Volta</span> </div>
           <div class="tw-flex tw-items-center tw-text-p tw-text-[14px]">
             <v-date-input
                 flat

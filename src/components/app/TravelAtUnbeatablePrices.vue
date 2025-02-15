@@ -125,7 +125,7 @@ onMounted(()=>{
 
 <style scoped>
 .my-carrousel::v-deep(.carousel__viewport){
-  @apply !tw-rounded-xl
+  @apply lg:!tw-rounded-xl
 }
 
 .my-select::v-deep(.v-field__input) {

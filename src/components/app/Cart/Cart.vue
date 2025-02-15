@@ -5,11 +5,13 @@ import {formatCurrency} from "../../../Helper/Ultis.js";
 import {useCartStore} from "../../../store/CartStore.js";
 import {Icon} from "@iconify/vue";
 import {routes} from "../../../services/fetch.js";
+import {email} from "@vuelidate/validators";
 
 const props = defineProps({
   auth:Object
 })
 
+defineEmits(['close'])
 
 
 const orders = computed(()=>{
@@ -30,7 +32,12 @@ watch(()=>props.auth,()=>{
 
 <template>
   <div class="tw-flex tw-flex-col">
-    <v-card flat variant="tonal" color="secondary" rounded="lg" class="tw-text-center ma-5 pa-3 tw-text-lg tw-font-bold">Minhas Viagens</v-card>
+    <v-card flat variant="tonal" color="secondary" rounded="lg" class=" ma-5 pa-3 tw-text-lg tw-font-bold">
+      <div class="tw-flex tw-items-center tw-justify-between">
+        <div> Minhas Viagens</div>
+        <Icon icon="carbon:close-outline" class="mr-2 tw-cursor-pointer" width="30" @click="$emit('close')"/>
+      </div>
+    </v-card>
   </div>
   <div v-if="!useCartStore().isEmptyCart()" class="tw-flex tw-flex-col tw-gap-3 px-3 mx-2">
     <CartItem v-for="item in orders?.passagens_agrupadas" :data="item"/>

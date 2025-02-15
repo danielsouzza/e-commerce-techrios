@@ -820,11 +820,11 @@ onBeforeUnmount(() => {
               <v-col cols="12" md="6" class="tw-hidden lg:tw-block">
                 <div class="tw-flex tw-justify-center lg:tw-justify-start tw-w-full tw-font-bold">Mais viajante?</div>
                 <div class="tw-text-p tw-text-xs">selecione outro lugar.</div>
-                <div v-if="roomsSelected.dataVolta.selectedsByType?.length >  0 || roomsSelected.dataVolta.selectedsById?.length >  0" class="tw-flex tw-gap-3 mt-5">
+                <div  class="tw-flex tw-gap-3 mt-5">
                   <v-btn variant="outlined"  color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 py-1" size="xs" @click="beforeStep">
                     <Icon icon="mdi:navigate-before" width="20"    /><span class=" !tw-text-xs "  >voltar</span>
                   </v-btn>
-                  <v-btn variant="flat"  color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 py-1" size="xs" @click="initSale">
+                  <v-btn v-if="roomsSelected.dataVolta.selectedsByType?.length >  0 || roomsSelected.dataVolta.selectedsById?.length >  0" variant="flat"  color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 py-1" size="xs" @click="initSale">
                     <span class=" !tw-text-xs tw-text-white"  >Avançar</span><Icon icon="mdi:navigate-next" width="20"  class="ml-1 tw-text-white"  />
                   </v-btn>
 
@@ -842,7 +842,7 @@ onBeforeUnmount(() => {
         </div>
       </v-tabs-window-item>
 
-      <div class="lg:tw-flex tw-justify-between tw-items-center lg:tw-flex-row-reverse">
+      <div class="tw-flex lg:tw-flex-row tw-flex-col tw-justify-center tw-mt-3 lg:tw-justify-between lg:tw-items-center lg:tw-flex-row-reverse">
         <v-btn :variant="!openRooms ? 'flat': 'outlined'" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 py-1" size="xs" @click="onClickBtnSelect">
           <Icon icon="icon-park-outline:ticket" width="20"  class="mr-1 " :class="!openRooms ? 'tw-text-white' : ''" /><span class=" !tw-text-xs " :class="!openRooms ? 'tw-text-white' : ''" >{{!openRooms ? 'Selecionar' : 'Cancelar'}}</span>
         </v-btn>

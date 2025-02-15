@@ -266,14 +266,32 @@ function saveTicket(items){
         nome:'',
         document:'',
         nascimento:null,
-        desconto_id:formSale.dataVolta.trecho.desconto?.id,
+        desconto_id:formSale.dataVolta.trecho.desconto?.id ?? null,
         comodo:item.id,
         tipo_comodidade:item.tipo_comodidade,
         embarque:parseInt(formatMoney(items.dataVolta.trecho.taxa_de_embarque)),
         valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.dataVolta.trecho.valor)),
-        comodo_relacionado:'',
+        comodo_relacionado:null,
+        comodos_filhos:item.quantidade,
         telefone:''
       })
+      console.log(item)
+      for (let i = 1; i < item.quantidade; i++){
+        formSale.dataVolta.dataComodos.push({
+          tipo_doc:1,
+          nome:'',
+          document:'',
+          nascimento:null,
+          desconto_id:formSale.dataVolta.trecho.desconto?.id ?? null,
+          comodo:item.id,
+          tipo_comodidade:item.tipo_comodidade,
+          embarque:parseInt(formatMoney(items.dataVolta.trecho.taxa_de_embarque)),
+          valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.dataVolta.trecho.valor)),
+          comodo_relacionado:item.id,
+          comodos_filhos:1,
+          telefone:''
+        })
+      }
     })
   }
 
@@ -291,9 +309,28 @@ function saveTicket(items){
       tipo_comodidade:item.tipo_comodidade,
       embarque:parseInt(formatMoney(items.dataIda.trecho.taxa_de_embarque)),
       valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.dataIda.trecho.valor)),
-      comodo_relacionado:'',
+      comodo_relacionado:null,
+      comodos_filhos:item.quantidade,
       telefone:''
     })
+
+    for (let i = 1; i < item.quantidade; i++){
+      formSale.dataComodos.push({
+        tipo_doc:1,
+        nome:'',
+        document:'',
+        nascimento:null,
+        desconto_id:formSale.dataIda.trecho.desconto?.id ?? null,
+        comodo:item.id,
+        tipo_comodidade:item.tipo_comodidade,
+        embarque:parseInt(formatMoney(items.dataIda.trecho.taxa_de_embarque)),
+        valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.dataIda.trecho.valor)),
+        comodo_relacionado:item.id,
+        comodos_filhos:1,
+        telefone:''
+      })
+    }
+
   })
   nextStep()
 }
@@ -416,7 +453,7 @@ function submitPaymentCredit(){
 
 function submitPaymentPix(){
   waitServe.value = true
-  routes["payment.pix"]({order_id:cartStore.order?.id}).then(res => {
+  routes["payment.pix"]({order_id:useCartStore().order?.id}).then(res => {
     console.log(res.data)
     if(res.data.success){
       paymentPending.value = res.data.data;
@@ -424,12 +461,10 @@ function submitPaymentPix(){
       whatPayment.value = true
       showSuccessNotification(res.data.message)
       nextStep()
-      useCartStore().clearCartLocal()
       checkStatusPayment()
     }
   }).catch(error=>{
     showErrorNotification(error.response.data.message);
-    console.log(error)
     waitServe.value = false
     whatPayment.value = false
   })
@@ -569,7 +604,7 @@ watch(()=>props.tab,()=>{
 
 <template>
   <v-card  color="primary" rounded="0"  class="!tw-py-6">
-    <div class="maxWidth tw-flex lg:!tw-mb-[70px] !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
+    <div class="maxWidth tw-flex lg:!tw-mb-[70px] !tw-mb-[70px] !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
       <div class="text-center lg:tw-text-start tw-py-4 px-5 lg:tw-text-lg">
         Passagem de <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem',filtersData)}} </strong> para <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}</strong>
       </div>
@@ -580,7 +615,7 @@ watch(()=>props.tab,()=>{
         v-model="filtersSelected"
         @update:modelValue="getTrechosWithTravels()"
         :options="filtersData"
-        class=" tw-top-[-30px]  !tw-mb-[-30px] lg:tw-top-[-100px] lg:!tw-mb-[-90px] !tw-mx-5 lg:!tw-mx-0  lg:!tw-block" />
+        class=" tw-top-[-100px]  !tw-mb-[-60px] lg:tw-top-[-100px] lg:!tw-mb-[-90px] !tw-mx-5 lg:!tw-mx-0  lg:!tw-block" />
 
     <div class="lg:tw-flex tw-items-center !tw-my-10  tw-hidden">
       <v-btn variant="outlined" :color="stepSale > 1 ? 'success': 'secondary'" rounded @click="prevStep">
@@ -969,14 +1004,17 @@ watch(()=>props.tab,()=>{
             <BaseCard v-if="filtersSelected.type == 'ida-e-volta'" title="Dados de quem irá viajar (VOLTA)" color="secondary" class="mt-3">
               <PassegerForm v-for="(item,index) in formSale.dataVolta?.dataComodos" :form="item" :key="index" :index="index"/>
             </BaseCard>
+            <v-col cols="12">
+              <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
+                <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 tw-text-white"  /><span class=" !tw-text-xs tw-text-white ml-1">Salvar e continuar comprando</span>
+              </v-btn>
+              <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
+            </v-col>
             <v-col cols="12"  class="tw-flex tw-justify-between mt-3">
               <v-btn variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="prevStep">
                 <Icon icon="mdi:navigate-before" width="20"  class="mr-1 tw-text-white"  /> <span class=" !tw-text-xs tw-text-white mr-1"  >Voltar</span>
               </v-btn>
               <div class="tw-flex tw-justify-end tw-gap-3">
-                <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="addCart">
-                  <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 tw-text-white"  /><span class=" !tw-text-xs tw-text-white ml-1">Salvar e continuar comprando</span>
-                </v-btn>
                 <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="submitOrder">
                   <span class=" !tw-text-xs tw-text-white ml-1"  >Avançar</span><Icon icon="mdi:navigate-next" width="20"  class="ml-1 tw-text-white"  />
                 </v-btn>
@@ -1007,7 +1045,7 @@ watch(()=>props.tab,()=>{
                     Total  passagens
                   </v-col>
                   <v-col cols="6" >
-                    +{{formatCurrency(cart.order.total)}}
+                    +{{formatCurrency(cart.getTotal())}}
                   </v-col>
                   <v-col cols="6" class="pt-0" >
                     Taxa de serviço
@@ -1168,7 +1206,7 @@ watch(()=>props.tab,()=>{
       </v-tabs-window-item>
       <v-tabs-window-item :value="4">
         <v-row  >
-          <v-col cols="12" v-if="formPayment.payment_method_id === 6" >
+          <v-col cols="12" v-if="formPayment.payment_method_id == 6" >
             <BaseCard title="Confirmação da compra"  class="mt-3">
               <v-progress-linear
                   :active="whatPayment"
@@ -1210,9 +1248,9 @@ watch(()=>props.tab,()=>{
               <div class="tw-flex tw-justify-center tw-flex-col tw-items-center tw-text-center">
                 <Icon icon="icon-park-outline:ticket"  class="mr-2 tw-text-secondary !tw-text-[80px]"  />
                 <p class="tw-text-xl tw-text-secondary tw-font-bold my-2">Compra realizada com sucesso!</p>
-                <p> Olá, {{orderConfirmation.contato.name}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
+                <p> Olá, {{orderConfirmation.contato.nome}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
                 <p><strong>Pedido {{orderConfirmation.id}}</strong></p>
-                <p>Para consultar seu pedido é só <a href="#" class="tw-text-secondary tw-underline tw-font-semibold">clicar aqui</a></p>
+<!--                <p>Para consultar seu pedido é só <a href="#" class="tw-text-secondary tw-underline tw-font-semibold">clicar aqui</a></p>-->
                 <div class="tw-flex tw-justify-center tw-items-center tw-gap-1  py-2">
                   <div class="!tw-rounded-[3px] !tw-text-[10px] tw-text-secondary tw-bg-secondary/10 tw-flex tw-p-2 tw-items-center tw-font-bold"><Icon icon="lets-icons:print" width="15"  class="mr-1 tw-text-black" />PASSAGEM IMPRESSA</div>
                   <div class="!tw-rounded-[3px] !tw-text-[10px] tw-text-secondary tw-bg-secondary/10 tw-flex tw-p-2 tw-items-center tw-font-bold"><Icon icon="tdesign:qrcode" width="15"  class="mr-1 tw-text-black" />PASSAGEM NO CELULAR</div>
@@ -1226,7 +1264,7 @@ watch(()=>props.tab,()=>{
               <div class="tw-flex tw-justify-center tw-flex-col tw-items-center tw-text-center">
                 <Icon icon="icon-park-outline:ticket"  class="mr-2 tw-text-secondary !tw-text-[80px]"  />
                 <p class="tw-text-xl tw-text-secondary tw-font-bold my-2">Compra realizada com sucesso!</p>
-                <p> Olá, {{authStore.user.name}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
+                <p> Olá, {{orderConfirmation.contato.nome}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
                 <p><strong> {{orderConfirmation.description}}</strong></p>
                 <p><strong> {{formatCurrency(orderConfirmation.amount)}}</strong></p>
                 <p><strong> {{orderConfirmation.installments}}x  {{orderConfirmation.payment_method}}</strong></p>

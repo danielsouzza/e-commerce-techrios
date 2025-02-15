@@ -45,22 +45,22 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
               <p>Sábado, domingo e feriado das 09h às 18h</p>
             </ListExpensiveItem>
             <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 lg:!tw-hidden" color="secondary"></v-divider>
-            <v-card class="mt-5 tw-w-full">
-              <v-list  class="py-0 px-0 ">
-                <v-list-group >
-                  <template v-slot:activator="{ props }">
-                    <v-list-item v-bind="props">
-                      <template v-slot:title>
-                        <p ><small>Sites das embarcações</small></p>
-                      </template>
-                    </v-list-item>
-                  </template>
-                  <v-list-item
-                      title="Erlon Nav"
-                  ></v-list-item>
-                </v-list-group>
-              </v-list>
-            </v-card>
+<!--            <v-card class="mt-5 tw-w-full">-->
+<!--              <v-list  class="py-0 px-0 ">-->
+<!--                <v-list-group >-->
+<!--                  <template v-slot:activator="{ props }">-->
+<!--                    <v-list-item v-bind="props">-->
+<!--                      <template v-slot:title>-->
+<!--                        <p ><small>Sites das embarcações</small></p>-->
+<!--                      </template>-->
+<!--                    </v-list-item>-->
+<!--                  </template>-->
+<!--                  <v-list-item-->
+<!--                      title="Erlon Nav"-->
+<!--                  ></v-list-item>-->
+<!--                </v-list-group>-->
+<!--              </v-list>-->
+<!--            </v-card>-->
           </div>
         </div>
         <v-divider  :thickness="1" class="border-opacity-25 tw-mt-4 " color="secondary"></v-divider>

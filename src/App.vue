@@ -7,7 +7,7 @@ const isLoading = ref(true);
 onMounted(() => {
   setTimeout(() => {
     isLoading.value = false;
-  }, 500);
+  }, 2000);
 });
 
 </script>
@@ -18,8 +18,9 @@ onMounted(() => {
         v-model="isLoading"
         persistent
         contained
-        opacity="90%"
-        class="align-center justify-center"
+        color="white"
+
+        class="align-center tw-bg-white justify-center"
     >
       <v-progress-circular
           width="2"

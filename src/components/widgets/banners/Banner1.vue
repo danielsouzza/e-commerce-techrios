@@ -25,7 +25,7 @@ onMounted(()=>{
 <template>
   <v-skeleton-loader
       :loading="loading"
-      class="!tw-h-full my-load"
+      class="!tw-h-full my-load "
       type="image"
   >
     <v-responsive>
@@ -38,7 +38,8 @@ onMounted(()=>{
           hide-delimiter-background
       >
         <v-carousel-item
-            class="my-carousel"
+            class="my-carousel !tw-h-[170px] lg:!tw-h-full "
+            cover
             v-for="(item,i) in slides"
             lazy-src="https://picsum.photos/1920/500"
             :key="i"
@@ -47,7 +48,7 @@ onMounted(()=>{
         >
           <template v-slot:error>
             <v-img
-                class="mx-auto"
+                class="mx-auto "
                 src="https://picsum.photos/1920/500"
             ></v-img>
           </template>

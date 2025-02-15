@@ -19,6 +19,8 @@ export const useCartStore = defineStore('cart', {
             if (authStore.isAuthenticated()) {
                 await routes['order.open']().then((response) => {
                     this.order = response.data.data
+                }).catch((error) => {
+
                 })
             } else {
                 const localCart = localStorage.getItem('cart');

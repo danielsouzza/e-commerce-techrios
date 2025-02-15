@@ -12,6 +12,7 @@ import router from "../routes/index.js";
 const authStore = userAuthStore()
 const appsdrawer = ref(false);
 const menu = ref(false);
+const menuMobile = ref(false);
 const showCart = ref(false);
 
 
@@ -94,6 +95,7 @@ onMounted(()=>{
                         </RouterLink>
                       </v-list-item>
 
+
                       <v-list-item>
                         <RouterLink  :to="{name: 'area-do-cliente',params:{tab:'pedidos'}}">
                           Meus pedidos
@@ -101,7 +103,6 @@ onMounted(()=>{
                       </v-list-item>
 
                       <v-list-item v-if="authStore.isAuthenticated()" @click="logout" color="secondary" class="tw-cursor-pointer">
-                        {{authStore.isAuthenticated()}}
                           Sair
                       </v-list-item>
                       <v-list-item v-else @click="goToLoginPage" color="secondary" class="tw-cursor-pointer">
@@ -113,14 +114,47 @@ onMounted(()=>{
                 <v-btn variant="flat" color="success" rounded  class="d-lg-flex d-none !tw-font-extrabold  ">
                   <Icon icon="ic:baseline-whatsapp" width="25"  class="mr-2 tw-text-white" /><span class="tw-text-white ">ATENDIMENTO</span>
                 </v-btn>
-
               </div>
-              <v-menu>
+              <v-menu
+                  transition="slide-x-transition"
+                  v-model="menuMobile"
+              >
+                <template v-slot:activator="{ props }">
+                  <v-btn v-bind="props" variant="text" class="hidden-lg-and-up " icon >
+                    <Icon icon="mdi:user-circle-outline"  width="35"/>
+                  </v-btn>
+                </template>
 
+                <v-card class="mt-1">
+
+
+                  <v-list>
+                    <v-list-item>
+                      <RouterLink  :to="{name: 'area-do-cliente',params:{tab:'perfil'}}">
+                        Perfil
+                      </RouterLink>
+                    </v-list-item>
+
+                    <v-list-item @click="showCart = true">
+                      Carrinho
+                    </v-list-item>
+
+                    <v-list-item>
+                      <RouterLink  :to="{name: 'area-do-cliente',params:{tab:'pedidos'}}">
+                        Pedidos
+                      </RouterLink>
+                    </v-list-item>
+
+                    <v-list-item v-if="authStore.isAuthenticated()" @click="logout" color="secondary" class="tw-cursor-pointer">
+                      Sair
+                    </v-list-item>
+                    <v-list-item v-else @click="goToLoginPage" color="secondary" class="tw-cursor-pointer">
+                      Entrar
+                    </v-list-item>
+                  </v-list>
+                </v-card>
               </v-menu>
-              <v-btn variant="text" class="hidden-lg-and-up " icon >
-                <Icon icon="mdi:user-circle-outline"  width="35"/>
-              </v-btn>
+
             </v-toolbar>
           </v-container>
         </v-app-bar>
@@ -130,7 +164,7 @@ onMounted(()=>{
 
     <v-layout>
       <v-navigation-drawer elevation="10" location="right" v-model="showCart"  width="600" temporary >
-        <Cart :auth="authStore.user"/>
+        <Cart :auth="authStore.user" @close="showCart = false"/>
       </v-navigation-drawer>
       <v-navigation-drawer class="lp-drawer" v-model="appsdrawer" location="left" temporary>
         <MobileSidebar />

@@ -105,10 +105,10 @@ onMounted(()=>{
     </div>
     <div class="tw-flex tw-flex-col tw-gap-5 lg:tw-flex-row tw-h-full  tw-justify-between !tw-mt-5 tw-w-full">
 
-      <div class="lg:!tw-w-[50%] !tw-w-full !tw-rounded-xl ">
-        <Carousel v-bind="config_1" class="tw-w-[100vw] !tw-rounded-xl lg:tw-w-full tw-mb-4 my-carrousel my-carrousel">
-          <Slide v-for="(item,n) in travels_more_important" :key="item.id"  class="tw-px-5 lg:tw-px-0">
-            <CardTripFull :data="item"/>
+      <div class="lg:!tw-w-[50%] !tw-w-full lg:!tw-rounded-xl ">
+        <Carousel v-bind="config_1" class="tw-w-[100vw] lg:!tw-rounded-xl lg:tw-w-full tw-mb-4 my-carrousel my-carrousel">
+          <Slide v-for="(item,n) in travels_more_important" :key="item.id"  class="tw-px-5 lg:tw-px-0 tw-h-full">
+            <CardTripFull :data="item" class="tw-h-full"/>
           </Slide>
           <template #addons>
             <Pagination class=" "/>

@@ -59,7 +59,7 @@ onMounted(()=>{
   </v-card>
 
   <div class="maxWidth tw-px-3 ">
-    <v-row  class="my-3">
+    <v-row v-if="trechosWithTravels.data?.trechos?.data.length > 0"   class="my-3">
       <v-col cols="12"  >
         <div class="tw-mb-3 ">
           <div class="tw-flex tw-text-p   "><IconsBoat/> <span  class="tw-ml-3 tw-flex tw-flex-wrap">Viagens saindo de:<span class="tw-text-primary tw-font-black" > {{municipioLabel(origem)}}</span></span></div>
@@ -82,6 +82,10 @@ onMounted(()=>{
         <CardTicket :data="item"/>
       </v-col>
     </v-row>
+    <div v-else class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
+      <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
+      <p class="tw-text-p mt-1">Nenhuma passagem encontrada</p>
+    </div>
     <div class="tw-flex tw-justify-center mb-5">
       <v-btn @click="showMoreticket" v-if="filtersSelected.quantia <= trechosWithTravels.data?.trechos.total" flat variant="plain" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
         <Icon icon="line-md:arrow-down" class="mr-2 tw-text-xl"/>

@@ -61,7 +61,7 @@ onMounted(() => {
         v-model="filtersSelected"
         @update:modelValue="goToSalePage"
         :options="filtersData"
-        class=" tw-top-[-30px]  !tw-mb-[-30px] lg:tw-top-[-110px] lg:!tw-mb-[-80px] !tw-mx-5 lg:!tw-mx-0"/>
+        class=" tw-top-[-80px]  !tw-mb-[-30px] lg:tw-top-[-110px] lg:!tw-mb-[-80px] !tw-mx-5 lg:!tw-mx-0"/>
 
     <RiversOfOffers class="!tw-my-5"/>
 
