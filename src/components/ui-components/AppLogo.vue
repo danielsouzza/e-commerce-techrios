@@ -24,8 +24,8 @@ const logo = computed(()=>{
 
 <template>
     <img v-if="footer" src="../../assets/images/logo-techrios-black-white.svg" :width="size" alt=""/>
-    <v-avatar v-else  size="90">
-      <img  :src="logo" :width="size" alt="" />
+    <v-avatar v-else  :size="size" >
+      <img  :src="logo"  alt="" />
     </v-avatar>
 
 </template>

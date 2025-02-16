@@ -13,7 +13,7 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 
-const open = ref(false)
+const open = ref(props.modelValue == props.value)
 const iconToggle = computed(()=> open.value ? 'mdi:chevron-up' : 'mdi:chevron-down')
 
 watch(()=>props.modelValue, (value)=> {

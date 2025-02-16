@@ -6,7 +6,7 @@ import {routes} from "../../services/fetch.js";
 import Boat from "./Boat.vue";
 import BaseCard from "./BaseCard.vue";
 import {
-  calcularValorParcelado,
+  calcularValorParcelado, calcularValorPix,
   formatarHora,
   formatarTempoViagem,
   formatCurrency,
@@ -462,8 +462,8 @@ onBeforeUnmount(() => {
         <div class="tw-flex tw-justify-end tw-items-center tw-w-full  md:tw-w-1/2  lg:tw-ml-10 lg:tw-mr-5">
           <div class="tw-mt-4 tw-text-right ">
             <p v-if="dataIda?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(dataIda.valor))}}</span> por</p>
-            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{dataIda?.desconto ? formatCurrency(formatMoney(dataIda.valor) - dataIda.desconto.desconto) : dataIda.valor}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
-            <p class="tw-text-[10px] tw-text-gray-500">ou a até 6x de {{calcularValorParcelado(dataIda)}}  no cartão</p>
+            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{calcularValorPix(dataIda)}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
+            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{calcularValorParcelado(dataIda)}} no cartão</p>
           </div>
         </div>
       </div>
@@ -503,8 +503,8 @@ onBeforeUnmount(() => {
         <div class="tw-flex tw-justify-end tw-items-center tw-w-full  md:tw-w-1/2 lg:tw-ml-10 lg:tw-mr-5">
           <div class="tw-mt-4 tw-text-right">
             <p v-if="dataVolta?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(dataVolta.valor))}}</span> por</p>
-            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{dataVolta?.desconto ? formatCurrency(formatMoney(dataVolta.valor) - dataVolta.desconto.desconto) :dataVolta.valor}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
-            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de R$ 65,92 no cartão</p>
+            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{calcularValorPix(dataVolta)}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
+            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{calcularValorParcelado(dataVolta)}} no cartão</p>
           </div>
         </div>
       </div>

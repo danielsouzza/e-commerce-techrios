@@ -46,7 +46,7 @@ const trechosWithTravels = ref([])
 const waitServe = ref(false)
 const formPayment = reactive({
   order_id:null,
-  payment_method_id:null,
+  payment_method_id:6,
   credit_card:{
     holder:null,
     card_number:null,
@@ -877,10 +877,10 @@ watch(()=>props.tab,()=>{
                   <v-col cols="6" class="tw-flex tw-items-center !tw-py-2 !tw-font-black tw-text-sm !tw-text-primary tw-justify-end">
                     {{ formatCurrency(formSale.total_passagems) }}
                   </v-col>
-                  <v-col cols="6" class="tw-flex tw-items-center !tw-pt-0  tw-text-xs ">
+                  <v-col v-if="formSale.total_taxas" cols="6" class="tw-flex tw-items-center !tw-pt-0  tw-text-xs ">
                     <Icon icon="icon-park-outline:doc-search-two" class="mr-2" width="15"/>Taxa de serviço
                   </v-col>
-                  <v-col cols="6" class="tw-flex tw-items-center !tw-pt-0  tw-text-xs  tw-justify-end">
+                  <v-col v-if="formSale.total_taxas" cols="6" class="tw-flex tw-items-center !tw-pt-0  tw-text-xs  tw-justify-end">
                     {{ formatCurrency(formSale.total_taxas) }}
                   </v-col>
                 </v-row>
@@ -1047,16 +1047,16 @@ watch(()=>props.tab,()=>{
                   <v-col cols="6" >
                     +{{formatCurrency(cart.getTotal())}}
                   </v-col>
-                  <v-col cols="6" class="pt-0" >
+                  <v-col cols="6" class="pt-0" v-if="cart.getTotalTaxa()" >
                     Taxa de serviço
                   </v-col>
-                  <v-col cols="6" class="pt-0">
+                  <v-col cols="6" class="pt-0" v-if="cart.getTotalTaxa()">
                     +{{formatCurrency(cart.getTotalTaxa())}}
                   </v-col>
-                  <v-col cols="6" class="pt-0">
+                  <v-col cols="6" class="pt-0" v-if="cart.getOffers()">
                     Descontos
                   </v-col>
-                  <v-col cols="6" class="pt-0">
+                  <v-col cols="6" class="pt-0" v-if="cart.getOffers()">
                     -{{formatCurrency(cart.getOffers())}}
                   </v-col>
                   <v-col cols="6" class="tw-font-bold" >
@@ -1099,7 +1099,7 @@ watch(()=>props.tab,()=>{
             <BaseCard class="mt-3">
               <div class=" tw-font-bold tw-px-2 tw-text-gray-800 ">Escolher como pagar sua viagem</div>
             </BaseCard>
-            <BaseCard title="Desconto de 5% para pagamento via pix"  class="mt-3">
+            <BaseCard title="Desconto de 4% para pagamento via pix"  class="mt-3">
               <CardPayment title=" PIX (liberação imediata)" icon="ic:baseline-pix" value="6" v-model="formPayment.payment_method_id">
                 <template #icon>
                   <Icon icon="ic:baseline-pix"  class="mr-2 tw-text-green-400" width="26"/>

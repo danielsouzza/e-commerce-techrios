@@ -87,10 +87,19 @@ function calcularValorParcelado(data) {
     let valorComDesconto = valor - desconto;
     let valorFinal = (valorComDesconto + (valorComDesconto * 0.10)) / 6;
 
+    return formatCurrency(valorComDesconto);
+}
+
+function calcularValorPix(data) {
+    let valor = formatMoney(data.valor);
+    let desconto = data?.desconto ? data.desconto.desconto : 0;
+    let valorComDesconto = valor - desconto;
+    let valorFinal = valorComDesconto - (valorComDesconto * 0.04);
+
     return formatCurrency(valorFinal);
 }
 
 
 export {formatCurrency, formatMoney,formatDateToServe,
     getMonicipioLabel, formatDate, formatarTempoViagem,
-    gerarStringTiposComodos,municipioLabel,formatarHora,calcularValorParcelado};
+    gerarStringTiposComodos,municipioLabel,formatarHora,calcularValorParcelado,calcularValorPix};

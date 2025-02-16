@@ -82,13 +82,13 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
               <p class="tw-text-secondary tw-text-[12px] tw-font-[800]">SIGA TECHRIOS</p>
             </div>
             <div class="tw-flex tw-gap-2  tw-items-center ">
-              <a href="#">
+              <a href="https://www.instagram.com/yjaraviagens/" target="_blank">
                 <img src="../assets/images/footer/instagram.svg" alt="" width="30"/>
               </a>
-              <a href="#">
+              <a href="https://www.instagram.com/yjaraviagens/" target="_blank">
                 <img src="../assets/images/footer/facebook.svg" alt="" width="30"/>
               </a>
-              <a href="#">
+              <a href="https://www.instagram.com/yjaraviagens/" target="_blank">
                 <img src="../assets/images/footer/youtube.svg" alt="" width="30"/>
               </a>
             </div>

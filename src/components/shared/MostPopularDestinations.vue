@@ -42,11 +42,12 @@ onMounted(()=>{
 </script>
 
 <template>
+
   <v-card color="secondary" >
     <div class="maxWidth">
       <v-card-title class="tw-text-center !tw-px-0  lg:tw-text-start !tw-font-black tw-text-primary !tw-text-2xl !tw-py-5">Destinos mais procurados</v-card-title>
       <Carousel v-bind="config" class="tw-w-[100vw] lg:tw-w-full tw-mb-10 my-carrousel">
-        <Slide v-for="(item, n) in data?.data" :key="item.id" >
+        <Slide v-for="(item, n) in data" :key="item.id" >
           <v-img
               cover
               gradient="to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 20%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0) 50%"
