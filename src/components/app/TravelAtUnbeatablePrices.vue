@@ -39,16 +39,9 @@ const config = {
   },
 };
 
-const gallery = [
-  {id:1},
-  {id:2},
-  {id:3},
-  {id:4},
-]
 
 function getMunicipios(search='') {
   routes['municipios']({search:search}).then((response) => {
-    console.log(response);
     municipios.value = response.data.data;
   })
 }
@@ -75,7 +68,7 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div class=" tw-flex tw-flex-col  tw-gap-10 lg:tw-flex-row-reverse lg:tw-items-start tw-justify-center !tw-mt-5">
+  <div class=" tw-flex tw-flex-col  tw-gap-10 lg:tw-flex-row-reverse lg:tw-items-start tw-justify-center !tw-mt-5" v-if="trechosWithTravels.data?.trechos?.data.length > 0">
    <div class="tw-flex tw-flex-col tw-items-center lg:tw-flex-col-reverse">
      <div class="tw-flex tw-flex-col tw-w-full tw-items-center lg:tw-items-start">
        <div class=" tw-text-[25px] tw-font-extrabold tw-text-center lg:tw-text-start lg:tw-text-[35px] tw-text-primary " style="line-height: 35px">
@@ -110,7 +103,7 @@ onMounted(()=>{
      </div>
    </div>
     <div class="lg:!tw-w-[75%] ">
-      <Carousel v-bind="config" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-mb-4 my-carrousel">
+      <Carousel  v-bind="config" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-mb-4 my-carrousel">
         <Slide v-for="(item, n) in trechosWithTravels.data?.trechos?.data" :key="item.id">
           <CardTicket :data="item" :active="currentSlide === n -1"/>
         </Slide>

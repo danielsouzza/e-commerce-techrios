@@ -7,7 +7,7 @@ import { VDateInput } from 'vuetify/labs/VDateInput'
   <v-card class=" !tw-rounded-xl tw-w-full"  elevation="0"  >
     <div class="tw-flex tw-flex-col tw-h-full lg:tw-flex-row justify-space-between">
       <div class="tw-pl-5 tw-hidden lg:tw-block">
-        <img :src="'./src/assets/images/footer/email.png'" alt=""  class="tw-w-[260px] tw-h-full"/>
+        <img :src="'../src/assets/images/footer/email.png'" alt=""  class="tw-w-[260px] tw-h-full"/>
       </div>
       <div class="tw-flex tw-flex-col tw-w-full tw-mx-0 lg:tw-mx-10 tw-p-2">
         <v-card-title class="tw-text-wrap !tw-whitespace-normal !tw-px-2 !tw-pb-0 ">Cadastre seu e-mail e telefone para receber ofertas e descontos</v-card-title>

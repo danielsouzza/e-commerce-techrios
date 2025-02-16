@@ -30,8 +30,9 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
           </ListExpensiveItem>
           <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 lg:!tw-hidden" color="secondary"></v-divider>
           <ListExpensiveItem title="Institucional" class="tw-w-full">
-            <p>De segunda a sexta das 07 às 22h</p>
-            <p>Sábado, domingo e feriado das 09h às 18h</p>
+            <RouterLink  :to="{name: 'institucional'}">
+              Como funciona
+            </RouterLink>
           </ListExpensiveItem>
           <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 lg:!tw-hidden" color="secondary"></v-divider>
           <ListExpensiveItem title="Links Úteis" class="tw-w-full">

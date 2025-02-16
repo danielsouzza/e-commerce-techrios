@@ -13,6 +13,9 @@ const routes = [
         path: '/viagems-em-destaques',
         component: ()=>import('../pages/Destaques.vue'), name: 'viagems-em-destaques'},
     {
+        path: '/institucional',
+        component: ()=>import('../pages/Institucional.vue'), name: 'institucional'},
+    {
         path: '/viagems-imbativeis',
         component: ()=>import('../pages/PrecosEmbativeis.vue'), name: 'viagems-imbativeis'},
     {
