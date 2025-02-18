@@ -6,8 +6,9 @@ import TableOrders from "../components/shared/TableOrders.vue";
 import {routes} from "../services/fetch.js";
 import {VDateInput} from 'vuetify/labs/VDateInput'
 import axios from "axios";
-import router from "../routes/index.js";
 import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
+import {formatDateToServe} from "../Helper/Ultis.js";
+import router from "../routes/index.js";
 
 const props = defineProps({
   tab:String,
@@ -17,7 +18,6 @@ const auth = ref(null)
 const municipios = ref([]);
 const tab = ref(props.tab)
 const visible1 = ref(false);
-const visible2 = ref(false);
 const visible3 = ref(false);
 const tabs = [
   {
@@ -46,12 +46,25 @@ const tabs = [
   }
 ]
 
+
+
+const formPassword = reactive({
+  current_password:null,
+  new_password:'',
+  password_confirmation:null,
+  errors:{}
+
+})
+
 const form = reactive({
+  id:null,
   name:"",
   email: "",
   telefone:"",
   nascimento:null,
+  password:null,
   comprador:{
+    nascimento:null,
     cpf_cnpj:"",
     estrangeiro:false,
     xlgr:"",
@@ -64,11 +77,12 @@ const form = reactive({
 })
 
 function fillFormDataUser(){
+  form.id = auth.value.id
   form.name = auth.value.name;
   form.email = auth.value.email
   form.telefone = auth.value.comprador.telefone
   form.comprador.telefone = auth.value.comprador.telefone
-  form.nascimento = auth.value.nascimento
+  form.nascimento = new Date(auth.value.comprador.nascimento)
   form.comprador.telefone = auth.value.comprador.telefone
   form.comprador.estrangeiro = auth.value.comprador.estrangeiro
   form.comprador.bairro = auth.value.comprador.bairro
@@ -87,6 +101,8 @@ const titlePage = computed(()=>{
 function handleSubmit() {
   form.comprador.xnome = form.name
   form.comprador.telefone = form.telefone
+  form.password = formPassword.new_password
+  form.comprador.nascimento = formatDateToServe(form.nascimento)
   routes['user.register'](form).then((response) => {
     showSuccessNotification('Usuário atualizado com sucesso!')
   }).catch((error) => {
@@ -97,6 +113,7 @@ function handleSubmit() {
 function deleteAccount() {
   routes['user.delete'](form).then((response) => {
     showSuccessNotification('Usuário deletado com sucesso!')
+    router.push({name: "login"})
   }).catch((error) => {
     console.log(error)
     showErrorNotification('Erro ao deletar o usuário')
@@ -119,6 +136,30 @@ function getMunicipios(){
     municipios.value = response.data
   })
 }
+
+const validatePassword = () => {
+  if (!formPassword.new_password || !formPassword.password_confirmation) {
+    return false;
+  }
+  const isValid = passwordRules.value.every(rule => rule.rule);
+  return isValid && formPassword.new_password === formPassword.password_confirmation;
+};
+
+const passwordRules = computed(() => {
+  return [
+    { rule: formPassword.new_password?.length >= 8, message: 'Pelo menos 8 caracteres' },
+    { rule: /[A-Z]/.test(formPassword.new_password), message: 'Pelo menos uma letra maiúscula' },
+    { rule: /[a-z]/.test(formPassword.new_password), message: 'Pelo menos uma letra minúscula' },
+    { rule: /[0-9]/.test(formPassword.new_password), message: 'Pelo menos um número' },
+  ];
+});
+
+function submitFormPassword(){
+  if(validatePassword()){
+    handleSubmit()
+  }
+}
+
 
 onMounted(()=>{
   getMunicipios();
@@ -370,21 +411,6 @@ onMounted(()=>{
                 <v-divider  :thickness="1" class="border-opacity-100  " ></v-divider>
               </div>
               <v-row class="my-5">
-                <v-col cols="12" >
-                  <div class="text-subtitle-1 text-medium-emphasis">Sua senha atual</div>
-                  <v-text-field
-                      :append-inner-icon="visible1 ? 'mdi-eye-off' : 'mdi-eye'"
-                      :type="visible1 ? 'text' : 'password'"
-                      density="compact"
-                      color="secondary"
-                      hide-details="auto"
-                      v-model="form.password_confirmation"
-                      placeholder="Digite sua senha atual"
-                      prepend-inner-icon="mdi-lock-outline"
-                      variant="outlined"
-                      @click:append-inner="visible1 = !visible1"
-                  ></v-text-field>
-                </v-col>
                 <v-col cols="12"  >
                   <div class="text-subtitle-1 text-medium-emphasis">Sua nova senha</div>
                   <v-text-field
@@ -393,12 +419,21 @@ onMounted(()=>{
                       density="compact"
                       color="secondary"
                       hide-details="auto"
-                      v-model="form.password"
+                      v-model="formPassword.new_password"
                       placeholder="Digite sua nova senha"
                       prepend-inner-icon="mdi-lock-outline"
                       variant="outlined"
                       @click:append-inner="visible1 = !visible1"
                   ></v-text-field>
+                  <v-list dense>
+                    <v-list-item v-for="(rule, index) in passwordRules" :key="index">
+                      <div class="tw-flex tw-gap-2 tw-items-center">
+                        <v-icon v-if="rule.rule" color="green">mdi-check-circle</v-icon>
+                        <v-icon v-else color="red">mdi-close-circle</v-icon>
+                        <v-list-item-title>{{ rule.message }}</v-list-item-title>
+                      </div>
+                    </v-list-item>
+                  </v-list>
                 </v-col>
                 <v-col cols="12"  >
                   <div class="text-subtitle-1 text-medium-emphasis">Confirme sua nova senha</div>
@@ -409,7 +444,7 @@ onMounted(()=>{
                       density="compact"
                       color="secondary"
                       hide-details="auto"
-                      v-model="form.password_confirmation"
+                      v-model="formPassword.password_confirmation"
                       placeholder="Digite novamente sua nova senha"
                       prepend-inner-icon="mdi-lock-outline"
                       variant="outlined"
@@ -417,6 +452,18 @@ onMounted(()=>{
                   ></v-text-field>
                 </v-col>
               </v-row>
+
+              <v-btn
+                  @click="submitFormPassword"
+                  class=""
+                  color="secondary"
+                  size="large"
+                  rounded
+                  variant="outlined"
+                  block
+              >
+                Atualizar
+              </v-btn>
 
             </v-card>
           </v-tabs-window-item>
@@ -428,7 +475,7 @@ onMounted(()=>{
             >
               <div class="tw-flex tw-items-center  mb-5">
                 <v-btn variant="outlined" color="error" rounded >
-                  <span class="tw-text-xs">Deletar Contar Pemanentemente</span>
+                  <span class="tw-text-xs">Deletar Contar Permanentemente</span>
                 </v-btn>
                 <v-divider  :thickness="1" class="border-opacity-100  " ></v-divider>
               </div>
@@ -438,6 +485,7 @@ onMounted(()=>{
                 </v-col >
                 <v-col cols="12" >
                   <v-btn
+                      @click="deleteAccount"
                       color="error"
                       size="large"
                       rounded

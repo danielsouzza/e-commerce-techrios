@@ -100,6 +100,7 @@ function calcularValorPix(data) {
 }
 
 
+
 export {formatCurrency, formatMoney,formatDateToServe,
     getMonicipioLabel, formatDate, formatarTempoViagem,
     gerarStringTiposComodos,municipioLabel,formatarHora,calcularValorParcelado,calcularValorPix};

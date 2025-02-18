@@ -80,7 +80,7 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
           </div>
           <div class="tw-flex tw-flex-col tw-justify-center tw-gap-10 lg:tw-flex-row hidden-md-and-down tw-items-center   ">
             <div class="tw-flex tw-gap-4  tw-items-center">
-              <p class="tw-text-secondary tw-text-[12px] tw-font-[800]">SIGA TECHRIOS</p>
+              <p class="tw-text-secondary tw-text-[12px] tw-font-[800]">SIGA A YJARA</p>
             </div>
             <div class="tw-flex tw-gap-2  tw-items-center ">
               <a href="https://www.instagram.com/yjaraviagens/" target="_blank">

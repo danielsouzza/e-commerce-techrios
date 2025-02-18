@@ -196,7 +196,6 @@ function onClickRoom(room, type,typeTravel='dataIda') {
 
       if(typeTravel == 'dataVolta'){
         const totalIda = qunatidadeTotalPassagens()
-        console.log(comodo)
         const totalVolta = qunatidadeTotalPassagens('dataVolta') + room.quantidade
         if (totalVolta > totalIda) {
           throw new Error('Número de passagens de volta não pode ser maior que as de ida.');
@@ -215,12 +214,24 @@ function onClickRoom(room, type,typeTravel='dataIda') {
 
 }
 
-function incrementComodo(type,typeTravel='dataIda') {
-  const selectedsByType = roomsSelected.value[typeTravel].selectedsByType
-  const type_comodo = selectedsByType.find(it=>it.type_comodo_id === type)
-  if(type_comodo){
-    type_comodo.quantidade++
+function incrementComodo(type, typeTravel='dataIda') {
+  try {
+    const selectedsByType = roomsSelected.value[typeTravel].selectedsByType
+    const type_comodo = selectedsByType.find(it=>it.type_comodo_id === type)
+    if(type_comodo){
+      if(typeTravel == 'dataVolta'){
+        const totalIda = qunatidadeTotalPassagens()
+        const totalVolta = qunatidadeTotalPassagens('dataVolta') + type_comodo.quantidade
+        if (totalVolta > totalIda) {
+          throw new Error('Número de passagens de volta não pode ser maior que as de ida.');
+        }
+      }
+      type_comodo.quantidade++
+    }
+  }catch (error){
+    showErrorNotification(error.message)
   }
+
 }
 
 function decrementComodo(type,typeTravel='dataIda') {

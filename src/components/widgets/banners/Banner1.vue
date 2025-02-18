@@ -7,9 +7,8 @@ const loading = ref(true);
 
 const slides = ref([])
 function getSlides() {
-  routes["banners"]({subdomain:window.subdomain}).then(res => {
+  routes["banners"]({subdomain:window.subdomain,principal:1}).then(res => {
     slides.value = res.data.data;
-    console.log(res);
     loading.value = false;
   })
 }

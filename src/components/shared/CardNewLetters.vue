@@ -1,6 +1,21 @@
 <script setup>
 import {Icon} from "@iconify/vue";
-import { VDateInput } from 'vuetify/labs/VDateInput'
+import {routes} from "../../services/fetch.js";
+import {reactive} from "vue";
+
+const form = reactive({
+  email:null,
+  telefone: null
+})
+
+function submit(){
+  routes['newletters'](form).then(() => {
+
+  }).catch((error) => {
+
+  })
+}
+
 </script>
 
 <template>
@@ -13,16 +28,16 @@ import { VDateInput } from 'vuetify/labs/VDateInput'
         <v-card-title class="tw-text-wrap !tw-whitespace-normal !tw-px-2 !tw-pb-0 ">Cadastre seu e-mail e telefone para receber ofertas e descontos</v-card-title>
         <v-row class="tw-w-full lg:tw-items-center ">
           <v-col cols="12" lg="6" md="6">
-            <v-text-field :autofocus="false" class="my-class px-2 " hide-details="auto" flat variant="solo" placeholder="DIGITE SEU E-MAIL"></v-text-field>
+            <v-text-field v-model="form.email" :autofocus="false" class="my-class px-2 " hide-details="auto" flat variant="solo" placeholder="DIGITE SEU E-MAIL"></v-text-field>
           </v-col>
           <v-col  cols="12" lg="6" md="6">
-            <v-text-field  :autofocus="false" class="my-class px-2 " hide-details="auto" flat variant="solo" placeholder="DIGITE SEU WHATSAPP"></v-text-field>
+            <v-text-field  v-model="form.telefone"   v-mask="'(##) #####-####'" :autofocus="false" class="my-class px-2 " hide-details="auto" flat variant="solo" placeholder="DIGITE SEU WHATSAPP"></v-text-field>
           </v-col>
         </v-row>
 
       </div>
 
-      <v-btn class="tw-w-full lg:tw-w-[20%]  !tw-h-auto " variant="flat" color="secondary" rounded="0" >
+      <v-btn @click="submit" class="tw-w-full lg:tw-w-[20%]  !tw-h-auto " variant="flat" color="secondary" rounded="0" >
         <div class="tw-text-[20px] py-3 tw-flex tw-items-center tw-text-white tw-font-[900]  tw-normal-case ">
           <Icon icon="line-md:email" class="tw-text-[30px] tw-text-black tw-mr-1 " />Cadastrar
         </div>

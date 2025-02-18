@@ -111,9 +111,12 @@ onMounted(()=>{
                     </v-list>
                   </v-card>
                 </v-menu>
-                <v-btn variant="flat" color="success" rounded  class="d-lg-flex d-none !tw-font-extrabold  ">
-                  <Icon icon="ic:baseline-whatsapp" width="25"  class="mr-2 tw-text-white" /><span class="tw-text-white ">ATENDIMENTO</span>
-                </v-btn>
+                <a href="https://wa.me/559391893803?text=Olá,%20gostaria%20de%20mais%20informações!" target="_blank">
+                  <v-btn   variant="flat" color="success" rounded  class="d-lg-flex d-none !tw-font-extrabold  ">
+                    <Icon icon="ic:baseline-whatsapp" width="25"  class="mr-2 tw-text-white" /><span class="tw-text-white ">ATENDIMENTO</span>
+                  </v-btn>
+                </a>
+
               </div>
               <v-menu
                   transition="slide-x-transition"

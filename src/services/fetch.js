@@ -33,6 +33,8 @@ export const routes = {
     'user.register':(params= {}) => api.post('/register',params),
     'user.delete':() => api.delete('/usuario'),
 
+    'newletters':(params= {}) => api.post('/newsletter',params),
+
 
 }
 
