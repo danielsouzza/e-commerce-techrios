@@ -19,7 +19,7 @@ import PassegerForm from "../components/app/PassegerForm.vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
 import CardPayment from "../components/shared/CardPayment.vue";
 import CopyToClipboard from "../components/shared/CopyToClipboard.vue";
-import QRCode from 'qrcode-svg';
+import VueQrcode from "vue-qrcode";
 import {useCartStore} from "../store/CartStore.js";
 import router from "../routes/index.js";
 import CartItem from "../components/app/Cart/CartItem.vue";
@@ -119,22 +119,7 @@ const stepSale = ref(tabs.find(it=>it.value == props.tab).step)
 const cart = computed(()=>{
   return cartStore
 })
-const qrcode = computed(()=>{
-  if(!paymentPending.value.pix_copia_cola ) return ""
-  const qr = new QRCode({
-    content:  paymentPending.value.pix_copia_cola,
-    width: 400,
-    height: 400,
-    color: "#000000",
-    background: "#ffffff"
-  });
 
-  const svgString = qr.svg();
-
-  const blob = new Blob([svgString], { type: "image/svg+xml" });
-
-  return  URL.createObjectURL(blob);
-})
 const pacerls = [
   {value:1,pencet:0.0},
   {value:2,pencet:0.06},
@@ -485,7 +470,6 @@ function identificarCpfOuCnpj(valor) {
   }
 }
 
-
 function resetFormSale() {
   formSale.trecho = null
   formSale.viagem = null
@@ -595,7 +579,6 @@ function getTicketPdf(){
   })
 }
 
-
 function loadData(){
   if(stepSale.value === 1){
     updateFilters()
@@ -614,7 +597,6 @@ watch(()=>props.tab,()=>{
   cartStore.loadCart()
   stepSale.value = tabs.find(it=>it.value == props.tab).step
 })
-
 
 </script>
 
@@ -1234,22 +1216,7 @@ watch(()=>props.tab,()=>{
               <div class="tw-flex tw-justify-center tw-flex-col tw-items-center">
                 <p class="tw-text-p tw-text-sm">Sua compra foi concluída com sucesso. Você receberá um e-mail de confirmação com mais detalhes</p>
                 <p class="tw-text-lg tw-font-bold my-2">Realize o pagamento através do QR Code abaixo.</p>
-                <v-img
-                    rounded
-                    width="400"
-                    height="400"
-                    lazy-src="https://picsum.photos/id/11/400/400"
-                    :src="qrcode"
-                >
-                  <template v-slot:placeholder>
-                    <div class="d-flex align-center justify-center fill-height">
-                      <v-progress-circular
-                          color="grey-lighten-4"
-                          indeterminate
-                      ></v-progress-circular>
-                    </div>
-                  </template>
-                </v-img>
+                <VueQrcode :value="paymentPending.pix_copia_cola" :size="200" />
                 <p class="tw-text-lg tw-font-bold my-2">PIX Copiar e Colar</p>
                 <CopyToClipboard  :textToCopy="paymentPending.pix_copia_cola" />
               </div>
