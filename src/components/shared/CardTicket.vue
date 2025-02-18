@@ -450,11 +450,12 @@ onBeforeUnmount(() => {
         <div class="tw-flex tw-justify-between tw-items-center  mt-3 tw-w-full mr-10">
           <div>
             <v-img
+                class="bg-grey-lighten-2"
                 width="120px"
                 height="50px"
                 cover
                 rounded
-                :src="baseurl + data.municipio_destino.image"
+                :src="baseurl + dataIda.municipio_destino?.image"
             ></v-img>
           </div>
           <div class="tw-flex lg:tw-ml-5 tw-text-[10px] tw-gap-4 lg:tw-gap-6 lg:tw-text-sm">
@@ -493,11 +494,13 @@ onBeforeUnmount(() => {
         <div class="tw-flex tw-justify-between tw-items-center  mt-3 tw-w-full mr-10">
           <div>
             <v-img
+                class="bg-grey-lighten-2"
+
                 width="120px"
                 height="50px"
                 cover
                 rounded
-                src="https://picsum.photos/350/165?random"
+                :src="baseurl + dataVolta.municipio_destino?.image"
             ></v-img>
           </div>
           <div class="tw-flex lg:tw-ml-5 tw-text-[10px] tw-gap-4 lg:tw-gap-6 lg:tw-text-sm">

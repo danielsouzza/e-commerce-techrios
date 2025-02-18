@@ -25,6 +25,7 @@ import router from "../routes/index.js";
 import CartItem from "../components/app/Cart/CartItem.vue";
 import {userAuthStore} from "../store/AuthStore.js";
 import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
+import {getApiBaseUrl} from "../services/api.js";
 
 
 const props = defineProps({
@@ -82,13 +83,13 @@ const formSale = reactive({
   dataComodos:[],
   dataVolta:null,
 })
-const tiposDoc = [
-  { id:1, nome: 'RG', tamanho: 15, mask: '###############' },
-  { id:2, nome: 'Titulo de Eleitor', tamanho: 12, mask: '#### #### ####' },
-  { id:3, nome: 'Passaporte', tamanho: 20, mask: '******************' },
-  { id:4, nome: 'CNH', tamanho: 11, mask: '###########' },
-  { id:5, nome: 'CPF', tamanho: 0, mask: '###.###.###-##' }
+
+
+const tiposDocComprador = [
+  { id:5, nome: 'CPF', tamanho: 0, mask: '###.###.###-##' },
+  { id:6, nome: 'CNPJ', tamanho: 11, mask: '##.###.###/####-##' },
 ];
+
 const nextDays = ref([])
 const years = computed(() => {
       const currentYear = new Date().getFullYear();
@@ -470,6 +471,21 @@ function submitPaymentPix(){
   })
 }
 
+function identificarCpfOuCnpj(valor) {
+  if (typeof valor !== "string") return "Formato inválido";
+
+  const numero = valor.replace(/\D/g, '');
+
+  if (numero.length === 11) {
+    return 5;
+  } else if (numero.length === 14) {
+    return 6;
+  } else {
+    return "Formato inválido";
+  }
+}
+
+
 function resetFormSale() {
   formSale.trecho = null
   formSale.viagem = null
@@ -480,9 +496,9 @@ function resetFormSale() {
     nome: authStore.user?.name ?? null,
     email: authStore.user?.email ?? null,
     telefone: authStore.user?.comprador.telefone,
-    tipo_doc: 1,
+    tipo_doc: identificarCpfOuCnpj(authStore.user?.comprador.cpf_cnpj),
     nascimento: authStore.user?.comprador.nascimento ?
-        new Date(authStore.user?.comprador.nascimento) :
+        new Date(authStore.user?.comprador.nascimento+ 'T00:00:00') :
         null,
     document:authStore.user?.comprador.cpf_cnpj,
   };
@@ -559,7 +575,7 @@ function showMoreticket(){
 }
 
 function getTicketPdf(){
-  const baseUrl = "http://localhost";
+  const baseurl = getApiBaseUrl().replaceAll('api','')
   const pathToReplace = "/var/www/storage/app/public/";
   const newPathPrefix = `${baseUrl}/storage/`;
 
@@ -949,7 +965,7 @@ watch(()=>props.tab,()=>{
                       item-value="id"
                       v-model="formSale.contato.tipo_doc"
                       hide-details="auto"
-                      :items="tiposDoc"
+                      :items="tiposDocComprador"
                   >
                   </v-select>
                 </v-col>
@@ -959,7 +975,7 @@ watch(()=>props.tab,()=>{
                       variant="plain"
                       v-model="formSale.contato.document"
                       label="Nº do documento"
-                      v-mask="tiposDoc[formSale.contato.tipo_doc-1]?.mask"
+                      v-mask="tiposDocComprador[formSale.contato.tipo_doc-5]?.mask"
                       hide-details="auto"
                   >
                     <template v-slot:prepend-inner>

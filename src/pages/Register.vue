@@ -17,8 +17,8 @@ const form = reactive({
   password: "",
   password_confirmation: "",
   telefone:"",
-  nascimento:null,
   comprador:{
+  nascimento:null,
     cpf_cnpj:"",
     xnome:"",
     estrangeiro:false,
@@ -122,7 +122,7 @@ onMounted(()=>{
               color="secondary"
               hide-details="auto"
               prepend-icon=""
-              v-model="form.nascimento"
+              v-model="form.comprador.nascimento"
               variant="outlined"
               placeholder="Data de Nascimento">
             <template #default>
