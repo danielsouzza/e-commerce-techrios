@@ -13,6 +13,7 @@ import '@mdi/font/css/materialdesignicons.css';
 import router from './routes'
 import {DEFAULT_THEME} from "./themes/DefaultTheme.js";
 import {routes} from "./services/fetch.js";
+import {getApiBaseUrl} from "./services/api.js";
 
 const hostname = window.location.hostname;
 const parts = hostname.split(".");
@@ -29,14 +30,13 @@ async function fetchTheme() {
     if (subdomain) {
         try {
             const response = await  routes['empresa.theme']({subdomain:window.subdomain})
-            console.log(response.data.data)
-            console.log(response.data.data)
+            const baseurl = getApiBaseUrl().replaceAll('api','')
             const { theme, image_path } = response.data.data;
 
 
             themeConfig.primaryColor = theme.primary_color || themeConfig.primaryColor;
             themeConfig.secondaryColor = theme.secondary_color || themeConfig.secondaryColor;
-            themeConfig.logo = 'http://localhost/' + image_path
+            themeConfig.logo = baseurl + image_path
 
         } catch (error) {
             console.error("Erro ao buscar tema da loja:", error);

@@ -1,12 +1,12 @@
 import axios from 'axios';
 
 
-function getApiBaseUrl() {
+export function getApiBaseUrl() {
     return import.meta.env.VITE_API_TECHRIOS_URL;
 }
 
 
-const api = axios.create({
+export const api = axios.create({
     baseURL: getApiBaseUrl(),
     timeout: 15000,
 })
@@ -25,5 +25,3 @@ api.interceptors.request.use(
         return Promise.reject(error);
     }
 );
-
-export default api;
