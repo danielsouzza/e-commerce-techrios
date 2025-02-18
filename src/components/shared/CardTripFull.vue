@@ -9,11 +9,14 @@ import {
   municipioLabel
 } from "../../Helper/Ultis.js";
 import router from "../../routes/index.js";
+import {getApiBaseUrl} from "../../services/api.js";
 
 const props = defineProps({
   data: Object,
   dragging:Boolean,
 })
+
+const baseurl = getApiBaseUrl().replaceAll('api','')
 
 function goToSalePage(){
   if(props.dragging)return;
@@ -30,9 +33,10 @@ function goToSalePage(){
 <template>
   <div  @click="goToSalePage" class="tw-relative tw-w-[100vw] lg:tw-w-full tw-h-full tw-rounded-xl tw-overflow-hidden tw-shadow-lg tw-cursor-pointer">
     <div
-        class="tw-w-full tw-h-[300px] md:tw-h-[500px] lg:tw-h-[405px] !tw-rounded-xl tw-bg-cover tw-bg-center "
-        style="background-image: url('./src/_mockData/banners/banner-primary-1.png');">
+        class="tw-w-full tw-h-[300px] md:tw-h-[500px] lg:tw-h-[405px] !tw-rounded-xl tw-bg-cover tw-bg-center"
+        :style="{ backgroundImage: `url('${baseurl}${data.municipio_destino.image}')` }">
     </div>
+
 
     <div class="tw-absolute tw-top-0 tw-left-0 tw-w-full tw-h-full tw-bg-gradient-to-t tw-from-black/100 tw-via-black/50 tw-to-transparent"></div>
 

@@ -1,11 +1,13 @@
 <script setup>
 import 'vue3-carousel/dist/carousel.css'
-import {Carousel, Pagination, Slide} from "vue3-carousel";
+import {Carousel, Slide} from "vue3-carousel";
 import {routes} from "../../services/fetch.js";
 import {onMounted, ref} from "vue";
+import {getApiBaseUrl} from "../../services/api.js";
 
 
 const data = ref([])
+const baseurl = getApiBaseUrl().replaceAll('api','')
 const config = {
   itemsToShow: 2,
   gap:10,
@@ -55,7 +57,7 @@ onMounted(()=>{
               class="!tw-rounded-xl"
               height="120"
               width="40"
-              src="https://picsum.photos/350/165?random"
+              :src="baseurl + data.municipio?.image"
           >
             <div class="d-flex align-center justify-center tw-absolute tw-bottom-0 tw-text-white tw-p-2 tw-w-full">
              {{item.municipio.nome}}

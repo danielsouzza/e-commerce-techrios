@@ -15,6 +15,7 @@ import {
   gerarStringTiposComodos
 } from "../../Helper/Ultis.js";
 import {showErrorNotification} from "../../event-bus.js";
+import {getApiBaseUrl} from "../../services/api.js";
 
 const props = defineProps({
   modelValue: Object,
@@ -46,6 +47,7 @@ const roomsSelected = ref({
 })
 
 const step = ref(1)
+const baseurl = getApiBaseUrl().replaceAll('api','')
 const matrizRooms = ref({
   ida:[],
   volta:[]
@@ -452,7 +454,7 @@ onBeforeUnmount(() => {
                 height="50px"
                 cover
                 rounded
-                src="https://picsum.photos/350/165?random"
+                :src="baseurl + data.municipio_destino.image"
             ></v-img>
           </div>
           <div class="tw-flex lg:tw-ml-5 tw-text-[10px] tw-gap-4 lg:tw-gap-6 lg:tw-text-sm">

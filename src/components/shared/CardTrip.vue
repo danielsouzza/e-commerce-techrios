@@ -13,11 +13,17 @@ import {
   municipioLabel
 } from "../../Helper/Ultis.js";
 import router from "../../routes/index.js";
+import {getApiBaseUrl} from "../../services/api.js";
 
+const baseurl = getApiBaseUrl().replaceAll('api','')
 const props = defineProps({
   data:Object,
   active: Boolean,
   dragging: Boolean,
+  superSale:{
+    type:Boolean,
+    default:false
+  }
 })
 
 function goToSalePage(){
@@ -39,9 +45,9 @@ function goToSalePage(){
         cover
         class="bg-grey-lighten-2"
         height="200"
-        src="https://picsum.photos/350/165?random"
+        :src="baseurl + data.municipio_destino.image"
     ></v-img>
-    <SuperOfferStamp v-if="false" class="tw-absolute tw-top-[39.5%] tw-right-[50%] " rounded="!tw-rounded-t-lg"/>
+    <SuperOfferStamp v-if="superSale" class="tw-absolute tw-top-[39.5%] tw-right-[50%] " rounded="!tw-rounded-t-lg"/>
     <v-card-title class="tw-bg-white lg:!tw-h-full">
       <div class="tw-mb-2">
         <p class="tw-text-p tw-font-bold tw-flex tw-items-center">

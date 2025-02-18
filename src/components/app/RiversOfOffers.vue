@@ -91,7 +91,7 @@ onMounted(()=>{
      </div>
       <Carousel v-else @drag="isDragging=true" @slideEnd="isDragging=false" v-bind="config" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-mb-4 my-carrousel">
         <Slide v-for="(item, n) in trechosWithTravels.data?.trechos?.data" :key="item.id">
-          <CardTicket :dragging="isDragging" :data="item" :active="currentSlide === n -1"/>
+          <CardTicket super-sale :dragging="isDragging" :data="item" :active="currentSlide === n -1"/>
         </Slide>
         <template #addons>
           <Pagination class="!tw-bottom-[-30px] "/>
