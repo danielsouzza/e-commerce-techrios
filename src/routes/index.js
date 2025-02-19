@@ -1,9 +1,8 @@
-import {createRouter, createWebHistory} from 'vue-router'
-import {useCartStore} from "../store/CartStore.js";
-import {userAuthStore} from "../store/AuthStore.js";
+import { createRouter, createWebHistory } from 'vue-router'
+import { useCartStore } from "../store/CartStore.js";
+import { userAuthStore } from "../store/AuthStore.js";
 
 const appName = import.meta.env.VITE_APP_NAME || 'Yjara Viagens';
-
 
 const routes = [
     {
@@ -19,9 +18,9 @@ const routes = [
         meta: { title: 'Rios de Ofertas' }
     },
     {
-        path: '/viagems-em-destaques',
+        path: '/viagens-em-destaque',
         component: () => import('../pages/Destaques.vue'),
-        name: 'viagems-em-destaques',
+        name: 'viagens-em-destaque',
         meta: { title: 'Viagens em Destaque' }
     },
     {
@@ -31,9 +30,9 @@ const routes = [
         meta: { title: 'Institucional' }
     },
     {
-        path: '/viagems-imbativeis',
+        path: '/viagens-imbativeis',
         component: () => import('../pages/PrecosEmbativeis.vue'),
-        name: 'viagems-imbativeis',
+        name: 'viagens-imbativeis',
         meta: { title: 'Viagens Imbatíveis' }
     },
     {
@@ -62,13 +61,18 @@ const routes = [
         meta: { title: 'Área do Cliente', requiresAuth: true },
         props: true,
     },
+    {
+        path: '/:pathMatch(.*)*',
+        component: () => import('../pages/NotFound.vue'),
+        name: 'not-found',
+        meta: { title: 'Página Não Encontrada' }
+    }
 ];
 
 const router = createRouter({
     history: createWebHistory(),
     routes,
-    scrollBehavior(to, from, savedPosition) {
-
+    scrollBehavior() {
         return { top: 0, behavior: 'smooth' };
     }
 })
@@ -77,23 +81,22 @@ router.afterEach((to) => {
     document.title = to.meta.title + " - " + appName;
 });
 
-
 router.beforeEach(async (to, from, next) => {
-    const cartStore = useCartStore()
-    const userStore = userAuthStore()
-    await cartStore.loadCart()
+    const cartStore = useCartStore();
+    const userStore = userAuthStore();
+    await cartStore.loadCart();
 
     if (to.meta.requiresAuth && !userStore.isAuthenticated()) {
-        return next({name: 'login'})
+        return next({ name: 'login' });
     }
 
     if (to.name === 'sale' && to.params.tab === 'pagamento') {
-
         if (cartStore.isEmptyCart()) {
-            return next({name: 'home'});
+            return next({ name: 'home' });
         }
     }
-    next()
-})
 
-export default router
+    next();
+});
+
+export default router;

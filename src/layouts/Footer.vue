@@ -3,6 +3,7 @@ import AppLogo from "../components/ui-components/AppLogo.vue";
 import ListExpensiveItem from "../components/app/ListExpensiveItem.vue";
 import CardNewLetters from "../components/shared/CardNewLetters.vue";
 import MostPopularDestinations from "../components/shared/MostPopularDestinations.vue";
+import {userAuthStore} from "../store/AuthStore.js";
 
 
 
@@ -12,11 +13,11 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
 <template>
 
   <div class="relative  " >
-    <MostPopularDestinations class="!tw-pb-[80px]" />
+    <MostPopularDestinations  :class="userAuthStore().isAuthenticated() ? '!tw-pb-[10px]' : '!tw-pb-[80px]'"  />
 
     <div class="tw-flex tw-flex-col  tw-w-full tw-bg-primary tw-px-3 ">
-      <CardNewLetters class="maxWidth  tw-top-[-100px]  !tw-mb-[-100px] lg:tw-top-[-50px] lg:!tw-mb-[-20px] " />
-      <div class="tw-flex tw-flex-col  tw-w-full maxWidth">
+      <CardNewLetters v-if="!userAuthStore().isAuthenticated()" class="maxWidth  tw-top-[-100px]  !tw-mb-[-100px] lg:tw-top-[-50px] lg:!tw-mb-[-20px] " />
+      <div class="tw-flex tw-flex-col  tw-w-full maxWidth" :class="userAuthStore().isAuthenticated() ? 'tw-pt-10' : ''">
         <div class="tw-flex tw-flex-col tw-w-full lg:tw-flex-row lg:tw-justify-start lg:tw-gap-5 ">
           <div class="tw-flex tw-flex-col tw-items-center lg:tw-items-start  tw-w-full ">
             <div class="py-5">

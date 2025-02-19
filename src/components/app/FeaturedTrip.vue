@@ -94,7 +94,7 @@ onMounted(()=>{
       <div class=" tw-text-[25px] tw-font-extrabold tw-text-center tw-text-primary " style="line-height: 28px">
         Viagens em destaques
       </div>
-      <RouterLink  :to="{name: 'viagems-em-destaques'}">
+      <RouterLink  :to="{name: 'viagens-em-destaques'}">
         <v-btn color="secondary" class="my-5" variant="outlined" rounded>
           <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs" >VER MAIS VIAGENS
             <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>

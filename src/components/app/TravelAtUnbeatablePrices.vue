@@ -68,14 +68,14 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div class=" tw-flex tw-flex-col  tw-gap-10 lg:tw-flex-row-reverse lg:tw-items-start tw-justify-center !tw-mt-5" v-if="trechosWithTravels.data?.trechos?.data.length > 0">
+  <div class=" tw-flex tw-flex-col  tw-gap-10 lg:tw-flex-row-reverse  lg:tw-items-start tw-justify-center !tw-mt-5" v-if="trechosWithTravels.data?.trechos?.data.length > 0">
    <div class="tw-flex tw-flex-col tw-items-center lg:tw-flex-col-reverse">
      <div class="tw-flex tw-flex-col tw-w-full tw-items-center lg:tw-items-start">
        <div class=" tw-text-[25px] tw-font-extrabold tw-text-center lg:tw-text-start lg:tw-text-[35px] tw-text-primary " style="line-height: 35px">
          Viagens com preços <br>
          imbatíveis!
        </div>
-       <RouterLink  :to="{name: 'viagems-imbativeis'}">
+       <RouterLink  :to="{name: 'viagens-imbativeis'}">
          <v-btn color="secondary" class="my-5" variant="outlined" rounded>
            <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs" >VER MAIS OFERTAS
              <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>
