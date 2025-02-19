@@ -33,6 +33,7 @@ const props = defineProps({
 })
 
 
+const timeToPay = ref(30 * 60)
 const cartStore = useCartStore()
 const authStore = userAuthStore()
 const route = useRoute();
@@ -83,13 +84,10 @@ const formSale = reactive({
   dataComodos:[],
   dataVolta:null,
 })
-
-
 const tiposDocComprador = [
   { id:5, nome: 'CPF', tamanho: 0, mask: '###.###.###-##' },
   { id:6, nome: 'CNPJ', tamanho: 11, mask: '##.###.###/####-##' },
 ];
-
 const nextDays = ref([])
 const years = computed(() => {
       const currentYear = new Date().getFullYear();
@@ -119,7 +117,6 @@ const stepSale = ref(tabs.find(it=>it.value == props.tab).step)
 const cart = computed(()=>{
   return cartStore
 })
-
 const pacerls = [
   {value:1,pencet:0.0},
   {value:2,pencet:0.06},
@@ -128,6 +125,23 @@ const pacerls = [
   {value:5,pencet:0.09},
   {value:6,pencet:0.10},
 ]
+let intervalo = null;
+
+const iniciarTemporizador = () => {
+  intervalo = setInterval(() => {
+    if (timeToPay.value > 0) {
+      timeToPay.value--;
+    } else {
+      clearInterval(intervalo);
+    }
+  }, 1000);
+};
+
+const formatarTempo = () => {
+  const minutos = Math.floor(timeToPay.value / 60);
+  const segundos = timeToPay.value % 60;
+  return `${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
+};
 
 const downloadFile = async (url, filename) => {
   const link = document.createElement('a');
@@ -407,7 +421,15 @@ function checkStatusPayment(){
         whatPayment.value = false
         cartStore.clearCartLocal()
       }else{
-        setTimeout(()=>checkStatusPayment(),10000)
+        if(timeToPay.value == 0){
+          clearInterval(intervalo);
+          showErrorNotification('Tempo de venda expirou')
+          whatPayment.value = false
+          timeToPay.value = 30 * 60
+          resetFormSale()
+        }else{
+          setTimeout(()=>checkStatusPayment(),10000)
+        }
       }
     }
 
@@ -447,6 +469,7 @@ function submitPaymentPix(){
       whatPayment.value = true
       showSuccessNotification(res.data.message)
       nextStep()
+      iniciarTemporizador()
       checkStatusPayment()
     }
   }).catch(error=>{
@@ -537,7 +560,6 @@ function removerDadosIdaDaVolta(){
   })
 }
 
-
 function removerCompradorComoPassageiro(){
   formSale.dataComodos[0].tipo_doc = 1;
   formSale.dataComodos[0].nome = null;
@@ -614,7 +636,6 @@ watch(()=>props.tab,()=>{
         @update:modelValue="getTrechosWithTravels()"
         :options="filtersData"
         class=" tw-top-[-100px]  !tw-mb-[-60px] lg:tw-top-[-100px] lg:!tw-mb-[-90px] !tw-mx-5 lg:!tw-mx-0  lg:!tw-block" />
-
     <div class="lg:tw-flex tw-items-center !tw-my-10  tw-hidden">
       <v-btn variant="outlined" :color="stepSale > 1 ? 'success': 'secondary'" rounded @click="prevStep">
         <Icon icon="mingcute:ship-line" class="ml-2 tw-text-xl" />
@@ -642,7 +663,6 @@ watch(()=>props.tab,()=>{
         CONFIRMAÇÃO DA VIAGEM
       </v-btn>
     </div>
-
     <v-tabs-window v-model="stepSale" class="mb-3">
       <v-tabs-window-item :value="1">
         <div class="tw-flex tw-justify-between tw-items-center  tw-px-3 mt-5 lg:!tw-hidden">
@@ -1213,6 +1233,9 @@ watch(()=>props.tab,()=>{
                   absolute
                   bottom
               ></v-progress-linear>
+              <div>
+               <v-chip> {{ formatarTempo() }}</v-chip>
+              </div>
               <div class="tw-flex tw-justify-center tw-flex-col tw-items-center">
                 <p class="tw-text-p tw-text-sm">Sua compra foi concluída com sucesso. Você receberá um e-mail de confirmação com mais detalhes</p>
                 <p class="tw-text-lg tw-font-bold my-2">Realize o pagamento através do QR Code abaixo.</p>
@@ -1233,7 +1256,6 @@ watch(()=>props.tab,()=>{
                 <p class="tw-text-xl tw-text-secondary tw-font-bold my-2">Compra realizada com sucesso!</p>
                 <p> Olá, {{orderConfirmation.contato.nome}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
                 <p><strong>Pedido {{orderConfirmation.id}}</strong></p>
-<!--                <p>Para consultar seu pedido é só <a href="#" class="tw-text-secondary tw-underline tw-font-semibold">clicar aqui</a></p>-->
                 <div class="tw-flex tw-justify-center tw-items-center tw-gap-1  py-2">
                   <div class="!tw-rounded-[3px] !tw-text-[10px] tw-text-secondary tw-bg-secondary/10 tw-flex tw-p-2 tw-items-center tw-font-bold"><Icon icon="lets-icons:print" width="15"  class="mr-1 tw-text-black" />PASSAGEM IMPRESSA</div>
                   <div class="!tw-rounded-[3px] !tw-text-[10px] tw-text-secondary tw-bg-secondary/10 tw-flex tw-p-2 tw-items-center tw-font-bold"><Icon icon="tdesign:qrcode" width="15"  class="mr-1 tw-text-black" />PASSAGEM NO CELULAR</div>

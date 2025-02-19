@@ -17,8 +17,9 @@ import {getApiBaseUrl} from "./services/api.js";
 
 const hostname = window.location.hostname;
 const parts = hostname.split(".");
-const subdomain = parts.length > 1 ? parts[0] : null;
-window.subdomain = subdomain;
+const subdomain = parts.length > 1 ?  parts[0] : null;
+
+window.subdomain = subdomain != "loja" ? subdomain : null;
 
 const themeConfig = reactive({
     primaryColor: '#00579d',
