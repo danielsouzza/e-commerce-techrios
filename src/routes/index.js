@@ -2,39 +2,67 @@ import {createRouter, createWebHistory} from 'vue-router'
 import {useCartStore} from "../store/CartStore.js";
 import {userAuthStore} from "../store/AuthStore.js";
 
+const appName = import.meta.env.VITE_APP_NAME || 'Yjara Viagens';
+
+
 const routes = [
     {
         path: '/',
-        component: ()=>import('../pages/Home.vue'), name: 'home'},
+        component: () => import('../pages/Home.vue'),
+        name: 'home',
+        meta: { title: 'Home' }
+    },
     {
         path: '/rios-de-ofertas',
-        component: ()=>import('../pages/RiosDeOfertas.vue'), name: 'rios-de-ofertas'},
+        component: () => import('../pages/RiosDeOfertas.vue'),
+        name: 'rios-de-ofertas',
+        meta: { title: 'Rios de Ofertas' }
+    },
     {
         path: '/viagems-em-destaques',
-        component: ()=>import('../pages/Destaques.vue'), name: 'viagems-em-destaques'},
+        component: () => import('../pages/Destaques.vue'),
+        name: 'viagems-em-destaques',
+        meta: { title: 'Viagens em Destaque' }
+    },
     {
         path: '/institucional',
-        component: ()=>import('../pages/Institucional.vue'), name: 'institucional'},
+        component: () => import('../pages/Institucional.vue'),
+        name: 'institucional',
+        meta: { title: 'Institucional' }
+    },
     {
         path: '/viagems-imbativeis',
-        component: ()=>import('../pages/PrecosEmbativeis.vue'), name: 'viagems-imbativeis'},
+        component: () => import('../pages/PrecosEmbativeis.vue'),
+        name: 'viagems-imbativeis',
+        meta: { title: 'Viagens Imbatíveis' }
+    },
     {
         path: '/login',
-        component: ()=>import('../pages/Login.vue'), name: 'login'},
+        component: () => import('../pages/Login.vue'),
+        name: 'login',
+        meta: { title: 'Login' }
+    },
     {
         path: '/registrar',
-        component: ()=>import('../pages/Register.vue'), name: 'register'},
+        component: () => import('../pages/Register.vue'),
+        name: 'register',
+        meta: { title: 'Registrar' }
+    },
     {
         path: '/comprar-passagem/:tab',
-        component: ()=>import('../pages/Sale.vue'), name:'sale',props:true },
+        component: () => import('../pages/Sale.vue'),
+        name: 'sale',
+        props: true,
+        meta: { title: 'Comprar Passagem' }
+    },
     {
         path: '/area-do-cliente/:tab',
-        component: ()=>import('../pages/AreaDoCliente.vue'),
-        name:'area-do-cliente',
-        meta: { requiresAuth: true },
-        props:true,
+        component: () => import('../pages/AreaDoCliente.vue'),
+        name: 'area-do-cliente',
+        meta: { title: 'Área do Cliente', requiresAuth: true },
+        props: true,
     },
-]
+];
 
 const router = createRouter({
     history: createWebHistory(),
@@ -44,6 +72,11 @@ const router = createRouter({
         return { top: 0, behavior: 'smooth' };
     }
 })
+
+router.afterEach((to) => {
+    document.title = to.meta.title + " - " + appName;
+});
+
 
 router.beforeEach(async (to, from, next) => {
     const cartStore = useCartStore()
