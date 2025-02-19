@@ -56,6 +56,7 @@ function goToSalePage(query){
 
 onMounted(() => {
   getFilterItems()
+  getSlides()
 });
 
 
@@ -73,7 +74,7 @@ onMounted(() => {
     <RiversOfOffers class="!tw-my-5"/>
 
     <div class="tw-grid md:tw-grid-cols-2 tw-gap-2  tw-py-2 tw-px-5 lg:tw-px-0">
-      <Banner2 v-for="i in slides" :key="i" :src="i.image_url"  :link="i.link"/>
+      <Banner2 v-for="i in slides.slice(0,2)" :key="i" :src="i.image_url"  :link="i.link"/>
     </div>
 
     <FeaturedTrip/>

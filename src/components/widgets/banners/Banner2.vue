@@ -8,7 +8,7 @@ defineProps({
 </script>
 
 <template>
-  <v-img :src="src" class="tw-rounded-md tw-h-[100px] md:tw-h-[115px] lg:tw-h-[200px]" :href="link"/>
+  <img :src="src" class="tw-rounded-md tw-h-[100px] md:tw-h-[115px] lg:tw-h-[200px]"  alt=""/>
 </template>
 
 <style scoped>
