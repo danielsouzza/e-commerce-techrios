@@ -67,16 +67,16 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
         <v-divider  :thickness="1" class="border-opacity-25 tw-mt-4 " color="secondary"></v-divider>
         <div class="tw-flex tw-flex-col tw-justify-center lg:tw-justify-between lg:tw-flex-row tw-gap-5 tw-items-center mt-5 tw-w-full tw-py-4 mb-2">
           <div class="tw-flex tw-gap-4  tw-items-center">
-            <img src="../assets/images/footer/cadastur.svg" alt="" width="90"/>
+            <img src="/assets/images/footer/cadastur.svg" alt="" width="90"/>
             <p class="tw-text-secondary tw-text-[12px] tw-font-[800]">COMPRA 100% SEGURA</p>
           </div>
           <div class="tw-flex tw-gap-4  tw-items-center ">
-            <img src="../assets/images/footer/pix.svg" alt="" width="30"/>
-            <img src="../assets/images/footer/visa.svg" alt="" width="30"/>
-            <img src="../assets/images/footer/mastercard.svg" alt="" width="30"/>
-            <img src="../assets/images/footer/america_express.svg" alt="" width="30"/>
-            <img src="../assets/images/footer/elo.svg" alt="" width="30"/>
-            <img src="../assets/images/footer/hipercard.svg" alt="" width="30"/>
+            <img src="/assets/images/footer/pix.svg" alt="" width="30"/>
+            <img src="/assets/images/footer/visa.svg" alt="" width="30"/>
+            <img src="/assets/images/footer/mastercard.svg" alt="" width="30"/>
+            <img src="/assets/images/footer/america_express.svg" alt="" width="30"/>
+            <img src="/assets/images/footer/elo.svg" alt="" width="30"/>
+            <img src="/assets/images/footer/hipercard.svg" alt="" width="30"/>
           </div>
           <div class="tw-flex tw-flex-col tw-justify-center tw-gap-10 lg:tw-flex-row hidden-md-and-down tw-items-center   ">
             <div class="tw-flex tw-gap-4  tw-items-center">
