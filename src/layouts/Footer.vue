@@ -17,7 +17,7 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
     <div class="tw-flex tw-flex-col  tw-w-full tw-bg-primary tw-px-3 ">
       <CardNewLetters class="maxWidth  tw-top-[-100px]  !tw-mb-[-100px] lg:tw-top-[-50px] lg:!tw-mb-[-20px] " />
       <div class="tw-flex tw-flex-col  tw-w-full maxWidth">
-        <div class="tw-flex tw-flex-col tw-w-full lg:tw-flex-row lg:tw-justify-start lg:tw-gap-5">
+        <div class="tw-flex tw-flex-col tw-w-full lg:tw-flex-row lg:tw-justify-start lg:tw-gap-5 ">
           <div class="tw-flex tw-flex-col tw-items-center lg:tw-items-start  tw-w-full ">
             <div class="py-5">
               <AppLogo footer size="190" />
@@ -31,21 +31,21 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
           <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 lg:!tw-hidden" color="secondary"></v-divider>
           <ListExpensiveItem title="Institucional" class="tw-w-full">
             <RouterLink  :to="{name: 'institucional'}">
-              Como funciona
+              Como funciona?
             </RouterLink>
           </ListExpensiveItem>
           <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 lg:!tw-hidden" color="secondary"></v-divider>
-          <ListExpensiveItem title="Links Úteis" class="tw-w-full">
-            <p>De segunda a sexta das 07 às 22h</p>
-            <p>Sábado, domingo e feriado das 09h às 18h</p>
-          </ListExpensiveItem>
+<!--          <ListExpensiveItem title="Links Úteis" class="tw-w-full">-->
+<!--            <p>De segunda a sexta das 07 às 22h</p>-->
+<!--            <p>Sábado, domingo e feriado das 09h às 18h</p>-->
+<!--          </ListExpensiveItem>-->
           <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 lg:!tw-hidden" color="secondary"></v-divider>
-          <div class="tw-w-full">
-            <ListExpensiveItem title="Guia de Viagem" class="tw-w-full">
-              <p>De segunda a sexta das 07 às 22h</p>
-              <p>Sábado, domingo e feriado das 09h às 18h</p>
-            </ListExpensiveItem>
-            <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 lg:!tw-hidden" color="secondary"></v-divider>
+<!--          <div class="tw-w-full">-->
+<!--            <ListExpensiveItem title="Guia de Viagem" class="tw-w-full">-->
+<!--              <p>De segunda a sexta das 07 às 22h</p>-->
+<!--              <p>Sábado, domingo e feriado das 09h às 18h</p>-->
+<!--            </ListExpensiveItem>-->
+<!--            <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 lg:!tw-hidden" color="secondary"></v-divider>-->
 <!--            <v-card class="mt-5 tw-w-full">-->
 <!--              <v-list  class="py-0 px-0 ">-->
 <!--                <v-list-group >-->
@@ -62,7 +62,7 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
 <!--                </v-list-group>-->
 <!--              </v-list>-->
 <!--            </v-card>-->
-          </div>
+<!--          </div>-->
         </div>
         <v-divider  :thickness="1" class="border-opacity-25 tw-mt-4 " color="secondary"></v-divider>
         <div class="tw-flex tw-flex-col tw-justify-center lg:tw-justify-between lg:tw-flex-row tw-gap-5 tw-items-center mt-5 tw-w-full tw-py-4 mb-2">
@@ -84,13 +84,13 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
             </div>
             <div class="tw-flex tw-gap-2  tw-items-center ">
               <a href="https://www.instagram.com/yjaraviagens/" target="_blank">
-                <img src="../assets/images/footer/instagram.svg" alt="" width="30"/>
+                <img src="/assets/images/footer/instagram.svg" alt="" width="30"/>
               </a>
               <a href="https://www.instagram.com/yjaraviagens/" target="_blank">
-                <img src="../assets/images/footer/facebook.svg" alt="" width="30"/>
+                <img src="/assets/images/footer/facebook.svg" alt="" width="30"/>
               </a>
               <a href="https://www.instagram.com/yjaraviagens/" target="_blank">
-                <img src="../assets/images/footer/youtube.svg" alt="" width="30"/>
+                <img src="/assets/images/footer/youtube.svg" alt="" width="30"/>
               </a>
             </div>
           </div>
@@ -102,13 +102,13 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
           </div>
           <div class="tw-flex tw-gap-2  tw-items-center mt-4">
             <a href="#">
-              <img src="../assets/images/footer/instagram.svg" alt="" width="40"/>
+              <img src="/assets/images/footer/instagram.svg" alt="" width="40"/>
             </a>
             <a href="#">
-              <img src="../assets/images/footer/facebook.svg" alt="" width="40"/>
+              <img src="/assets/images/footer/facebook.svg" alt="" width="40"/>
             </a>
             <a href="#">
-              <img src="../assets/images/footer/youtube.svg" alt="" width="40"/>
+              <img src="/assets/images/footer/youtube.svg" alt="" width="40"/>
             </a>
           </div>
         </div>
@@ -116,7 +116,7 @@ import MostPopularDestinations from "../components/shared/MostPopularDestination
         <div class="tw-flex tw-flex-col tw-justify-center  tw-items-center mt-3 tw-w-full  mb-2">
           <div class="tw-flex tw-flex-col tw-justify-center tw-items-center lg:tw-flex-row lg:tw-justify-between tw-w-full tw-gap-4">
             <div class="tw-flex tw-gap-2  tw-items-center ">
-              <img src="../assets/images/footer/logo-w3.svg" alt="" width="140"/>
+              <img src="/assets/images/footer/logo-w3.svg" alt="" width="140"/>
             </div>
             <div class="tw-flex tw-gap-2  tw-items-center  tw-text-secondary tw-text-[12px]">
               <a href="#">Investidores</a>

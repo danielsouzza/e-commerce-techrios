@@ -22,7 +22,7 @@ import {Icon} from "@iconify/vue";
           <p  class="tw-text-p  tw-text-justify">As empresas parceiras são usuárias do programa homologado pelo SEFAZ <a href="https://yjaraviagens.com/" class="tw-font-bold">yjaraviagens.com</a> o que garante aos nossos clientes que as passagens compradas online são válidas e aceitas em qualquer validador portuário.</p>
         </v-col>
         <v-col cols="12" md="6" >
-          <img src="../assets/images/institucional1.png" class="mx-auto" alt=""/>
+          <img src="/assets/images/institucional1.png" class="mx-auto" alt=""/>
         </v-col>
       </v-row>
     </div>
@@ -32,7 +32,7 @@ import {Icon} from "@iconify/vue";
     <div class="maxWidth tw-px-3 ">
       <v-row class="tw-flex-col-reverse lg:tw-flex-row">
         <v-col cols="12" md="6">
-          <img src="../assets/images/institucional2.png" class="tw-rounded-[20px] mx-auto" alt=""/>
+          <img src="/assets/images/institucional2.png" class="tw-rounded-[20px] mx-auto" alt=""/>
         </v-col>
         <v-col cols="12" md="6">
           <h2 class="tw-text-primary tw-text-4xl tw-font-bold tw-mb-5 tw-text-center lg:tw-text-left">Quais as Vantagens <br> da Yjara Viagens?</h2>

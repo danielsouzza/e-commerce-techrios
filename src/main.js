@@ -24,7 +24,7 @@ window.subdomain = subdomain != "loja" ? subdomain : null;
 const themeConfig = reactive({
     primaryColor: '#00579d',
     secondaryColor: '#3dccfd',
-    logo: '/src/assets/images/logo-yjara.svg'
+    logo: '/assets/images/logo-yjara.svg'
 });
 
 async function fetchTheme() {
