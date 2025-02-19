@@ -32,6 +32,13 @@ const bannerSecondaryItems = [
   }
 ]
 
+const slides = ref([])
+function getSlides() {
+  routes["banners"]({subdomain:window.subdomain,principal:0}).then(res => {
+    slides.value = res.data.data;
+  })
+}
+
 function getFilterItems(){
   routes["filtros"]().then(res => {
     if(!res.data.data.success){
@@ -66,7 +73,7 @@ onMounted(() => {
     <RiversOfOffers class="!tw-my-5"/>
 
     <div class="tw-grid md:tw-grid-cols-2 tw-gap-2  tw-py-2 tw-px-5 lg:tw-px-0">
-      <Banner2 v-for="i in bannerSecondaryItems" :key="i" :src="i.src" :title="i.title" :link="i.link"/>
+      <Banner2 v-for="i in slides" :key="i" :src="i.image_url"  :link="i.link"/>
     </div>
 
     <FeaturedTrip/>
