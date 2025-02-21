@@ -9,6 +9,7 @@ import * as directives from 'vuetify/directives'
 import VueTheMask from 'vue-the-mask'
 import { createPinia } from 'pinia'
 import '@mdi/font/css/materialdesignicons.css';
+import { pt } from 'vuetify/locale'
 
 import router from './routes'
 import {DEFAULT_THEME} from "./themes/DefaultTheme.js";
@@ -62,6 +63,10 @@ async function fetchTheme() {
 
     const vuetify = createVuetify({
         ssr: true,
+        locale: {
+            locale: 'pt',
+            messages:{pt}
+        },
         components,
         directives,
         theme: {

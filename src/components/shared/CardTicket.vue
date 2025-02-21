@@ -6,6 +6,7 @@ import {routes} from "../../services/fetch.js";
 import Boat from "./Boat.vue";
 import BaseCard from "./BaseCard.vue";
 import {
+  calcularValor,
   calcularValorParcelado, calcularValorPix,
   formatarHora,
   formatarTempoViagem,
@@ -495,7 +496,6 @@ onBeforeUnmount(() => {
           <div>
             <v-img
                 class="bg-grey-lighten-2"
-
                 width="120px"
                 height="50px"
                 cover
@@ -621,7 +621,7 @@ onBeforeUnmount(() => {
                             Valor
                           </v-col>
                           <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                            {{formatCurrency(item.comodo_trechos.valor)}}
+                            {{calcularValor(dataIda.valor)}}
                           </v-col>
                         </v-row>
                       </v-card>
@@ -649,7 +649,7 @@ onBeforeUnmount(() => {
                         </div>
                       </div>
                     </v-col>
-                    <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? formatCurrency(room.comodo_trechos?.valor) : dataIda.valor}} <Icon @click="onClickRoom(room, null)" icon="mdi:close-box"  width="15"  class="ml-3" /></v-col>
+                    <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? calcularValor(room.comodo_trechos?.valor) : calcularValor(formatMoney(dataIda.valor),dataIda.desconto?.desconto)}} <Icon @click="onClickRoom(room, null)" icon="mdi:close-box"  width="15"  class="ml-3" /></v-col>
                   </v-row>
                 </div>
                 <div class=" mt-3" v-if="roomsSelected.dataIda.selectedsByType?.length > 0">
@@ -660,7 +660,7 @@ onBeforeUnmount(() => {
                       </div>
                     </v-col>
                     <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end ">  <Icon @click="incrementComodo(room.type_comodo_id )" icon="ph:plus-fill"  width="15"  class="mr-3" /> {{ room.quantidade}} <Icon @click="decrementComodo(room.type_comodo_id )" icon="ph:minus-fill"  width="15"  class="ml-3" /></v-col>
-                    <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">   {{ dataIda.valor}} <Icon @click="onClickRoom(null,room.type_comodo_id)" icon="mdi:close-box"  width="15"  class="ml-3" /> </v-col>
+                    <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">    {{calcularValorPix(dataIda)}} <Icon @click="onClickRoom(null,room.type_comodo_id)" icon="mdi:close-box"  width="15"  class="ml-3" /> </v-col>
                   </v-row>
                 </div>
                 <div v-if="roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0" class="tw-flex  tw-items-center tw-gap-1 tw-text-xs tw-text-p  !tw-m-0">
@@ -764,7 +764,7 @@ onBeforeUnmount(() => {
                               Valor
                             </v-col>
                             <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                              {{formatCurrency(formatMoney(dataVolta.valor))}}
+                              {{calcularValorPix(dataVolta)}}
                             </v-col>
                           </v-row>
                         </v-card>

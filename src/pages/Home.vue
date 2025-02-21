@@ -17,20 +17,8 @@ const filtersSelected = ref({
   destino:null,
   dataIda:new Date(),
   dataVolta:null,
-  type:"ida-e-volta"
+  type:"somente-ida"
 })
-const bannerSecondaryItems = [
-  {
-    title: "Banner secondary 1",
-    link: "#",
-    src: "./src/_mockData/banners/banner-secondary-1.png"
-  },
-  {
-    title: "Banner secondary 2",
-    link: "#",
-    src: "./src/_mockData/banners/banner-secondary-2.png"
-  }
-]
 
 const slides = ref([])
 function getSlides() {
@@ -48,10 +36,9 @@ function getFilterItems(){
 }
 
 function goToSalePage(query){
-  filtersSelected.value = query;
-  filtersSelected.value.dataIda = formatDateToServe(query.dataIda);
-  filtersSelected.value.dataVolta = query.dataVolta ? formatDateToServe(query.dataVolta) : null;
-  router.push({name: "sale",params:{tab:'escolher-passagem'},query: filtersSelected.value})
+  query.dataIda = formatDateToServe(query.dataIda);
+  query.dataVolta = query.dataVolta ? formatDateToServe(query.dataVolta) : null;
+  router.push({name: "sale",params:{tab:'escolher-passagem'},query: query})
 }
 
 onMounted(() => {
@@ -74,7 +61,7 @@ onMounted(() => {
     <RiversOfOffers class="!tw-my-5"/>
 
     <div class="tw-grid md:tw-grid-cols-2 tw-gap-2  tw-py-2 tw-px-5 lg:tw-px-0">
-      <Banner2 v-for="i in slides.slice(0,2)" :key="i" :src="i.image_url"  :link="i.link"/>
+      <Banner2 v-for="i in slides.slice(0,2)" :key="i" :src="i.image_url"  :link="i.redirect_url"/>
     </div>
 
     <FeaturedTrip/>

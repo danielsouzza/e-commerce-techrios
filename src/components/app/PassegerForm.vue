@@ -1,6 +1,7 @@
 <script setup>
 import {Icon} from "@iconify/vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
+import {converterData} from "../../Helper/Ultis.js";
 
 const props = defineProps({
   form:Object,
@@ -36,6 +37,7 @@ const tiposDoc = [
     <v-col  cols="6">
       <v-text-field
           v-model="form.telefone"
+          v-mask="'(##) #####-####'"
           variant="plain"
           label="Telefone"
           hide-details="auto"
@@ -59,6 +61,7 @@ const tiposDoc = [
     </v-col>
     <v-col cols="6" >
       <v-text-field
+          v-if="form.tipo_doc"
           v-model="form.document"
           variant="plain"
           label="Nº do documento"
@@ -75,6 +78,9 @@ const tiposDoc = [
           flat
           hide-details
           prepend-icon=""
+          hide-actions
+          v-mask="'##/##/####'"
+          @change="(e)=>{ form.nascimento = new Date(converterData(e.target._value) + 'T00:00:00')}"
           v-model="form.nascimento"
           variant="solo"
           class="my-select"

@@ -36,22 +36,23 @@ onMounted(()=>{
           show-arrows="hover"
           hide-delimiter-background
       >
-        <v-carousel-item
-            class="my-carousel !tw-h-[170px] lg:!tw-h-full "
-            cover
-            v-for="(item,i) in slides"
-            lazy-src="https://picsum.photos/1920/500"
-            :key="i"
-            :src="item.image_url"
+        <a   v-for="(item,i) in slides" :href="item.redirect_url" target="_blank" >
+          <v-carousel-item
+              class="my-carousel !tw-h-[170px] lg:!tw-h-full "
+              cover
+              lazy-src="https://picsum.photos/1920/500"
+              :key="i"
+              :src="item.image_url"
+          >
+            <template v-slot:error>
+              <v-img
+                  class="mx-auto "
+                  src="https://picsum.photos/1920/500"
+              ></v-img>
+            </template>
+          </v-carousel-item>
+        </a>
 
-        >
-          <template v-slot:error>
-            <v-img
-                class="mx-auto "
-                src="https://picsum.photos/1920/500"
-            ></v-img>
-          </template>
-        </v-carousel-item>
       </v-carousel>
     </v-responsive>
   </v-skeleton-loader>

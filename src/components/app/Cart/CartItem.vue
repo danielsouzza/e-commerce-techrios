@@ -4,16 +4,28 @@ import {formatCurrency} from "../../../Helper/Ultis.js";
 import {computed, ref} from "vue";
 import {Icon} from "@iconify/vue";
 import {routes} from "../../../services/fetch.js";
+import {getApiBaseUrl} from "../../../services/api.js";
+import {useCartStore} from "../../../store/CartStore.js";
 
 const props = defineProps({
   data:Object
 })
 
 const openRooms = ref(false);
-
+const baseurl = getApiBaseUrl().replaceAll('api','')
 const valorTotal = computed(()=>{
-  const valor = props.data.passagem_pedidos.reduce((acc, item)=>acc+item.valor,0)
-  const taxa  = props.data.passagem_pedidos.reduce((acc, item)=>acc+item.taxa_embarque,0)
+  const valor = props.data.passagem_pedidos.reduce((acc, item)=> {
+    if(item.deleted_at){
+      return acc
+    }
+    return acc + item.valor - (item.desconto?.desconto ?? 0)
+  },0)
+  const taxa  = props.data.passagem_pedidos.reduce((acc, item)=> {
+    if(item.deleted_at){
+      return acc
+    }
+    return acc + item.taxa_embarque
+  },0)
   return valor + taxa;
 })
 
@@ -25,7 +37,7 @@ function onOpenRooms(){
 
 function removerRoom(params){
   routes["order.delete"](params.pedido,params).then(response => {
-    console.log(response)
+    useCartStore().loadCart()
   })
 }
 
@@ -39,9 +51,10 @@ function removerRoom(params){
         <v-img
             width="120px"
             height="50px"
+            class="bg-grey-lighten-2"
             cover
             rounded
-            src="https://picsum.photos/350/165?random"
+            :src="baseurl + data.municipio_destino?.image"
         ></v-img>
       </div>
       <v-row>

@@ -34,7 +34,7 @@ watch(()=>props.auth,()=>{
   <div class="tw-flex tw-flex-col">
     <v-card flat variant="tonal" color="secondary" rounded="lg" class=" ma-5 pa-3 tw-text-lg tw-font-bold">
       <div class="tw-flex tw-items-center tw-justify-between">
-        <div> Minhas Viagens</div>
+        <div> Meu carrinho</div>
         <Icon icon="carbon:close-outline" class="mr-2 tw-cursor-pointer" width="30" @click="$emit('close')"/>
       </div>
     </v-card>
@@ -54,7 +54,7 @@ watch(()=>props.auth,()=>{
         Total
       </v-col>
       <v-col cols="6"  class="tw-text-end tw-text-lg tw-font-bold">
-        {{formatCurrency(orders?.total)}}
+        {{formatCurrency(useCartStore().getTotal())}}
       </v-col>
       <v-col>
         <v-btn @click="useCartStore().clearCart()" variant="outlined" color="prmary" rounded="lg" class="tw-w-full" size="large">

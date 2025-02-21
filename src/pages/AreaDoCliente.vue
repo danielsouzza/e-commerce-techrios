@@ -82,7 +82,7 @@ function fillFormDataUser(){
   form.email = auth.value.email
   form.telefone = auth.value.comprador.telefone
   form.comprador.telefone = auth.value.comprador.telefone
-  form.nascimento = new Date(auth.value.comprador.nascimento)
+  form.nascimento = auth.value.comprador.nascimento ? new Date(auth.value.comprador.nascimento) : []
   form.comprador.telefone = auth.value.comprador.telefone
   form.comprador.estrangeiro = auth.value.comprador.estrangeiro
   form.comprador.bairro = auth.value.comprador.bairro

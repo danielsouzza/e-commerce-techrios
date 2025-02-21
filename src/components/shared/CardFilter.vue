@@ -2,6 +2,8 @@
 import {Icon} from "@iconify/vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
 import {ref} from "vue";
+import CustomDateInput from "./CustomDateInput.vue";
+import {converterData, formatDateToServe} from "../../Helper/Ultis.js";
 
 
 const props = defineProps({
@@ -32,16 +34,18 @@ function changeTypeTravel(){
   // updateFilters()
 }
 
+
+
 </script>
 
 <template>
   <v-card elevation="0" class="my-5 !tw-rounded-xl !tw-bg-transparent">
     <v-btn-toggle v-model="modelValue.type" @update:modelValue="changeTypeTravel" dense rounded="xl" color="secondary" class="mb-1 mx-auto tw-w-full"  >
-      <v-btn value="ida-e-volta" class="!tw-font-bold" >
-        Ida e volta
-      </v-btn>
       <v-btn value="somente-ida" class="!tw-font-bold" >
         Somente ida
+      </v-btn>
+      <v-btn value="ida-e-volta" class="!tw-font-bold" >
+        Ida e volta
       </v-btn>
     </v-btn-toggle>
 
@@ -50,6 +54,7 @@ function changeTypeTravel(){
         <div class="tw-flex tw-flex-col tw-px-5 tw-py-3 tw-border-r tw-border-b lg:tw-border-b-0 lg:!tw-ml-5">
           <div class="tw-text-p tw-font-extrabold tw-text-[20px]">Saindo de</div>
           <div class="tw-flex tw-items-center tw-text-p tw-text-[14px]">
+
             <v-autocomplete
                 flat
                 menu-icon=""
@@ -109,7 +114,10 @@ function changeTypeTravel(){
                 v-model="modelValue.dataIda"
                 :rules="[v => !!v || 'Esse campo é obrigatório']"
                 variant="solo"
+                v-mask="'##/##/####'"
+                @change="(e)=>{ props.modelValue.dataIda = new Date(converterData(e.target._value) + 'T00:00:00')}"
                 class="my-select"
+                hide-actions
                 placeholder="dd/mm/aaaa">
               <template #default>
                 <Icon icon="uis:calendar" class="mr-2"/>
@@ -120,11 +128,17 @@ function changeTypeTravel(){
         <div v-if="modelValue.type == 'ida-e-volta'" class="tw-flex tw-flex-col tw-px-5 tw-py-3  !tw-ml-5">
           <div class="tw-text-p "><span class="tw-font-extrabold tw-text-[20px] ">Volta</span> </div>
           <div class="tw-flex tw-items-center tw-text-p tw-text-[14px]">
+<!--            <custom-date-input v-model="modelValue.dataVolta" />-->
+
             <v-date-input
                 flat
                 hide-details="auto"
                 prepend-icon=""
+                locale="pt"
+                hide-actions
                 variant="solo"
+                v-mask="'##/##/####'"
+                @change="(e)=>{ props.modelValue.dataVolta = new Date(converterData(e.target._value) + 'T00:00:00')}"
                 v-model="modelValue.dataVolta"
                 :rules="[v =>  modelValue.type == 'ida-e-volta' ? !!v  ||  'Esse campo é obrigatório' : true]"
                 class="my-select"

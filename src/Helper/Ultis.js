@@ -99,8 +99,23 @@ function calcularValorPix(data) {
     return formatCurrency(valorFinal);
 }
 
+function calcularValor(valor, desconto = null, percent = 0) {
+    let desc  = desconto ? desconto : 0;
+    let valorComDesconto = valor - desc;
+    let valorFinal = valorComDesconto - (valorComDesconto * percent);
+    return formatCurrency(valorFinal);
+}
+
+function converterData(data) {
+    const [dia, mes, ano] = data.split('/');
+    return `${ano}-${mes}-${dia}`;
+}
+
 
 
 export {formatCurrency, formatMoney,formatDateToServe,
     getMonicipioLabel, formatDate, formatarTempoViagem,
-    gerarStringTiposComodos,municipioLabel,formatarHora,calcularValorParcelado,calcularValorPix};
+    gerarStringTiposComodos,municipioLabel,formatarHora,
+    calcularValorParcelado,calcularValorPix,calcularValor,
+    converterData
+};

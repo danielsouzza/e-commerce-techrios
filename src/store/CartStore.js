@@ -55,18 +55,24 @@ export const useCartStore = defineStore('cart', {
             localStorage.removeItem('cart');
         },
 
-        getOffers(){
+        getTotal(){
             return this.order?.passagens_agrupadas?.reduce((total, item) => {
                 return total + item.passagem_pedidos.reduce((t, i) => {
-                   return total + (i.desconto?.desconto ?? 0)
+                    if(i.deleted_at){
+                        return t
+                    }
+                    return t + ((i.valor + (i.taxa_embarque ?? 0)) - (i.desconto?.desconto ?? 0))
                 },0)
             },0)
         },
 
-        getTotal(){
+        getTotalTickets(){
             return this.order?.passagens_agrupadas?.reduce((total, item) => {
                 return total + item.passagem_pedidos.reduce((t, i) => {
-                    return total + ((i.valor + (i.taxa_embarque ?? 0)) - (i.desconto?.desconto ?? 0))
+                    if(i.deleted_at){
+                        return t
+                    }
+                    return t + (i.valor  - (i.desconto?.desconto ?? 0))
                 },0)
             },0)
         },
@@ -74,7 +80,10 @@ export const useCartStore = defineStore('cart', {
         getTotalTaxa(){
             return this.order?.passagens_agrupadas?.reduce((total, item) => {
                 return total + item.passagem_pedidos.reduce((t, i) => {
-                    return total + ( i.taxa_embarque ?? 0)
+                    if(i.deleted_at){
+                        return t
+                    }
+                    return t + ( i.taxa_embarque ?? 0)
                 },0)
             },0)
         },

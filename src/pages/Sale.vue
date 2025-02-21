@@ -8,6 +8,7 @@ import BaseCard from "../components/shared/BaseCard.vue";
 import CardTicket from "../components/shared/CardTicket.vue";
 import CardFilter from "../components/shared/CardFilter.vue";
 import {
+  calcularValor, converterData,
   formatarTempoViagem,
   formatCurrency,
   formatDate, formatDateToServe,
@@ -374,6 +375,7 @@ function submitOrder(){
     params.dataVolta = {...formSale.dataVolta,trecho:formSale.dataVolta.trecho.id}
   }
 
+  waitServe.value = true
   routes["order"](params).then(res => {
     if(res.data.success){
       orderResponse.value = res.data.data;
@@ -381,7 +383,12 @@ function submitOrder(){
       cartStore.loadCart()
       formPayment.order_id = orderResponse.value.id;
       nextStep()
+      waitServe.value = false
     }
+  }).catch(error=>{
+      console.log(error)
+      waitServe.value = false
+      showErrorNotification(error.response.data.message)
   })
 }
 
@@ -480,7 +487,7 @@ function submitPaymentPix(){
 }
 
 function identificarCpfOuCnpj(valor) {
-  if (typeof valor !== "string") return "Formato inválido";
+  if (typeof valor !== "string") return 0;
 
   const numero = valor.replace(/\D/g, '');
 
@@ -489,7 +496,7 @@ function identificarCpfOuCnpj(valor) {
   } else if (numero.length === 14) {
     return 6;
   } else {
-    return "Formato inválido";
+    return 0;
   }
 }
 
@@ -503,7 +510,7 @@ function resetFormSale() {
     nome: authStore.user?.name ?? null,
     email: authStore.user?.email ?? null,
     telefone: authStore.user?.comprador.telefone,
-    tipo_doc: identificarCpfOuCnpj(authStore.user?.comprador.cpf_cnpj),
+    tipo_doc: authStore.user?.comprador.cpf_cnpj ? identificarCpfOuCnpj(authStore.user?.comprador.cpf_cnpj) : null,
     nascimento: authStore.user?.comprador.nascimento ?
         new Date(authStore.user?.comprador.nascimento+ 'T00:00:00') :
         null,
@@ -909,7 +916,7 @@ watch(()=>props.tab,()=>{
                   </v-col>
                   <v-col cols="6" class="tw-flex tw-items-center  !tw-font-black tw-text-[17px] !tw-text-primary tw-justify-end">
                     <div class="tw-text-end">
-                      {{formatCurrency(formSale.total_passagems + formSale.total_taxas)}}<br>
+                      {{calcularValor(formSale.total_passagems + formSale.total_taxas )}}<br>
                       <p class="tw-text-xs tw-text-gray-500 tw-font-light">ou até 6x de {{formatCurrency((formSale.total_passagems + formSale.total_taxas)/6)}} no cartão</p>
                     </div>
                   </v-col>
@@ -950,6 +957,7 @@ watch(()=>props.tab,()=>{
                       variant="plain"
                       v-model="formSale.contato.telefone"
                       label="Telefone"
+                      v-mask="'(##) #####-####'"
                       hide-details="auto"
                   >
                     <template v-slot:prepend-inner>
@@ -972,12 +980,12 @@ watch(()=>props.tab,()=>{
                   </v-select>
                 </v-col>
 
-                <v-col cols="6" >
+                <v-col cols="6"  v-if="formSale.contato.tipo_doc">
                   <v-text-field
                       variant="plain"
                       v-model="formSale.contato.document"
                       label="Nº do documento"
-                      v-mask="tiposDocComprador[formSale.contato.tipo_doc-5]?.mask"
+                      v-mask="formSale.contato.tipo_doc ?  tiposDocComprador[formSale.contato.tipo_doc-5]?.mask : '###########'"
                       hide-details="auto"
                   >
                     <template v-slot:prepend-inner>
@@ -990,6 +998,9 @@ watch(()=>props.tab,()=>{
                       flat
                       hide-details
                       prepend-icon=""
+                      hide-actions
+                      v-mask="'##/##/####'"
+                      @change="(e)=>{formSale.contato.nascimento = new Date(converterData(e.target._value) + 'T00:00:00')}"
                       v-model="formSale.contato.nascimento"
                       variant="solo"
                       class="my-select"
@@ -1012,6 +1023,7 @@ watch(()=>props.tab,()=>{
             <BaseCard title="Dados de quem irá viajar (IDA)" color="secondary" class="mt-3">
               <PassegerForm v-for="(item,index) in formSale.dataComodos" :form="item" :key="index" :index="index"/>
               <v-checkbox
+                  v-if="filtersSelected.type == 'ida-e-volta'"
                   @update:modelValue="(arg)=>{if(arg) adicionarDadosIdaNaVolta(); else removerDadosIdaDaVolta()}"
                   hide-details="auto"
                   class="!tw-text-p tw-mt-3 !tw-text-sx"
@@ -1051,10 +1063,10 @@ watch(()=>props.tab,()=>{
                 <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
                 <v-row class="!tw-text-gray-500 tw-font-semibold tw-text-xs">
                   <v-col cols="6" class="tw-flex tw-items-center !tw-py-2  tw-text-xs">
-                    <Icon icon="icon-park-outline:ticket" class="mr-2" width="15"/>{{cart.getTotalTravelCount()}} {{cart.getTotalTravelCount() > 1 ? 'viagens' : 'viagem'}}
+                    <Icon icon="icon-park-outline:ticket" class="mr-2" width="15"/>{{useCartStore().getTotalTravelCount()}} {{useCartStore().getTotalTravelCount() > 1 ? 'viagens' : 'viagem'}}
                   </v-col>
                   <v-col cols="6" class="tw-flex tw-items-center !tw-py-2  tw-text-xs">
-                    <Icon icon="mdi:boat" class="mr-2" width="15"/>{{cart.getTotalTicketCount()}} {{cart.getTotalTicketCount() > 1 ? 'passagens' : 'passagem'}}
+                    <Icon icon="mdi:boat" class="mr-2" width="15"/>{{useCartStore().getTotalTicketCount()}} {{useCartStore().getTotalTicketCount() > 1 ? 'passagens' : 'passagem'}}
                   </v-col>
                 </v-row>
                 <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
@@ -1063,32 +1075,26 @@ watch(()=>props.tab,()=>{
                     Total  passagens
                   </v-col>
                   <v-col cols="6" >
-                    +{{formatCurrency(cart.getTotal())}}
+                    +{{formatCurrency(useCartStore().getTotalTickets())}}
                   </v-col>
-                  <v-col cols="6" class="pt-0" v-if="cart.getTotalTaxa()" >
+                  <v-col cols="6" class="pt-0" v-if="useCartStore().getTotalTaxa()" >
                     Taxa de serviço
                   </v-col>
-                  <v-col cols="6" class="pt-0" v-if="cart.getTotalTaxa()">
-                    +{{formatCurrency(cart.getTotalTaxa())}}
-                  </v-col>
-                  <v-col cols="6" class="pt-0" v-if="cart.getOffers()">
-                    Descontos
-                  </v-col>
-                  <v-col cols="6" class="pt-0" v-if="cart.getOffers()">
-                    -{{formatCurrency(cart.getOffers())}}
+                  <v-col cols="6" class="pt-0" v-if="useCartStore().getTotalTaxa()">
+                    +{{formatCurrency(useCartStore().getTotalTaxa())}}
                   </v-col>
                   <v-col cols="6" class="tw-font-bold" >
                     Total
                   </v-col>
                   <v-col cols="6" class="tw-flex tw-items-center  !tw-font-black tw-text-[17px] !tw-text-primary tw-justify-end">
                     <div class="tw-text-end" v-if="formPayment.payment_method_id == 3">
-                      {{formatCurrency(cart.getTotal() + (cart.getTotal() * (formPayment.credit_card.installment_quantity.pencet ?? 0) ) )}}<br>
+                      {{formatCurrency(useCartStore().getTotal() + (useCartStore().getTotal() * (formPayment.credit_card.installment_quantity.pencet ?? 0) ) )}}<br>
                     </div>
                     <div class="tw-text-end" v-else-if="formPayment.payment_method_id == 6">
-                      {{formatCurrency(cart.getTotal() - (cart.getTotal() * 0.04 ) )}}<br>
+                      {{formatCurrency(useCartStore().getTotal() - (useCartStore().getTotal() * 0.04 ) )}} <span class="tw-text-p tw-text-[10px]"> no PIX</span><br>
                     </div>
                     <div class="tw-text-end" v-else>
-                      {{formatCurrency(cart.getTotal())}}<br>
+                      {{formatCurrency(useCartStore().getTotal())}}<br>
                     </div>
                   </v-col>
                 </v-row>
@@ -1098,7 +1104,7 @@ watch(()=>props.tab,()=>{
                   </v-col>
                   <v-col v-if="formPayment.credit_card.installment_quantity" cols="6" class="tw-flex tw-items-center py-0  !tw-font-black tw-text-[17px] !tw-text-primary tw-justify-end">
                     <div class="tw-text-end">
-                      <div  class="tw-text-p tw-flex tw-text-[13px] "> {{ formatCurrency((cart.getTotal() + (cart.getTotal() * formPayment.credit_card.installment_quantity.pencet) ) / formPayment.credit_card.installment_quantity.value ) }}</div>
+                      <div  class="tw-text-p tw-flex tw-text-[13px] "> {{ formatCurrency((useCartStore().getTotal() + (useCartStore().getTotal() * formPayment.credit_card.installment_quantity.pencet) ) / formPayment.credit_card.installment_quantity.value ) }}</div>
                     </div>
                   </v-col>
                 </v-row>
@@ -1110,7 +1116,7 @@ watch(()=>props.tab,()=>{
               <div class=" tw-font-bold tw-px-2 tw-text-gray-800 ">Minhas viagens</div>
             </BaseCard>
             <v-row class="mt-3">
-              <v-col cols="12" v-for="item in cart.order?.passagens_agrupadas">
+              <v-col cols="12" v-for="item in useCartStore().order?.passagens_agrupadas">
                 <CartItem  :data="item"/>
               </v-col>
             </v-row>
