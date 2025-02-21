@@ -329,6 +329,7 @@ async  function initSale(){
        rooms: data.data.comodos,
        formas_pagamento: data.formas_pagamento,
      }
+      onClickBtnSelect()
     }
   }).catch(error => {
     console.log(error)

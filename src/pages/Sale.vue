@@ -263,7 +263,7 @@ function saveTicket(items){
     formSale.dataVolta.viagem = items.dataVolta.trecho.id_viagem;
     items.dataVolta.rooms.forEach(item => {
       formSale.dataVolta.dataComodos.push({
-        tipo_doc:1,
+        tipo_doc:null,
         nome:'',
         document:'',
         nascimento:null,
@@ -279,7 +279,7 @@ function saveTicket(items){
       console.log(item)
       for (let i = 1; i < item.quantidade; i++){
         formSale.dataVolta.dataComodos.push({
-          tipo_doc:1,
+          tipo_doc:null,
           nome:'',
           document:'',
           nascimento:null,
@@ -301,7 +301,7 @@ function saveTicket(items){
   formSale.data_hora = items.dataIda.trecho.data_embarque;
   items.dataIda.rooms.forEach(item => {
     formSale.dataComodos.push({
-      tipo_doc:1,
+      tipo_doc:null,
       nome:'',
       document:'',
       nascimento:null,
@@ -317,7 +317,7 @@ function saveTicket(items){
 
     for (let i = 1; i < item.quantidade; i++){
       formSale.dataComodos.push({
-        tipo_doc:1,
+        tipo_doc:null,
         nome:'',
         document:'',
         nascimento:null,
@@ -363,6 +363,7 @@ function submitOrder(){
   formSale.total = formSale.total_passagems + formSale.total_taxas;
 
   const params = {
+    pedido_id: useCartStore().order?.id,
     ...formSale,
     trecho:formSale.trecho.id,
 
@@ -383,8 +384,8 @@ function submitOrder(){
       cartStore.loadCart()
       formPayment.order_id = orderResponse.value.id;
       nextStep()
-      waitServe.value = false
     }
+    waitServe.value = false
   }).catch(error=>{
       console.log(error)
       waitServe.value = false
@@ -397,25 +398,39 @@ function addCart(){
   formSale.dataComodos.forEach(item => {
     item.data_nascimento = formatDate(item.nascimento)
   })
-  formSale.dataVolta.dataComodos.forEach(item => {
-    item.data_nascimento = formatDate(item.nascimento)
-  })
+
+
   formSale.total = formSale.total_passagems + formSale.total_taxas;
 
   const params = {
+    pedido_id: useCartStore().order?.id,
     ...formSale,
     trecho:formSale.trecho.id,
-    dataVolta:{...formSale.dataVolta,trecho:formSale.dataVolta.trecho.id}
+
   }
 
-  formSale.total = formSale.total_passagems + formSale.total_taxas;
+  if(formSale.dataVolta){
+    formSale.dataVolta.dataComodos.forEach(item => {
+      item.data_nascimento = formatDate(item.nascimento)
+    })
+    params.dataVolta = {...formSale.dataVolta,trecho:formSale.dataVolta.trecho.id}
+  }
+  waitServe.value = true
   routes["order"](params).then(res => {
     if(res.data.success){
       orderResponse.value = res.data.data;
       cartStore.addItem(orderResponse.value)
+      cartStore.loadCart()
       formPayment.order_id = orderResponse.value.id;
+      resetFormSale()
       prevStep()
     }
+    waitServe.value = false
+
+  }).catch(error=>{
+    console.log(error)
+    waitServe.value = false
+    showErrorNotification(error.response.data.message)
   })
 }
 

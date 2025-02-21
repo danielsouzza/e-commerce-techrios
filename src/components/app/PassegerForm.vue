@@ -59,14 +59,13 @@ const tiposDoc = [
       >
       </v-select>
     </v-col>
-    <v-col cols="6" >
+    <v-col cols="6"  v-if="form.tipo_doc">
       <v-text-field
-          v-if="form.tipo_doc"
           v-model="form.document"
           variant="plain"
           label="Nº do documento"
           hide-details="auto"
-          v-mask="tiposDoc[form.tipo_doc-1]?.mask"
+          v-mask="form.tipo_doc ? tiposDoc[form.tipo_doc-1]?.mask : '###########' "
       >
         <template v-slot:prepend-inner>
           <Icon icon="material-symbols-light:id-card-outline" width="26"/>
