@@ -17,7 +17,7 @@ export const routes = {
     'rooms.reservas.delete': (params= {}) => api.delete('/reservas/comodo',params),
     'ticket.print': (ticket_id) => api.get(`/passagens/imprimir/${ticket_id}/pdf`),
 
-    'order.my': (params= {}) => api.get('/pedidos'),
+    'order.my': (params= {}) => api.get('/pedidos',params),
     'order': (params= {}) => api.post('/pedidos',params),
     'order.sync': (order_id) => api.patch(`/pedidos/${order_id}/associar`),
     'order.open': (params= {}) => api.get('/pedidos/ultimo-aberto/dados'),

@@ -50,7 +50,7 @@ const orders = computed(()=>{
 })
 
 function getOrder(){
-  routes['order.my']().then((res) => {
+  routes['order.my']({subdomain: window.subdomain || ''}).then((res) => {
     myOrders.value = res.data.data;
     console.log(myOrders.value)
   })

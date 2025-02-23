@@ -13,6 +13,7 @@ const tab = ref('login')
 const form2fa = reactive({
   email: '',
   verification_code:'',
+  subdomain: window.subdomain || '',
   errors:{}
 
 })
@@ -20,6 +21,7 @@ const form = reactive({
   email: "",
   password: "",
   remember: false,
+  subdomain: window.subdomain || '',
   errors:{}
 })
 
