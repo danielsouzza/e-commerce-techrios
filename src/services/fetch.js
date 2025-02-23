@@ -29,6 +29,7 @@ export const routes = {
 
     'user.me':() => api.get('/me'),
     'user.login':(params= {}) => api.post('/login',params),
+    'user.login.2fa':(params= {}) => api.post('/login/2fa',params),
     'user.logout':(params= {}) => api.delete('/logout',params),
     'user.register':(params= {}) => api.post('/register',params),
     'user.delete':() => api.delete('/usuario'),
