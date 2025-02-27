@@ -15,9 +15,11 @@ import {
   formatMoney,
   gerarStringTiposComodos
 } from "../../Helper/Ultis.js";
-import {showErrorNotification} from "../../event-bus.js";
 import {getApiBaseUrl} from "../../services/api.js";
+import { useToast } from "vue-toastification";
 
+
+const toast = useToast();
 const props = defineProps({
   modelValue: Object,
   dataIda: Object,
@@ -212,7 +214,7 @@ function onClickRoom(room, type,typeTravel='dataIda') {
       }
     }
   }catch (error){
-    showErrorNotification(error.message)
+    toast.error(error.message);
   }
 
 }
@@ -232,7 +234,7 @@ function incrementComodo(type, typeTravel='dataIda') {
       type_comodo.quantidade++
     }
   }catch (error){
-    showErrorNotification(error.message)
+    toast.error(error.message);
   }
 
 }
@@ -266,8 +268,8 @@ function postReserva(room){
       }
     }
   }).catch(error => {
-    console.log(error);
-    showErrorNotification(error.response.data.message);
+
+    toast.error(error.response.data.message);
     if(step.value === 1){
       roomsSelected.value.dataIda.selectedsById.splice(roomsSelected.value.dataIda.selectedsById.indexOf(room), 1)
     }else {
@@ -299,6 +301,7 @@ function deleteReserva(room){
     }else {
       roomsSelected.value.dataVolta.selectedsById.splice(roomsSelected.value.dataVolta.selectedsById.indexOf(room), 1)
     }
+    toast.error(error.response.data.message);
   })
 }
 
@@ -357,9 +360,10 @@ async  function initSale(){
           rooms: data.data.comodos,
           formas_pagamento: data.formas_pagamento,
         }
+        toast.success(response.data.message);
       }
     }).catch(error => {
-      console.log(error)
+      toast.error(error.response.data.message);
     })
 
   }
@@ -441,7 +445,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <BaseCard :active="openRooms">
+  <BaseCard :active="openRooms" @click="onClickBtnSelect" class="tw-cursor-pointer">
 
     <div class="tw-flex tw-flex-col " >
       <div v-if="dataVolta" class="tw-flex  tw-text-primary tw-px-2 tw-justify-between tw-rounded-lg tw-font-bold lg:tw-mr-5">

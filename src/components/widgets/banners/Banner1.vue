@@ -44,11 +44,17 @@ onMounted(()=>{
               :key="i"
               :src="item.image_url"
           >
-            <template v-slot:error>
-              <v-img
-                  class="mx-auto "
-                  src="https://picsum.photos/1920/500"
-              ></v-img>
+            <template v-slot:placeholder>
+              <v-row
+                  align="center"
+                  class="fill-height ma-0"
+                  justify="center"
+              >
+                <v-progress-circular
+                    color="grey-lighten-5"
+                    indeterminate
+                ></v-progress-circular>
+              </v-row>
             </template>
           </v-carousel-item>
         </a>

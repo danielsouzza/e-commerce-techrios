@@ -33,6 +33,8 @@ export const routes = {
     'user.logout':(params= {}) => api.delete('/logout',params),
     'user.register':(params= {}) => api.post('/register',params),
     'user.delete':() => api.delete('/usuario'),
+    'user.reset-password':(params= {}) => api.post('/login/recuperar-senha',params),
+    'user.reset-password-confirm':(params= {}) => api.post('/login/resetar-senha',params),
 
     'newletters':(params= {}) => api.post('/newsletter',params),
 

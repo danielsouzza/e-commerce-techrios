@@ -8,7 +8,9 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import VueTheMask from 'vue-the-mask'
 import { createPinia } from 'pinia'
+import Toast from "vue-toastification";
 import '@mdi/font/css/materialdesignicons.css';
+import "vue-toastification/dist/index.css";
 import { pt } from 'vuetify/locale'
 
 import router from './routes'
@@ -82,6 +84,7 @@ async function fetchTheme() {
     app.use(createPinia());
     app.use(VueTheMask);
     app.use(router);
+    app.use(Toast,{})
     app.use(vuetify);
 
     app.provide('themeConfig', themeConfig);

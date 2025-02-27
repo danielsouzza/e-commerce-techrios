@@ -42,6 +42,12 @@ const routes = [
         meta: { title: 'Login' }
     },
     {
+        path: '/reset-password',
+        component: () => import('../pages/ResetPassword.vue'),
+        name: 'reset-password',
+        meta: { title: 'Redefinir senha' }
+    },
+    {
         path: '/registrar',
         component: () => import('../pages/Register.vue'),
         name: 'register',

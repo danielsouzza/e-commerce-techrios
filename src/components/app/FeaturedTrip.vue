@@ -6,9 +6,11 @@ import {Carousel, Pagination, Slide} from "vue3-carousel";
 import CardTripFull from "../shared/CardTripFull.vue";
 import {computed, onMounted, ref} from "vue";
 import {routes} from "../../services/fetch.js";
-'vue3-carousel/dist/carousel.css'
+import { useToast } from "vue-toastification";
+import 'vue3-carousel/dist/carousel.css'
 
 
+const toast = useToast();
 const isDragging = ref(false);
 const config_1 = {
   itemsToShow: 1,
@@ -78,6 +80,8 @@ function getTrechosWithTravels() {
 
   routes["trechos-viagem"](params).then(response => {
     trechosWithTravels.value = response.data
+  }).catch(error => {
+    toast.error(error.response.data.message);
   })
 }
 

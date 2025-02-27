@@ -25,7 +25,7 @@ import {useCartStore} from "../store/CartStore.js";
 import router from "../routes/index.js";
 import CartItem from "../components/app/Cart/CartItem.vue";
 import {userAuthStore} from "../store/AuthStore.js";
-import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
+import { useToast } from "vue-toastification";
 import {getApiBaseUrl} from "../services/api.js";
 
 
@@ -33,7 +33,7 @@ const props = defineProps({
   tab:String,
 })
 
-
+const toast = useToast();
 const timeToPay = ref(30 * 60)
 const cartStore = useCartStore()
 const authStore = userAuthStore()
@@ -210,6 +210,8 @@ function getTrechos(){
           }
         }
     );
+  }).catch(error => {
+    toast.error(error.response.data.message);
   })
 }
 
@@ -383,13 +385,13 @@ function submitOrder(){
       cartStore.addItem(orderResponse.value)
       cartStore.loadCart()
       formPayment.order_id = orderResponse.value.id;
+      toast.success(res.data.message);
       nextStep()
     }
     waitServe.value = false
   }).catch(error=>{
-      console.log(error)
       waitServe.value = false
-      showErrorNotification(error.response.data.message)
+      toast.error(error.response.data.message);
   })
 }
 
@@ -422,15 +424,15 @@ function addCart(){
       cartStore.addItem(orderResponse.value)
       cartStore.loadCart()
       formPayment.order_id = orderResponse.value.id;
+      toast.success(res.data.message);
       resetFormSale()
       prevStep()
     }
     waitServe.value = false
 
   }).catch(error=>{
-    console.log(error)
     waitServe.value = false
-    showErrorNotification(error.response.data.message)
+    toast.error(error.response.data.message);
   })
 }
 
@@ -469,12 +471,12 @@ function submitPaymentCredit(){
       orderConfirmation.value = res.data.data;
       stepSale.value = 5
       useCartStore().clearCartLocal()
-      showSuccessNotification(res.data.message)
+      toast.success(res.data.message);
 
     }
     waitServe.value = false
   }).catch(error=>{
-    showErrorNotification(error.response.data.message);
+    toast.error(error.response.data.message);
     stepSale.value = 3
     waitServe.value = false
     console.log(error)
@@ -484,18 +486,17 @@ function submitPaymentCredit(){
 function submitPaymentPix(){
   waitServe.value = true
   routes["payment.pix"]({order_id:useCartStore().order?.id}).then(res => {
-    console.log(res.data)
     if(res.data.success){
       paymentPending.value = res.data.data;
       waitServe.value = false
       whatPayment.value = true
-      showSuccessNotification(res.data.message)
+      toast.success(res.data.message);
       nextStep()
       iniciarTemporizador()
       checkStatusPayment()
     }
   }).catch(error=>{
-    showErrorNotification(error.response.data.message);
+    toast.error(error.response.data.message);
     waitServe.value = false
     whatPayment.value = false
   })
@@ -617,7 +618,7 @@ function getTicketPdf(){
           );
         }
       }).catch(error => {
-        console.log(error)
+        toast.error(error.response.data.message);
       })
     })
   })

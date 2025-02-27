@@ -5,11 +5,18 @@ import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
 import {userAuthStore} from "../store/AuthStore.js";
 import {useCartStore} from "../store/CartStore.js";
-import {showErrorNotification} from "../event-bus.js";
+import { useToast } from "vue-toastification";
 
-
+const toast = useToast();
 const visible = ref(false);
 const tab = ref('login')
+
+const formReset = reactive({
+  email: '',
+  base_url: 'http://localhost:5174/',
+  errors:{}
+})
+
 const form2fa = reactive({
   email: '',
   verification_code:'',
@@ -62,19 +69,27 @@ function handleSubmit() {
 
   if(validateStepForm()){
     routes['user.login'](form).then((response) => {
-      console.log(response.data);
       if (response.data.success) {
-        console.log(response.data)
         tab.value = 'confirm-auth-2fa'
         form2fa.email = form.email
-
-        // authStore.setToken(response.data.data.token);
-        // authStore.loadUser();
-        // useCartStore().syncCart()
-        // goToHomePage()
+        toast.success(response.data.message);
       }
     }).catch(error => {
-      showErrorNotification('Credenciais inválidas. Verifique seus dados e tente novamente.');
+      toast.error(error.response.data.message);
+    })
+  }
+}
+
+function handleSubmitResetPassword() {
+  if(!formReset.email){
+    formReset.errors['email'] = "Por favor, insira seu email."
+  }else{
+    routes['user.reset-password'](formReset).then((response) => {
+      if (response.data.success) {
+        toast.success(response.data.message);
+      }
+    }).catch(error => {
+      toast.error(error.response.data.message);
     })
   }
 }
@@ -82,7 +97,6 @@ function handleSubmit() {
 function confirm2fat(){
   if(validateStepForm2fa()){
     routes['user.login.2fa'](form2fa).then((response) => {
-      console.log(response.data);
       if(response.data.success){
         userAuthStore().setToken(response.data.data.token);
         userAuthStore().loadUser();
@@ -90,7 +104,7 @@ function confirm2fat(){
         goToHomePage()
       }
     }).catch(error=>{
-      showErrorNotification('Erro na validação, verifique se o código esta correto');
+      toast.error(error.response.data.message);
     })
   }
 }
@@ -142,10 +156,10 @@ function goToHomePage(){
             <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
               Sua senha
               <a
+                  @click="tab = 'reset-password'"
                   class="text-caption text-decoration-none text-blue"
                   href="#"
                   rel="noopener noreferrer"
-                  target="_blank"
               >
                 Esqueci minha senha?</a>
             </div>
@@ -224,6 +238,57 @@ function goToHomePage(){
 
           <div class="text-caption">
             Não recebeu o código? <a class="text-decoration-underline" href="#" @click.prevent="form2fa.verification_code = ''">Reenviar</a>
+          </div>
+        </v-card>
+      </v-tabs-window-item>
+      <v-tabs-window-item value="reset-password">
+        <v-card
+            class="mx-auto pa-8 pb-8 my-4 tw-text-center"
+            elevation="3"
+            max-width="500"
+            rounded="lg"
+        >
+
+          <div class="tw-flex tw-items-center  mb-5">
+            <v-divider  :thickness="1" class="border-opacity-100  " ></v-divider>
+            <v-btn variant="outlined" color="secondary" rounded >
+              <span class="tw-text-xs"> Esqueci minha senha</span>
+            </v-btn>
+            <v-divider  :thickness="1" class="border-opacity-100  " ></v-divider>
+          </div>
+
+          <v-form @submit.prevent="handleSubmitResetPassword" validate-on="blur">
+            <div class="text-body-2 mb-3">
+              Para redefinir sua senha, informe o e-mail cadastrado na sua conta e lhe enviaremos um link com as instruções.
+            </div>
+
+            <v-text-field
+                density="compact"
+                color="secondary"
+                v-model="formReset.email"
+                :error-messages="formReset.errors.email"
+                required
+                placeholder="Digite o seu email "
+                prepend-inner-icon="mdi-email-outline"
+                variant="outlined"
+            ></v-text-field>
+          </v-form>
+
+          <v-btn
+              @click="handleSubmitResetPassword"
+              class="my-8"
+              color="secondary"
+              size="large"
+              width="100%"
+              rounded
+              text="Confirmar"
+              type="submit"
+              variant="outlined"
+              block
+          ></v-btn>
+
+          <div class="text-caption">
+            Não recebeu o código? <a class="text-decoration-underline" href="#" @click.prevent="">Reenviar</a>
           </div>
         </v-card>
       </v-tabs-window-item>

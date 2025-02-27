@@ -102,14 +102,14 @@ onMounted(()=>{
           ></v-text-field>
         </v-col>
         <v-col cols="12"  lg="6">
-          <div class="text-subtitle-1 text-medium-emphasis">CPF</div>
+          <div class="text-subtitle-1 text-medium-emphasis">{{!form.comprador.estrangeiro ? 'CPF' : 'Passaporte'}}</div>
 
           <v-text-field
               density="compact"
               color="secondary"
               hide-details="auto"
               v-model="form.comprador.cpf_cnpj"
-              v-mask="'###.###.###-##'"
+              v-mask="!form.comprador.estrangeiro ? '###.###.###-##' : '#################'"
               placeholder="Digite o seu cpf "
               prepend-inner-icon="mdi-account"
               variant="outlined"
