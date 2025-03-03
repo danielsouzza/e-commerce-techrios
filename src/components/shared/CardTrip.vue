@@ -30,7 +30,7 @@ function goToSalePage(){
   if(props.dragging)return;
   router.push({name: "sale",params:{tab:'escolher-passagem'},query: {
       destino: props.data?.municipio_destino.codigo,
-      origem: props.data?.municipio_origem.codig,
+      origem: props.data?.municipio_origem.codigo,
       dataIda: formatDateToServe(new Date(props.data?.data_embarque)),
       type:'somente-ida'
     }})

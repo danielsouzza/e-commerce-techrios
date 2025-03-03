@@ -1,7 +1,7 @@
 <script setup>
 import {Icon} from "@iconify/vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
-import {ref} from "vue";
+import {computed, ref} from "vue";
 import CustomDateInput from "./CustomDateInput.vue";
 import {converterData, formatDateToServe} from "../../Helper/Ultis.js";
 
@@ -13,7 +13,8 @@ const props = defineProps({
 
 const emit = defineEmits(['update:modelValue'])
 const form = ref(null);
-
+const hoje = new Date();
+hoje.setHours(0, 0, 0, 0);
 
 async function updateFilters(){
   const {valid}  = await form.value.validate()
@@ -21,6 +22,47 @@ async function updateFilters(){
     emit('update:modelValue',props.modelValue);
   }
 }
+
+const validarDataIda = computed(() => {
+  if (!props.modelValue.dataIda) return "Esse campo é obrigatório";
+  const dataIda = new Date(props.modelValue.dataIda);
+  if (dataIda < hoje) return "A data de ida não pode ser menor que hoje";
+  if(props.modelValue.dataVolta){
+    const dataVolta = new Date(props.modelValue.dataVolta);
+    if (dataVolta < dataIda) return "A data de ida não pode ser maior que a volta";
+  }
+  return true;
+});
+
+function permitirDatasIda(data) {
+  const dataSelecionada = new Date(data);
+  dataSelecionada.setHours(0, 0, 0, 0);
+  if (props.modelValue.type === 'ida-e-volta' && props.modelValue.dataVolta) {
+    return dataSelecionada >= hoje && dataSelecionada <= props.modelValue.dataVolta;
+  }
+  return dataSelecionada >= hoje;
+}
+
+function permitirDatasVolta(data) {
+  const dataSelecionada = new Date(data);
+  dataSelecionada.setHours(0, 0, 0, 0);
+  if (props.modelValue.dataIda) {
+    return dataSelecionada.getDate() >= props.modelValue.dataIda.getDate();
+  }
+  return dataSelecionada >= hoje;
+}
+
+const validarDataVolta = computed(() => {
+  if (props.modelValue.type !== "ida-e-volta") return true;
+  if (!props.modelValue.dataVolta) return "Esse campo é obrigatório";
+
+  const dataIda = new Date(props.modelValue.dataIda);
+  const dataVolta = new Date(props.modelValue.dataVolta);
+
+  if (dataVolta < dataIda) return "A data de volta não pode ser menor que a ida";
+  return true;
+});
+
 
 function invertFilter(){
   const temp = props.modelValue.origem;
@@ -112,7 +154,8 @@ function changeTypeTravel(){
                 hide-details="auto"
                 prepend-icon=""
                 v-model="modelValue.dataIda"
-                :rules="[v => !!v || 'Esse campo é obrigatório']"
+                :allowed-dates="permitirDatasIda"
+                :rules="[validarDataIda]"
                 variant="solo"
                 v-mask="'##/##/####'"
                 @change="(e)=>{ props.modelValue.dataIda = new Date(converterData(e.target._value) + 'T00:00:00')}"
@@ -128,19 +171,18 @@ function changeTypeTravel(){
         <div v-if="modelValue.type == 'ida-e-volta'" class="tw-flex tw-flex-col tw-px-5 tw-py-3  !tw-ml-5">
           <div class="tw-text-p "><span class="tw-font-extrabold tw-text-[20px] ">Volta</span> </div>
           <div class="tw-flex tw-items-center tw-text-p tw-text-[14px]">
-<!--            <custom-date-input v-model="modelValue.dataVolta" />-->
-
             <v-date-input
                 flat
                 hide-details="auto"
                 prepend-icon=""
                 locale="pt"
                 hide-actions
+                :allowed-dates="permitirDatasVolta"
                 variant="solo"
                 v-mask="'##/##/####'"
                 @change="(e)=>{ props.modelValue.dataVolta = new Date(converterData(e.target._value) + 'T00:00:00')}"
                 v-model="modelValue.dataVolta"
-                :rules="[v =>  modelValue.type == 'ida-e-volta' ? !!v  ||  'Esse campo é obrigatório' : true]"
+                :rules="[validarDataVolta]"
                 class="my-select"
                 placeholder="dd/mm/aaaa">
               <template #default>

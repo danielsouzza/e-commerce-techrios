@@ -183,7 +183,7 @@ onMounted(()=>{
         <v-col cols="12"  lg="6">
           <div class="text-subtitle-1 text-medium-emphasis">Município</div>
 
-          <v-select
+          <v-autocomplete
               density="compact"
               color="secondary"
               item-value="codigo"
@@ -193,7 +193,7 @@ onMounted(()=>{
               :items="municipios"
               placeholder="Selecione seu município "
               variant="outlined"
-          ></v-select>
+          ></v-autocomplete>
         </v-col>
         <v-col cols="12"  lg="6">
           <div class="text-subtitle-1 text-medium-emphasis">Logradouro</div>

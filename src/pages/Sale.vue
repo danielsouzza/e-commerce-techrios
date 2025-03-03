@@ -166,20 +166,49 @@ const updateFilters = () => {
 };
 
 function generateNextDays(data_hora) {
-  const dateCurrent = data_hora ?? filtersSelected.value.dataIda
-  if(dateCurrent){
-    let date = dateCurrent
-    let futureDates = [];
-    const start = isLargeScreen.value ? -3 : -1;
-    const end = isLargeScreen.value ? 4 : 2;
-    for (let i = start; i < end; i++) {
-      let futureDate = new Date(date);
-      futureDate.setDate(date.getDate() + i);
-      futureDates.push(futureDate);
-    }
-    nextDays.value =  futureDates;
+  const dateCurrent = data_hora ?? filtersSelected.value.dataIda;
+  if (!dateCurrent) return;
+
+  let date = new Date(dateCurrent);
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0); // Garantindo a comparação correta
+
+  // Garantir que a data de início não seja menor que hoje
+  if (date < hoje) {
+    date = hoje;
   }
+
+  let futureDates = [];
+  let start = isLargeScreen.value ? -3 : -1;
+  let end = isLargeScreen.value ? 4 : 2;
+
+  // Ajusta start para não ir antes de hoje
+  while (start < 0) {
+    let pastDate = new Date(date);
+    pastDate.setDate(date.getDate() + start);
+    if (pastDate < hoje) {
+      start++; // Move o intervalo para frente
+    } else {
+      break;
+    }
+  }
+
+  for (let i = start; i < end; i++) {
+    let futureDate = new Date(date);
+    futureDate.setDate(date.getDate() + i);
+
+    // Se houver data de volta, impedir que ultrapasse
+    if (filtersSelected.value.dataVolta && futureDate > filtersSelected.value.dataVolta) {
+      break;
+    }
+
+    futureDates.push(futureDate);
+  }
+
+  nextDays.value = futureDates;
 }
+
+
 
 function getTrechos(){
   const params = new URLSearchParams()
@@ -197,7 +226,7 @@ function getTrechos(){
     const first = nextDays.value[0].getDate()
     const last = nextDays.value[nextDays.value.length - 1].getDate()
     if(date === first || date === last){
-      generateNextDays(data_hora);
+      generateNextDays();
     }
     router.push(
         {
@@ -447,7 +476,7 @@ function checkStatusPayment(){
       }else{
         if(timeToPay.value == 0){
           clearInterval(intervalo);
-          showErrorNotification('Tempo de venda expirou')
+          toast.error('Tempo de venda expirou');
           whatPayment.value = false
           timeToPay.value = 30 * 60
           resetFormSale()
