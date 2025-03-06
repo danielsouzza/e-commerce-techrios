@@ -30,24 +30,65 @@ const form = reactive({
     nro:"",
     bairro:"",
     cmun:null,
+
     cep:"",
     telefone:"",
   },
   errors:{}
 })
 
-function getMunicipios(){
-  axios.get("https://yjaraviagens.com/municipios/PA").then((response) => {
-    municipios.value = response.data
+function getMunicipios(search='', after=()=>{}){
+  routes['municipios']({search:search}).then((response) => {
+    municipios.value = response.data.data
+    after()
   })
+}
+
+function resetAddress(){
+  form.comprador.bairro = ''
+  form.comprador.xlgr = ''
+  form.comprador.cmun = null
+}
+function getCep(){
+  if(form.comprador.cep.length > 8){
+    axios.get(`https://viacep.com.br/ws/${form.comprador.cep}/json/`).then((response) => {
+      if(!response.data.erro){
+        form.comprador.bairro = response.data.bairro
+        form.comprador.xlgr = response.data.logradouro
+        getMunicipios(response.data.localidade,()=>{
+          form.comprador.cmun = parseInt(municipios.value.find(it=>it.codigo == response.data.ibge)?.codigo)
+        })
+      }else{
+        resetAddress()
+      }
+
+    }).catch(error=>{
+      resetAddress()
+    })
+  }else {
+    resetAddress()
+  }
+
 }
 
 function goToLoginPage(){
   router.push({name: "login"})
 }
 
+function removeAcentos(str) {
+  if (!str) return "";
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+function customFilter(item, queryText) {
+  if (!queryText) return true;
+  const textoNormalizado = removeAcentos(item).toLowerCase();
+  const queryNormalizada = removeAcentos(queryText).toLowerCase();
+  return textoNormalizado.includes(queryNormalizada);
+}
+
 function handleSubmit() {
   form.comprador.xnome = form.name
+  form.comprador.telefone = form.telefone
   form.comprador.telefone = form.telefone
   routes['user.register'](form).then((response) => {
     goToLoginPage()
@@ -172,6 +213,7 @@ onMounted(()=>{
               color="secondary"
               v-mask="'#####-###'"
               v-model="form.comprador.cep"
+              @update:modelValue="getCep"
               :error-messages="form.errors['comprador.cep']"
               hide-details="auto"
               placeholder="Digite o seu cep "
@@ -192,7 +234,7 @@ onMounted(()=>{
           ></v-text-field>
         </v-col>
         <v-col cols="12"  lg="6">
-          <div class="text-subtitle-1 text-medium-emphasis">Município</div>
+          <div class="text-subtitle-1 text-medium-emphasis">Município </div>
 
           <v-autocomplete
               density="compact"
@@ -201,10 +243,12 @@ onMounted(()=>{
               item-title="nome"
               v-model="form.comprador.cmun"
               :error-messages="form.errors['comprador.cmun']"
+
               hide-details="auto"
               :items="municipios"
               placeholder="Selecione seu município "
               variant="outlined"
+              :custom-filter="customFilter"
           ></v-autocomplete>
         </v-col>
         <v-col cols="12"  lg="6">

@@ -40,7 +40,6 @@ onMounted(()=>{
           <v-carousel-item
               class="my-carousel !tw-h-[170px] lg:!tw-h-full "
               cover
-              lazy-src="https://picsum.photos/1920/500"
               :key="i"
               :src="item.image_url"
           >

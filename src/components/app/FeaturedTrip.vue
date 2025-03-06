@@ -76,7 +76,6 @@ function getTrechosWithTravels() {
   params.append('quantia', 5)
   params.append('is_destaque', 1)
   params.append('subdomain', window.subdomain || '')
-  console.log(window.subdomain)
 
   routes["trechos-viagem"](params).then(response => {
     trechosWithTravels.value = response.data

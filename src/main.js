@@ -20,9 +20,9 @@ import {getApiBaseUrl} from "./services/api.js";
 
 const hostname = window.location.hostname;
 const parts = hostname.split(".");
-const subdomain = parts.length > 1 ?  parts[0] : null;
+const subdomain = parts.length > 1 && parts[0] !== "loja" ? parts[0] : null;
 
-window.subdomain = subdomain != "loja" ? subdomain : null;
+window.subdomain = subdomain;
 
 const themeConfig = reactive({
     primaryColor: '#00579d',
@@ -34,7 +34,7 @@ async function fetchTheme() {
     if (subdomain) {
         try {
             const response = await  routes['empresa.theme']({subdomain:window.subdomain})
-            const baseurl = getApiBaseUrl().replaceAll('api','')
+            const baseurl = getApiBaseUrl()?.replaceAll('api','')
             const { theme, image_path } = response.data.data;
 
 
