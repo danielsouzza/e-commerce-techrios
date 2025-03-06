@@ -6,11 +6,15 @@ import {VDateInput} from 'vuetify/labs/VDateInput'
 import axios from "axios";
 import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
+import {useToast} from "vue-toastification";
 
+
+const toast = useToast();
 const visible1 = ref(false);
 const visible2 = ref(false);
 const municipios = ref([]);
 const form = reactive({
+
   name:"",
   email: "",
   email_confirmation: "",
@@ -28,12 +32,12 @@ const form = reactive({
     cmun:null,
     cep:"",
     telefone:"",
-  }
+  },
+  errors:{}
 })
 
 function getMunicipios(){
   axios.get("https://yjaraviagens.com/municipios/PA").then((response) => {
-    console.log(response)
     municipios.value = response.data
   })
 }
@@ -48,7 +52,9 @@ function handleSubmit() {
   routes['user.register'](form).then((response) => {
     goToLoginPage()
   }).catch((error) => {
+    form.errors = error.response.data.errors
     console.log(error)
+    toast.error('Preencha todos os dados');
   })
 }
 
@@ -96,6 +102,7 @@ onMounted(()=>{
               color="secondary"
               hide-details="auto"
               v-model="form.name"
+              :error-messages="form.errors.name"
               placeholder="Digite o seu nome completo "
               prepend-inner-icon="mdi-account"
               variant="outlined"
@@ -108,9 +115,10 @@ onMounted(()=>{
               density="compact"
               color="secondary"
               hide-details="auto"
+              :error-messages="form.errors['comprador.cpf_cnpj']"
               v-model="form.comprador.cpf_cnpj"
               v-mask="!form.comprador.estrangeiro ? '###.###.###-##' : '#################'"
-              placeholder="Digite o seu cpf "
+              :placeholder="!form.comprador.estrangeiro ? 'Digite o seu cpf' : 'Digite seu passaporte' "
               prepend-inner-icon="mdi-account"
               variant="outlined"
           ></v-text-field>
@@ -122,6 +130,7 @@ onMounted(()=>{
               color="secondary"
               hide-details="auto"
               prepend-icon=""
+              :error-messages="form.errors['comprador.nascimento']"
               v-model="form.comprador.nascimento"
               variant="outlined"
               placeholder="Data de Nascimento">
@@ -138,6 +147,7 @@ onMounted(()=>{
               color="secondary"
               hide-details="auto"
               v-mask="'(##) #####-####'"
+              :error-messages="form.errors.telefone"
               v-model="form.telefone"
               placeholder="Digite o seu numero de telefone "
               prepend-inner-icon="mdi-phone"
@@ -149,7 +159,6 @@ onMounted(()=>{
       <div class="tw-flex tw-items-center mt-5 ">
         <v-btn variant="outlined" color="secondary" rounded >
           <span class="tw-text-xs">Endereço</span>
-
         </v-btn>
         <v-divider  :thickness="1" class="border-opacity-100  " ></v-divider>
       </div>
@@ -163,6 +172,7 @@ onMounted(()=>{
               color="secondary"
               v-mask="'#####-###'"
               v-model="form.comprador.cep"
+              :error-messages="form.errors['comprador.cep']"
               hide-details="auto"
               placeholder="Digite o seu cep "
               variant="outlined"
@@ -175,6 +185,7 @@ onMounted(()=>{
               density="compact"
               color="secondary"
               v-model="form.comprador.bairro"
+              :error-messages="form.errors['comprador.bairro']"
               hide-details="auto"
               placeholder="Digite o seu bairro "
               variant="outlined"
@@ -189,6 +200,7 @@ onMounted(()=>{
               item-value="codigo"
               item-title="nome"
               v-model="form.comprador.cmun"
+              :error-messages="form.errors['comprador.cmun']"
               hide-details="auto"
               :items="municipios"
               placeholder="Selecione seu município "
@@ -201,6 +213,7 @@ onMounted(()=>{
           <v-text-field
               density="compact"
               color="secondary"
+              :error-messages="form.errors['comprador.xlgr']"
               v-model="form.comprador.xlgr"
               hide-details="auto"
               placeholder="Digite o seu logradouro "
@@ -213,6 +226,7 @@ onMounted(()=>{
           <v-text-field
               density="compact"
               color="secondary"
+              :error-messages="form.errors['comprador.nro']"
               v-model="form.comprador.nro"
               hide-details="auto"
               placeholder="Digite o seu número "
@@ -237,6 +251,7 @@ onMounted(()=>{
               density="compact"
               color="secondary"
               v-model="form.email"
+              :error-messages="form.errors.email"
               hide-details="auto"
               placeholder="Digite o seu email "
               prepend-inner-icon="mdi-email-outline"
@@ -265,6 +280,7 @@ onMounted(()=>{
               density="compact"
               color="secondary"
               hide-details="auto"
+              :error-messages="form.errors.password"
               v-model="form.password"
               placeholder="Digite sua senha"
               prepend-inner-icon="mdi-lock-outline"

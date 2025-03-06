@@ -44,6 +44,7 @@ const menu = ref(false)
 const filtersData = ref([])
 const orderResponse = ref(null)
 const paymentPending = ref(null)
+const empresas = ref([])
 const orderConfirmation = ref(null)
 const trechosWithTravels = ref([])
 const waitServe = ref(false)
@@ -65,6 +66,7 @@ const filtersSelected = ref({
   dataVolta:null,
   type:null,
   intervalo:null,
+  empresa:null,
   tipo_comodidade_id:null,
   quantia:8
 })
@@ -171,9 +173,8 @@ function generateNextDays(data_hora) {
 
   let date = new Date(dateCurrent);
   const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0); // Garantindo a comparação correta
+  hoje.setHours(0, 0, 0, 0);
 
-  // Garantir que a data de início não seja menor que hoje
   if (date < hoje) {
     date = hoje;
   }
@@ -182,12 +183,11 @@ function generateNextDays(data_hora) {
   let start = isLargeScreen.value ? -3 : -1;
   let end = isLargeScreen.value ? 4 : 2;
 
-  // Ajusta start para não ir antes de hoje
   while (start < 0) {
     let pastDate = new Date(date);
     pastDate.setDate(date.getDate() + start);
     if (pastDate < hoje) {
-      start++; // Move o intervalo para frente
+      start++;
     } else {
       break;
     }
@@ -197,7 +197,6 @@ function generateNextDays(data_hora) {
     let futureDate = new Date(date);
     futureDate.setDate(date.getDate() + i);
 
-    // Se houver data de volta, impedir que ultrapasse
     if (filtersSelected.value.dataVolta && futureDate > filtersSelected.value.dataVolta) {
       break;
     }
@@ -219,7 +218,9 @@ function getTrechos(){
   params.append('intervalo', filtersSelected.value.intervalo || '')
   params.append('tipo_comodidade_id', filtersSelected.value.tipo_comodidade_id || '')
   params.append('quantia', filtersSelected.value.quantia || '')
+  params.append('empresa', filtersSelected.value.empresa || '')
   params.append('subdomain', window.subdomain || '')
+  waitServe.value = true
   routes["trechos-viagem"](params).then(response => {
     trechosWithTravels.value = response.data
     const date = filtersSelected.value.dataIda.getDate()
@@ -228,6 +229,7 @@ function getTrechos(){
     if(date === first || date === last){
       generateNextDays();
     }
+    waitServe.value = false
     router.push(
         {
           name: "sale",
@@ -240,6 +242,7 @@ function getTrechos(){
         }
     );
   }).catch(error => {
+    waitServe.value = false
     toast.error(error.response.data.message);
   })
 }
@@ -253,6 +256,14 @@ function getFilterItems(){
   routes["filtros"]().then(res => {
     if(!res.data.data.success){
       filtersData.value = res.data.data;
+    }
+  })
+}
+
+function getEmpresas(){
+  routes["empresas"]().then(res => {
+    if(!res.data.data.success){
+     empresas.value = res.data.data
     }
   })
 }
@@ -664,6 +675,7 @@ function loadData(){
 onMounted(() => {
   getFilterItems()
   loadData()
+  getEmpresas()
   window.addEventListener('resize', updateWidth);
 });
 
@@ -774,12 +786,28 @@ watch(()=>props.tab,()=>{
                           :value="item.id"
                       ></v-checkbox>
                     </div>
+                    <p class="tw-font-semibold tw-px-3 mt-1">Empresas</p>
+                    <div>
+                      <v-autocomplete
+                          flat
+                          menu-icon=""
+                          hide-details="auto"
+                          item-value="id"
+                          item-title="xnomr"
+                          variant="solo"
+                          placeholder="Origem"
+                          class="my-select mt-1"
+                          v-model="filtersSelected.empresa"
+                          :items="empresas"
+                      >
+
+                      </v-autocomplete>
+                    </div>
                   </v-container>
                 </v-card>
 
                 <v-card-actions>
                   <v-spacer></v-spacer>
-
                   <v-btn
                       variant="text"
                       @click="menu = false"
@@ -843,6 +871,25 @@ watch(()=>props.tab,()=>{
                     hide-details
                     :value="item.id"
                 ></v-checkbox>
+              </div>
+              <p class="tw-font-semibold tw-px-3 mt-1">Empresas</p>
+              <div>
+                <v-autocomplete
+                    flat
+                    menu-icon=""
+                    hide-details="auto"
+                    item-value="id"
+                    item-title="xnome"
+                    variant="solo"
+                    clearable
+                    v-model="filtersSelected.empresa"
+                    @update:modelValue="getTrechosWithTravels"
+                    placeholder="Empresas"
+                    class="my-select mt-1"
+                    :items="empresas"
+                >
+
+                </v-autocomplete>
               </div>
             </v-container>
           </v-card>

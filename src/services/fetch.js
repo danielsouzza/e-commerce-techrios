@@ -5,6 +5,7 @@ export const routes = {
     'banners': (params={}) => api.get('/banners',{ params: params}),
     'empresa.theme': (params={}) => api.get('/empresa/tema',{ params: params}),
     'filtros': () => api.get('/filtros'),
+    'empresas': () => api.get('/empresa/empresas-com-dominio'),
     'municipios': (params={}) => api.get('/municipios',{ params: params}),
     'destinos-procurados': (params={}) => api.get('/destinos-procurados',{ params: params}),
 

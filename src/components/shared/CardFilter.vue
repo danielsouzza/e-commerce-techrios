@@ -16,6 +16,18 @@ const form = ref(null);
 const hoje = new Date();
 hoje.setHours(0, 0, 0, 0);
 
+
+function removeAcentos(str) {
+  if (!str) return "";
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+function customFilter(item, queryText) {
+  if (!queryText) return true;
+  const textoNormalizado = removeAcentos(item).toLowerCase();
+  const queryNormalizada = removeAcentos(queryText).toLowerCase();
+  return textoNormalizado.includes(queryNormalizada);
+}
+
 async function updateFilters(){
   const {valid}  = await form.value.validate()
   if(valid){
@@ -108,7 +120,9 @@ function changeTypeTravel(){
                 placeholder="Origem"
                 class="my-select mt-1"
                 v-model="modelValue.origem"
-                :items="options.municipiosOrigem">
+                :items="options.municipiosOrigem"
+                :custom-filter="customFilter"
+            >
               <template #prepend-inner>
                 <Icon icon="solar:map-arrow-up-bold" class="mr-2"/>
               </template>
@@ -129,7 +143,9 @@ function changeTypeTravel(){
                 variant="solo"
                 placeholder="Destino"
                 class="my-select mt-1 !tw-z-[1]"
-                :items="options.municipiosDestino">
+                :items="options.municipiosDestino"
+                :custom-filter="customFilter"
+            >
               <template #prepend-inner>
                 <Icon icon="flowbite:map-pin-alt-solid" class="mr-2"/>
               </template>
