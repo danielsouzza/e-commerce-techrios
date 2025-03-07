@@ -7,13 +7,15 @@ import {routes} from "../services/fetch.js";
 import {VDateInput} from 'vuetify/labs/VDateInput'
 import axios from "axios";
 import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
-import {formatDateToServe} from "../Helper/Ultis.js";
+import {converterData, formatDateToServe} from "../Helper/Ultis.js";
 import router from "../routes/index.js";
+import {useToast} from "vue-toastification";
 
 const props = defineProps({
   tab:String,
 })
 
+const toast = useToast();
 const auth = ref(null)
 const municipios = ref([]);
 const tab = ref(props.tab)
@@ -73,7 +75,9 @@ const form = reactive({
     cmun:null,
     cep:"",
     telefone:"",
-  }
+  },
+  errors:{},
+  processing:false
 })
 
 function fillFormDataUser(){
@@ -82,7 +86,7 @@ function fillFormDataUser(){
   form.email = auth.value.email
   form.telefone = auth.value.comprador.telefone
   form.comprador.telefone = auth.value.comprador.telefone
-  form.nascimento = auth.value.comprador.nascimento ? new Date(auth.value.comprador.nascimento) : []
+  form.nascimento = auth.value.comprador.nascimento ? new Date(auth.value.comprador.nascimento+'T00:00:00') : null
   form.comprador.telefone = auth.value.comprador.telefone
   form.comprador.estrangeiro = auth.value.comprador.estrangeiro
   form.comprador.bairro = auth.value.comprador.bairro
@@ -99,24 +103,29 @@ const titlePage = computed(()=>{
 })
 
 function handleSubmit() {
-  form.comprador.xnome = form.name
-  form.comprador.telefone = form.telefone
-  form.password = formPassword.new_password
-  form.comprador.nascimento = formatDateToServe(form.nascimento)
-  routes['user.register'](form).then((response) => {
-    showSuccessNotification('Usuário atualizado com sucesso!')
+  const data = {
+    ...form,
+  }
+  data.comprador.xnome = form.name
+  data.comprador.telefone = form.telefone
+  data.comprador.nascimento = formatDateToServe(data.nascimento)
+  console.log(data)
+
+  routes['user.register'](data).then((response) => {
+    showSuccessNotification(response.data.message)
+
   }).catch((error) => {
-    console.log(error)
+    showErrorNotification(error.response.data.data.error)
   })
 }
 
 function deleteAccount() {
   routes['user.delete'](form).then((response) => {
-    showSuccessNotification('Usuário deletado com sucesso!')
+    showSuccessNotification(response.data.message)
     router.push({name: "login"})
   }).catch((error) => {
     console.log(error)
-    showErrorNotification('Erro ao deletar o usuário')
+    showErrorNotification(error.response.data.data.error)
   })
 }
 
@@ -158,6 +167,14 @@ function submitFormPassword(){
   if(validatePassword()){
     handleSubmit()
   }
+}
+function permitirDatas(data) {
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const dataSelecionada = new Date(data);
+  dataSelecionada.setHours(0, 0, 0, 0);
+
+  return dataSelecionada < hoje;
 }
 
 
@@ -237,15 +254,16 @@ onMounted(()=>{
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12"  lg="6">
-                  <div class="text-subtitle-1 text-medium-emphasis">CPF</div>
+                  <div class="text-subtitle-1 text-medium-emphasis">{{!form.comprador.estrangeiro ? 'CPF' : 'Passaporte'}}</div>
 
                   <v-text-field
                       density="compact"
                       color="secondary"
                       hide-details="auto"
+                      :error-messages="form.errors['comprador.cpf_cnpj']"
                       v-model="form.comprador.cpf_cnpj"
-                      v-mask="'###.###.###-##'"
-                      placeholder="Digite o seu cpf "
+                      v-mask="!form.comprador.estrangeiro ? '###.###.###-##' : '#################'"
+                      :placeholder="!form.comprador.estrangeiro ? 'Digite o seu cpf' : 'Digite seu passaporte' "
                       prepend-inner-icon="mdi-account"
                       variant="outlined"
                   ></v-text-field>
@@ -257,7 +275,12 @@ onMounted(()=>{
                       color="secondary"
                       hide-details="auto"
                       prepend-icon=""
+                      v-mask="'##/##/####'"
+                      hide-actions
+                      :allowed-dates="permitirDatas"
                       v-model="form.nascimento"
+                      @change="(e)=>{ form.nascimento = new Date(converterData(e.target._value) + 'T00:00:00')}"
+                      :error-messages="form.errors['comprador.nascimento']"
                       variant="outlined"
                       placeholder="Data de Nascimento">
                     <template #default>

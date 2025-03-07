@@ -5,23 +5,26 @@ import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
 import {userAuthStore} from "../store/AuthStore.js";
 import {useCartStore} from "../store/CartStore.js";
-import { useToast } from "vue-toastification";
+import {getAppBaseUrl} from "../services/api.js";
+import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
 
-const toast = useToast();
+
 const visible = ref(false);
 const tab = ref('login')
 
 const formReset = reactive({
   email: '',
-  base_url: 'http://localhost:5174/',
-  errors:{}
+  base_url:getAppBaseUrl(),
+  errors:{},
+  processing:false
 })
 
 const form2fa = reactive({
   email: '',
   verification_code:'',
   subdomain: window.subdomain || '',
-  errors:{}
+  errors:{},
+  processing:false
 
 })
 const form = reactive({
@@ -29,7 +32,8 @@ const form = reactive({
   password: "",
   remember: false,
   subdomain: window.subdomain || '',
-  errors:{}
+  errors:{},
+  processing:false
 })
 
 
@@ -68,14 +72,17 @@ const validateStepForm2fa = () => {
 function handleSubmit() {
 
   if(validateStepForm()){
+    form.processing = true
     routes['user.login'](form).then((response) => {
       if (response.data.success) {
         tab.value = 'confirm-auth-2fa'
         form2fa.email = form.email
-        toast.success(response.data.message);
+        showSuccessNotification(response.data.message);
       }
+      form.processing = false
     }).catch(error => {
-      toast.error(error.response.data.message);
+      form.processing = false
+      showErrorNotification(error.response.data.data.error);
     })
   }
 }
@@ -84,18 +91,22 @@ function handleSubmitResetPassword() {
   if(!formReset.email){
     formReset.errors['email'] = "Por favor, insira seu email."
   }else{
+    formReset.processing = true
     routes['user.reset-password'](formReset).then((response) => {
       if (response.data.success) {
-        toast.success(response.data.message);
+        showSuccessNotification(response.data.message);
       }
+      formReset.processing = false
     }).catch(error => {
-      toast.error(error.response.data.message);
+      formReset.processing = false
+      showErrorNotification(error.response.data.data.error);
     })
   }
 }
 
 function confirm2fat(){
   if(validateStepForm2fa()){
+    form2fa.processing = true
     routes['user.login.2fa'](form2fa).then((response) => {
       if(response.data.success){
         userAuthStore().setToken(response.data.data.token);
@@ -103,8 +114,10 @@ function confirm2fat(){
         useCartStore().syncCart()
         goToHomePage()
       }
+      form2fa.processing = false
     }).catch(error=>{
-      toast.error(error.response.data.message);
+      form2fa.processing = false
+      showErrorNotification(error.response.data.data.error);
     })
   }
 }
@@ -182,6 +195,8 @@ function goToHomePage(){
                 class="mb-8"
                 color="secondary"
                 size="large"
+                :loading="form.processing"
+                :disabled="form.processing"
                 rounded
                 type="submit"
                 variant="outlined"
@@ -230,6 +245,8 @@ function goToHomePage(){
               size="large"
               width="100%"
               rounded
+              :loading="form2fa.processing"
+              :disabled="form2fa.processing"
               text="Confirmar"
               type="submit"
               variant="outlined"
@@ -237,8 +254,9 @@ function goToHomePage(){
           ></v-btn>
 
           <div class="text-caption">
-            Não recebeu o código? <a class="text-decoration-underline" href="#" @click.prevent="form2fa.verification_code = ''">Reenviar</a>
+            Não recebeu o código? <a class="text-decoration-underline" @click="handleSubmit" @click.prevent="form2fa.verification_code = ''">Reenviar</a>
           </div>
+
         </v-card>
       </v-tabs-window-item>
       <v-tabs-window-item value="reset-password">
@@ -281,14 +299,19 @@ function goToHomePage(){
               size="large"
               width="100%"
               rounded
+              :loading="formReset.processing"
+              :disabled="formReset.processing"
               text="Confirmar"
               type="submit"
               variant="outlined"
               block
           ></v-btn>
 
-          <div class="text-caption">
-            Não recebeu o código? <a class="text-decoration-underline" href="#" @click.prevent="">Reenviar</a>
+<!--          <div class="text-caption">-->
+<!--            Não recebeu o link? <a class="text-decoration-underline" @click="handleSubmitResetPassword" href="#" @click.prevent="">Reenviar</a>-->
+<!--          </div>-->
+          <div class="text-caption mt-2">
+            <a class="text-decoration-underline" @click="tab = 'login'" href="#" @click.prevent=""> Voltar ao login?</a>
           </div>
         </v-card>
       </v-tabs-window-item>

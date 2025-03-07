@@ -7,14 +7,12 @@ import {userAuthStore} from "../store/AuthStore.js";
 import {Icon} from "@iconify/vue";
 
 
-
-
 </script>
 
 <template>
 
   <div class="relative  " >
-    <MostPopularDestinations  :class="userAuthStore().isAuthenticated() ? '!tw-pb-[10px]' : '!tw-pb-[80px]'"  />
+    <MostPopularDestinations :class="userAuthStore().isAuthenticated() ? '!tw-pb-[10px]' : '!tw-pb-[80px]'"  />
 
     <div class="tw-flex tw-flex-col  tw-w-full tw-bg-primary tw-px-3 ">
       <CardNewLetters v-if="!userAuthStore().isAuthenticated()" class="maxWidth  tw-top-[-100px]  !tw-mb-[-100px] lg:tw-top-[-50px] lg:!tw-mb-[-20px] " />

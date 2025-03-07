@@ -3,16 +3,13 @@ import Footer from "./Footer.vue";
 import Header from "./Header.vue";
 import {onMounted, ref} from "vue";
 import {emitter, SHOW_NOTIFICATION} from "../event-bus.js";
+import DialogNotification from "../components/shared/DialogNotification.vue";
 
 const show = ref(false)
 const type = ref('success')
 const message = ref('')
 
-function close() {
-  show.value = false;
-  type.value = '';
-  message.value = ''
-}
+
 
 onMounted(() => {
   emitter.on(SHOW_NOTIFICATION, ({type: t, message: msg}) => {
@@ -30,18 +27,13 @@ onMounted(() => {
     <Header class="mb-auto border-t-lg  !tw-border-secondary" />
     <slot/>
     <Footer class="mt-auto"/>
-    <v-snackbar
-        z-index="2410"
-        :timeout="4000"
-        :color="type === 'success' ? 'green' : 'red'"
+    <DialogNotification
         v-model="show"
-        @update:modelValue="close"
-        multi-line
+        :message="message"
+        :type="type"
+        :timeout="4000"
     >
-            <span class="tw-text-white tw-text-xl">
-                {{message}}
-            </span>
-    </v-snackbar>
+    </DialogNotification>
   </div>
 
 </template>

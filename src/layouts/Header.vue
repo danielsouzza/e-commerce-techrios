@@ -24,7 +24,7 @@ function goToSalePage(){
 }
 
 function goToLoginPage(){
-  router.push({name: "login"})
+  router.replace({name: "login"})
 }
 
 
@@ -38,6 +38,20 @@ function logout() {
   })
 }
 
+function getFirstAndLastName() {
+  if(authStore.user?.name){
+    const nameParts = authStore.user?.name.split(/\s+/); // Remove espaços extras e divide pelo espaço
+
+    if (nameParts.length === 1) {
+      return  nameParts[0];
+    }
+
+    return nameParts[0] + ' '+ nameParts[nameParts.length - 1]
+  }
+
+  return 'MINHA CONTA'
+
+}
 
 
 watch(()=>showCart.value, ()=>{
@@ -85,7 +99,7 @@ onMounted(()=>{
                 >
                   <template v-slot:activator="{ props }">
                     <v-btn  v-bind="props" variant="outlined" color="secondary" rounded class=" d-lg-flex d-none !tw-font-extrabold ">
-                      <Icon icon="mdi:account-circle-outline" width="25"  class="mr-2"/> {{authStore.user?.name ?? 'MINHA CONTA'}}
+                      <Icon icon="mdi:account-circle-outline" width="25"  class="mr-2"/> {{getFirstAndLastName()}}
                     </v-btn>
                   </template>
 

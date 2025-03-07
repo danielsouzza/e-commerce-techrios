@@ -269,7 +269,7 @@ function postReserva(room){
     }
   }).catch(error => {
 
-    toast.error(error.response.data.message);
+    showErrorNotification(error.response.data.data.error);
     if(step.value === 1){
       roomsSelected.value.dataIda.selectedsById.splice(roomsSelected.value.dataIda.selectedsById.indexOf(room), 1)
     }else {
@@ -301,7 +301,7 @@ function deleteReserva(room){
     }else {
       roomsSelected.value.dataVolta.selectedsById.splice(roomsSelected.value.dataVolta.selectedsById.indexOf(room), 1)
     }
-    toast.error(error.response.data.message);
+    showErrorNotification(error.response.data.data.error);
   })
 }
 
@@ -360,10 +360,10 @@ async  function initSale(){
           rooms: data.data.comodos,
           formas_pagamento: data.formas_pagamento,
         }
-        toast.success(response.data.message);
+        showSuccessNotification(response.data.message);
       }
     }).catch(error => {
-      toast.error(error.response.data.message);
+      showErrorNotification(error.response.data.data.error);
     })
 
   }

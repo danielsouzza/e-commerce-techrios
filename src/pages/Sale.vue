@@ -243,7 +243,7 @@ function getTrechos(){
     );
   }).catch(error => {
     waitServe.value = false
-    toast.error(error.response.data.message);
+    showErrorNotification(error.response.data.data.error);
   })
 }
 
@@ -261,7 +261,7 @@ function getFilterItems(){
 }
 
 function getEmpresas(){
-  routes["empresas"]().then(res => {
+  routes["empresas"]({flag:2}).then(res => {
     if(!res.data.data.success){
      empresas.value = res.data.data
     }
@@ -431,7 +431,7 @@ function submitOrder(){
     waitServe.value = false
   }).catch(error=>{
       waitServe.value = false
-      toast.error(error.response.data.message);
+      showErrorNotification(error.response.data.data.error);
   })
 }
 
@@ -472,7 +472,7 @@ function addCart(){
 
   }).catch(error=>{
     waitServe.value = false
-    toast.error(error.response.data.message);
+    showErrorNotification(error.response.data.data.error);
   })
 }
 
@@ -516,7 +516,7 @@ function submitPaymentCredit(){
     }
     waitServe.value = false
   }).catch(error=>{
-    toast.error(error.response.data.message);
+    showErrorNotification(error.response.data.data.error);
     stepSale.value = 3
     waitServe.value = false
     console.log(error)
@@ -536,7 +536,7 @@ function submitPaymentPix(){
       checkStatusPayment()
     }
   }).catch(error=>{
-    toast.error(error.response.data.message);
+    showErrorNotification(error.response.data.data.error);
     waitServe.value = false
     whatPayment.value = false
   })
@@ -658,7 +658,7 @@ function getTicketPdf(){
           );
         }
       }).catch(error => {
-        toast.error(error.response.data.message);
+        showErrorNotification(error.response.data.data.error);
       })
     })
   })

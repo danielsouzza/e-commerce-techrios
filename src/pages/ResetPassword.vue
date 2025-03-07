@@ -5,6 +5,7 @@ import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
 import { useToast } from "vue-toastification";
 import {useRoute} from "vue-router";
+import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
 
 const toast = useToast();
 const tab = ref('reset-password')
@@ -15,14 +16,33 @@ const form = reactive({
   email: "",
   token:route.query.token,
   password: "",
-  confirmPassword:""
+  confirmPassword:"",
+  errors:{},
+  processing:false
 })
 
 const validatePassword = () => {
-  if (!form.password || !form.confirmPassword) {
+  if(!form.password){
+    form.errors.password = 'Por favor, insira uma senha'
     return false;
   }
+
   const isValid = passwordRules.value.every(rule => rule.rule);
+  if(!isValid){
+    form.errors.password = 'A senha deve atender todos os critérios'
+  }
+
+  if (!form.confirmPassword) {
+    form.errors.confirmPassword = 'Por favor, confirme sua senha'
+    return false;
+  }
+
+  if (form.confirmPassword != form.password) {
+    form.errors.confirmPassword = 'As senhas devem ser iguais'
+    return false;
+  }
+
+
   return isValid && form.password === form.confirmPassword;
 };
 
@@ -38,13 +58,17 @@ const passwordRules = computed(() => {
 function handleSubmit() {
 
   if(validatePassword()){
+    form.processing = true
     routes['user.reset-password-confirm'](form).then((response) => {
       if (response.data.success) {
-        toast.success(response.data.message);
+
+        showSuccessNotification(response.data.message);
         goLoginPage()
       }
+      form.processing = false
     }).catch(error => {
-      toast.error(error.response.data.message);
+      form.processing = false
+      showErrorNotification(error.response.data.data.error);
     })
   }
 }
@@ -91,6 +115,7 @@ function goLoginPage(){
                     color="secondary"
                     hide-details="auto"
                     v-model="form.password"
+                    :error-messages="form.errors.password"
                     placeholder="Digite sua nova senha"
                     prepend-inner-icon="mdi-lock-outline"
                     variant="outlined"
@@ -116,6 +141,7 @@ function goLoginPage(){
                     color="secondary"
                     hide-details="auto"
                     v-model="form.confirmPassword"
+                    :error-messages="form.errors.confirmPassword"
                     placeholder="Digite novamente sua nova senha"
                     prepend-inner-icon="mdi-lock-outline"
                     variant="outlined"
@@ -129,6 +155,8 @@ function goLoginPage(){
                 color="secondary"
                 size="large"
                 rounded
+                :loading="form.processing"
+                :disabled="form.processing"
                 type="submit"
                 variant="outlined"
                 block

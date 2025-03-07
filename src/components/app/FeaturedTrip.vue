@@ -80,7 +80,7 @@ function getTrechosWithTravels() {
   routes["trechos-viagem"](params).then(response => {
     trechosWithTravels.value = response.data
   }).catch(error => {
-    toast.error(error.response.data.message);
+    showErrorNotification(error.response.data.data.error);
   })
 }
 
