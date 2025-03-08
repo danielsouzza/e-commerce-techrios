@@ -142,10 +142,23 @@ function validarEmail(email) {
 }
 
 
+function isValidDate(dateString) {
+    const date = new Date(converterData(dateString) + 'T00:00:00')
+    return !isNaN(date.getTime())
+}
+
+function permitirDatasNascimento(data) {
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const dataSelecionada = new Date(data);
+    dataSelecionada.setHours(0, 0, 0, 0);
+
+    return dataSelecionada < hoje;
+}
 
 export {formatCurrency, formatMoney,formatDateToServe,
     getMonicipioLabel, formatDate, formatarTempoViagem,
     gerarStringTiposComodos,municipioLabel,formatarHora,
     calcularValorParcelado,calcularValorPix,calcularValor,
-    converterData,validarCPF,validarEmail
+    converterData,validarCPF,validarEmail,isValidDate,permitirDatasNascimento
 };

@@ -4,6 +4,7 @@ import {routes} from "../../services/fetch.js";
 import {reactive} from "vue";
 import {useToast} from "vue-toastification";
 import {validarEmail} from "../../Helper/Ultis.js";
+import {showErrorNotification, showSuccessNotification} from "../../event-bus.js";
 
 const form = reactive({
   email:'',
@@ -11,7 +12,6 @@ const form = reactive({
   processing:null,
   errors:{}
 })
-const toast = useToast();
 
 const validateForm = () => {
   form.errors = {};
@@ -43,15 +43,13 @@ const validateForm = () => {
   if(form.email && !validarEmail(form.email)){
     form.errors.emial = 'Email invalido!'
   }
-
-
   return Object.keys(form.errors).length === 0;
 };
 
 function submit(){
   if(validateForm()){
-    routes['newletters'](form).then((resp) => {
-      toast.success(resp.data.message)
+    routes['newletters'](form).then((response) => {
+      showSuccessNotification(response.data.message);
     }).catch((error) => {
       showErrorNotification(error.response.data.data.error)
     })

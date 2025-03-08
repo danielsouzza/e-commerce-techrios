@@ -1,7 +1,7 @@
 <script setup>
 
 import {Icon} from "@iconify/vue";
-import {computed, onMounted, reactive, ref, watch} from "vue";
+import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {routes} from "../services/fetch.js";
 import BaseCard from "../components/shared/BaseCard.vue";
@@ -14,7 +14,7 @@ import {
   formatDate, formatDateToServe,
   formatMoney,
   gerarStringTiposComodos,
-  getMonicipioLabel
+  getMonicipioLabel, isValidDate, permitirDatasNascimento, validarCPF, validarEmail
 } from "../Helper/Ultis.js";
 import PassegerForm from "../components/app/PassegerForm.vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
@@ -27,6 +27,7 @@ import CartItem from "../components/app/Cart/CartItem.vue";
 import {userAuthStore} from "../store/AuthStore.js";
 import { useToast } from "vue-toastification";
 import {getApiBaseUrl} from "../services/api.js";
+import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
 
 
 const props = defineProps({
@@ -48,6 +49,7 @@ const empresas = ref([])
 const orderConfirmation = ref(null)
 const trechosWithTravels = ref([])
 const waitServe = ref(false)
+const formRef = ref()
 const formPayment = reactive({
   order_id:null,
   payment_method_id:6,
@@ -86,6 +88,8 @@ const formSale = reactive({
   },
   dataComodos:[],
   dataVolta:null,
+  errors:{},
+  processing:false
 })
 const tiposDocComprador = [
   { id:5, nome: 'CPF', tamanho: 0, mask: '###.###.###-##' },
@@ -207,8 +211,6 @@ function generateNextDays(data_hora) {
   nextDays.value = futureDates;
 }
 
-
-
 function getTrechos(){
   const params = new URLSearchParams()
   params.append('origem', filtersSelected.value.origem || '')
@@ -286,96 +288,59 @@ function prevStep(){
   }
 }
 
-function saveTicket(items){
-  const totalIda =  calculateTotal(items.dataIda)
+function saveTicket(items) {
+  const totalIda = calculateTotal(items.dataIda);
 
-  formSale.total_passagems = totalIda.passagens
-  formSale.total_taxas = totalIda.taxa
+  Object.assign(formSale, {
+    total_passagems: totalIda.passagens,
+    total_taxas: totalIda.taxa,
+    trecho: items.dataIda.trecho,
+    viagem: items.dataIda.trecho.id_viagem,
+    data_hora: items.dataIda.trecho.data_embarque,
+    dataComodos: populateComodos(items.dataIda.rooms, items.dataIda.trecho)
+  });
 
-  if(filtersSelected.value.type == "ida-e-volta"){
-    const totalVolta =  calculateTotal(items.dataVolta)
-    formSale.total_passagems += totalVolta.passagens
-    formSale.total_taxas += totalVolta.taxa
+  if (filtersSelected.value.type === "ida-e-volta") {
+    const totalVolta = calculateTotal(items.dataVolta);
+    formSale.total_passagems += totalVolta.passagens;
+    formSale.total_taxas += totalVolta.taxa;
+
     formSale.dataVolta = {
-      trecho: null,
-      viagem: null,
-      dataComodos: []
+      trecho: items.dataVolta.trecho,
+      viagem: items.dataVolta.trecho.id_viagem,
+      dataComodos: populateComodos(items.dataVolta.rooms, items.dataVolta.trecho)
     };
-    formSale.dataVolta.trecho = items.dataVolta.trecho;
-    formSale.dataVolta.viagem = items.dataVolta.trecho.id_viagem;
-    items.dataVolta.rooms.forEach(item => {
-      formSale.dataVolta.dataComodos.push({
-        tipo_doc:null,
-        nome:'',
-        document:'',
-        nascimento:null,
-        desconto_id:formSale.dataVolta.trecho.desconto?.id ?? null,
-        comodo:item.id,
-        tipo_comodidade:item.tipo_comodidade,
-        embarque:parseInt(formatMoney(items.dataVolta.trecho.taxa_de_embarque)),
-        valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.dataVolta.trecho.valor)),
-        comodo_relacionado:null,
-        comodos_filhos:item.quantidade,
-        telefone:''
-      })
-      console.log(item)
-      for (let i = 1; i < item.quantidade; i++){
-        formSale.dataVolta.dataComodos.push({
-          tipo_doc:null,
-          nome:'',
-          document:'',
-          nascimento:null,
-          desconto_id:formSale.dataVolta.trecho.desconto?.id ?? null,
-          comodo:item.id,
-          tipo_comodidade:item.tipo_comodidade,
-          embarque:parseInt(formatMoney(items.dataVolta.trecho.taxa_de_embarque)),
-          valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.dataVolta.trecho.valor)),
-          comodo_relacionado:item.id,
-          comodos_filhos:1,
-          telefone:''
-        })
-      }
-    })
   }
 
-  formSale.trecho = items.dataIda.trecho;
-  formSale.viagem = items.dataIda.trecho.id_viagem;
-  formSale.data_hora = items.dataIda.trecho.data_embarque;
-  items.dataIda.rooms.forEach(item => {
-    formSale.dataComodos.push({
-      tipo_doc:null,
-      nome:'',
-      document:'',
-      nascimento:null,
-      comodo:item.id,
-      desconto_id:formSale.trecho.desconto?.id??null,
-      tipo_comodidade:item.tipo_comodidade,
-      embarque:parseInt(formatMoney(items.dataIda.trecho.taxa_de_embarque)),
-      valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.dataIda.trecho.valor)),
-      comodo_relacionado:null,
-      comodos_filhos:item.quantidade,
-      telefone:''
-    })
+  nextStep();
+}
 
-    for (let i = 1; i < item.quantidade; i++){
-      formSale.dataComodos.push({
-        tipo_doc:null,
-        nome:'',
-        document:'',
-        nascimento:null,
-        desconto_id:formSale.dataIda.trecho.desconto?.id ?? null,
-        comodo:item.id,
-        tipo_comodidade:item.tipo_comodidade,
-        embarque:parseInt(formatMoney(items.dataIda.trecho.taxa_de_embarque)),
-        valor:item.comodo_trechos?.valor ? item.comodo_trechos?.valor : parseFloat(formatMoney(items.dataIda.trecho.valor)),
-        comodo_relacionado:item.id,
-        comodos_filhos:1,
-        telefone:''
-      })
+function populateComodos(rooms, trecho) {
+  const comodos = [];
+
+  rooms.forEach(item => {
+    const baseComodo = {
+      tipo_doc: null,
+      nome: '',
+      document: '',
+      nascimento: null,
+      desconto_id: trecho.desconto?.id ?? null,
+      comodo: item.id,
+      tipo_comodidade: item.tipo_comodidade,
+      embarque: parseInt(formatMoney(trecho.taxa_de_embarque)),
+      valor: item.comodo_trechos?.valor ?? parseFloat(formatMoney(trecho.valor)),
+      telefone: '',
+      errors: {}
+    };
+
+    comodos.push({ ...baseComodo, comodo_relacionado: null, comodos_filhos: item.quantidade });
+
+    for (let i = 1; i < item.quantidade; i++) {
+      comodos.push({ ...baseComodo, comodo_relacionado: item.id, comodos_filhos: 1 });
     }
+  });
 
-  })
-  nextStep()
+  return comodos;
 }
 
 function calculateTotal(items){
@@ -393,6 +358,45 @@ function calculateTotal(items){
     passagens: valor,
     taxa:taxa,
   };
+}
+
+const validateForm = () => {
+  let hasError = false;
+  const validateField = (field, value, errorMessage,form) => {
+    if (value === null || value === undefined || value === '') {
+      form.errors[field] = errorMessage;
+      hasError = true;
+    } else {
+      delete form.errors[field];
+    }
+  };
+
+  formSale.dataComodos.forEach(it=>{
+    validateField('nome', it.nome, 'Por favor, insira seu nome e sobrenome.',it);
+    validateField('tipo_doc', it.tipo_doc, 'Por favor, escolha um tipo de documento.',it);
+    validateField('document', it.document, 'Por favor, insira número do documento.',it);
+    validateField('nascimento', it.nascimento, 'Por favor, insira uma data de nascimento.',it);
+    validateField('telefone', it.telefone, 'Por favor, insira um número de telefone.',it);
+  })
+
+  validateField('contato.nome', formSale.contato.nome, 'Por favor, insira seu nome e sobrenome.',formSale);
+  validateField('contato.email', formSale.contato.nome, 'Por favor, insira seu email.',formSale);
+  validateField('contato.tipo_doc', formSale.contato.tipo_doc, 'Por favor, escolha um tipo de documento.',formSale);
+  validateField('contato.document', formSale.contato.document, 'Por favor, insira número do documento.',formSale);
+  validateField('contato.nascimento', formSale.contato.nascimento, 'Por favor, insira uma data de nascimento.',formSale);
+  validateField('contato.telefone', formSale.contato.telefone, 'Por favor, insira um número de telefone.',formSale);
+
+  return !hasError
+};
+
+async function focusErro() {
+  nextTick(async () => {
+    const errors = await formRef.value.validate()
+    const erroredField = formRef.value?.$el.querySelector(".v-input.v-input--error input");
+    if (erroredField) {
+      erroredField.focus();
+    }
+  });
 }
 
 function submitOrder(){
@@ -418,21 +422,27 @@ function submitOrder(){
     params.dataVolta = {...formSale.dataVolta,trecho:formSale.dataVolta.trecho.id}
   }
 
-  waitServe.value = true
-  routes["order"](params).then(res => {
-    if(res.data.success){
-      orderResponse.value = res.data.data;
-      cartStore.addItem(orderResponse.value)
-      cartStore.loadCart()
-      formPayment.order_id = orderResponse.value.id;
-      toast.success(res.data.message);
-      nextStep()
-    }
-    waitServe.value = false
-  }).catch(error=>{
+  focusErro()
+  formSale.processing = true
+  if(validateForm()){
+    waitServe.value = true
+    routes["order"](params).then(res => {
+      if(res.data.success){
+        orderResponse.value = res.data.data;
+        cartStore.addItem(orderResponse.value)
+        cartStore.loadCart()
+        formPayment.order_id = orderResponse.value.id;
+        toast.success(res.data.message);
+        nextStep()
+      }
       waitServe.value = false
+      formSale.processing = false
+    }).catch(error=>{
+      waitServe.value = false
+      formSale.processing = false
       showErrorNotification(error.response.data.data.error);
-  })
+    })
+  }
 }
 
 function addCart(){
@@ -457,23 +467,28 @@ function addCart(){
     })
     params.dataVolta = {...formSale.dataVolta,trecho:formSale.dataVolta.trecho.id}
   }
-  waitServe.value = true
-  routes["order"](params).then(res => {
-    if(res.data.success){
-      orderResponse.value = res.data.data;
-      cartStore.addItem(orderResponse.value)
-      cartStore.loadCart()
-      formPayment.order_id = orderResponse.value.id;
-      toast.success(res.data.message);
-      resetFormSale()
-      prevStep()
-    }
-    waitServe.value = false
-
-  }).catch(error=>{
-    waitServe.value = false
-    showErrorNotification(error.response.data.data.error);
-  })
+  focusErro()
+  if(validateForm()){
+    waitServe.value = true
+    formSale.processing = true
+    routes["order"](params).then(res => {
+      if(res.data.success){
+        orderResponse.value = res.data.data;
+        cartStore.addItem(orderResponse.value)
+        cartStore.loadCart()
+        formPayment.order_id = orderResponse.value.id;
+        toast.success(res.data.message);
+        resetFormSale()
+        prevStep()
+      }
+      waitServe.value = false
+      formSale.processing = false
+    }).catch(error=>{
+      formSale.processing = false
+      waitServe.value = false
+      showErrorNotification(error.response.data.data.error);
+    })
+  }
 }
 
 function checkStatusPayment(){
@@ -511,15 +526,14 @@ function submitPaymentCredit(){
       orderConfirmation.value = res.data.data;
       stepSale.value = 5
       useCartStore().clearCartLocal()
-      toast.success(res.data.message);
+      showSuccessNotification(res.data.message);
 
     }
     waitServe.value = false
   }).catch(error=>{
+    waitServe.value = false
     showErrorNotification(error.response.data.data.error);
     stepSale.value = 3
-    waitServe.value = false
-    console.log(error)
   })
 }
 
@@ -530,15 +544,15 @@ function submitPaymentPix(){
       paymentPending.value = res.data.data;
       waitServe.value = false
       whatPayment.value = true
-      toast.success(res.data.message);
+      showSuccessNotification(res.data.message);
       nextStep()
       iniciarTemporizador()
       checkStatusPayment()
     }
   }).catch(error=>{
-    showErrorNotification(error.response.data.data.error);
     waitServe.value = false
     whatPayment.value = false
+    showErrorNotification(error.response.data.data.error);
   })
 }
 
@@ -1017,131 +1031,142 @@ watch(()=>props.tab,()=>{
             </BaseCard>
           </v-col>
           <v-col cols="12" md="9">
-            <BaseCard title="Dados de quem está comprando" color="secondary">
-              <v-row class="tw-px-2">
-                <v-col cols="12" md="6">
-                  <v-text-field
-                      variant="plain"
-                      v-model="formSale.contato.nome"
-                      label="Nome do comprador"
-                      hide-details="auto"
-                  >
-                    <template v-slot:prepend-inner>
-                      <Icon icon="stash:person-light" width="26"/>
-                    </template>
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-text-field
-                      variant="plain"
-                      v-model="formSale.contato.email"
-                      label="E-mail"
-                      hide-details="auto"
-                  >
-                    <template v-slot:prepend-inner>
-                      <Icon icon="mdi-light:email" width="26"/>
-                    </template>
-                  </v-text-field>
-                </v-col>
+            <v-form ref="formRef">
+              <BaseCard title="Dados de quem está comprando" color="secondary">
+                <v-row class="tw-px-2">
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                        variant="plain"
+                        v-model="formSale.contato.nome"
+                        :error-messages="formSale.errors['contato.nome']"
+                        label="Nome do comprador"
+                        hide-details="auto"
+                    >
+                      <template v-slot:prepend-inner>
+                        <Icon icon="stash:person-light" width="26"/>
+                      </template>
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                        variant="plain"
+                        v-model="formSale.contato.email"
+                        :error-messages="formSale.errors['contato.email']"
+                        label="E-mail"
+                        hide-details="auto"
+                    >
+                      <template v-slot:prepend-inner>
+                        <Icon icon="mdi-light:email" width="26"/>
+                      </template>
+                    </v-text-field>
+                  </v-col>
 
-                <v-col cols="12" md="6">
-                  <v-text-field
-                      variant="plain"
-                      v-model="formSale.contato.telefone"
-                      label="Telefone"
-                      v-mask="'(##) #####-####'"
-                      hide-details="auto"
-                  >
-                    <template v-slot:prepend-inner>
-                      <Icon icon="mdi-light:phone" width="26"/>
-                    </template>
-                  </v-text-field>
-                </v-col>
+                  <v-col cols="12" md="6">
+                    <v-text-field
+                        variant="plain"
+                        v-model="formSale.contato.telefone"
+                        :error-messages="formSale.errors['contato.telefone']"
+                        label="Telefone"
+                        v-mask="'(##) #####-####'"
+                        hide-details="auto"
+                    >
+                      <template v-slot:prepend-inner>
+                        <Icon icon="mdi-light:phone" width="26"/>
+                      </template>
+                    </v-text-field>
+                  </v-col>
 
 
-                <v-col cols="6" >
-                  <v-select
-                      variant="plain"
-                      label="Documento"
-                      item-title="nome"
-                      item-value="id"
-                      v-model="formSale.contato.tipo_doc"
-                      hide-details="auto"
-                      :items="tiposDocComprador"
-                  >
-                  </v-select>
-                </v-col>
+                  <v-col cols="6" >
+                    <v-select
+                        variant="plain"
+                        label="Documento"
+                        item-title="nome"
+                        item-value="id"
+                        v-model="formSale.contato.tipo_doc"
+                        :error-messages="formSale.errors['contato.tipo_doc']"
+                        hide-details="auto"
+                        :items="tiposDocComprador"
+                    >
+                    </v-select>
+                  </v-col>
 
-                <v-col cols="6"  v-if="formSale.contato.tipo_doc">
-                  <v-text-field
-                      variant="plain"
-                      v-model="formSale.contato.document"
-                      label="Nº do documento"
-                      v-mask="formSale.contato.tipo_doc ?  tiposDocComprador[formSale.contato.tipo_doc-5]?.mask : '###########'"
-                      hide-details="auto"
-                  >
-                    <template v-slot:prepend-inner>
-                      <Icon icon="material-symbols-light:id-card-outline" width="26"/>
-                    </template>
-                  </v-text-field>
-                </v-col>
-                <v-col cols="12" md="6">
-                  <v-date-input
-                      flat
-                      hide-details
-                      prepend-icon=""
-                      hide-actions
-                      v-mask="'##/##/####'"
-                      @change="(e)=>{formSale.contato.nascimento = new Date(converterData(e.target._value) + 'T00:00:00')}"
-                      v-model="formSale.contato.nascimento"
-                      variant="solo"
-                      class="my-select"
-                      placeholder="Data de Nascimento">
-                    <template #default>
-                      <Icon icon="uis:calendar" class="mr-2"/>
-                    </template>
-                  </v-date-input>
-                </v-col>
-              </v-row>
-              <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
-              <v-checkbox
-                  @update:modelValue="(arg)=>{if(arg) addCompradorComoPassageiro(); else removerCompradorComoPassageiro()}"
-                  hide-details="auto"
-                  class="!tw-text-p tw-mt-3 !tw-text-sx"
-                  label="Adicionar como passageiro"
-              >
-              </v-checkbox>
-            </BaseCard>
-            <BaseCard title="Dados de quem irá viajar (IDA)" color="secondary" class="mt-3">
-              <PassegerForm v-for="(item,index) in formSale.dataComodos" :form="item" :key="index" :index="index"/>
-              <v-checkbox
-                  v-if="filtersSelected.type == 'ida-e-volta'"
-                  @update:modelValue="(arg)=>{if(arg) adicionarDadosIdaNaVolta(); else removerDadosIdaDaVolta()}"
-                  hide-details="auto"
-                  class="!tw-text-p tw-mt-3 !tw-text-sx"
-                  label="Adcionar dados da ida na volta"
-              >
-              </v-checkbox>
-            </BaseCard>
-            <BaseCard v-if="filtersSelected.type == 'ida-e-volta'" title="Dados de quem irá viajar (VOLTA)" color="secondary" class="mt-3">
-              <PassegerForm v-for="(item,index) in formSale.dataVolta?.dataComodos" :form="item" :key="index" :index="index"/>
-            </BaseCard>
-            <v-col cols="12">
-              <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
-                <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 tw-text-white"  /><span class=" !tw-text-xs tw-text-white ml-1">Salvar e continuar comprando</span>
-              </v-btn>
-              <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
-            </v-col>
-            <v-col cols="12"  class="tw-flex tw-justify-between mt-3">
-              <v-btn variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="prevStep">
-                <Icon icon="mdi:navigate-before" width="20"  class="mr-1 tw-text-white"  /> <span class=" !tw-text-xs tw-text-white mr-1"  >Voltar</span>
-              </v-btn>
-              <div class="tw-flex tw-justify-end tw-gap-3">
-                <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="submitOrder">
-                  <span class=" !tw-text-xs tw-text-white ml-1"  >Avançar</span><Icon icon="mdi:navigate-next" width="20"  class="ml-1 tw-text-white"  />
+                  <v-col cols="6"  v-if="formSale.contato.tipo_doc">
+                    <v-text-field
+                        variant="plain"
+                        v-model="formSale.contato.document"
+                        :error-messages="formSale.errors['contato.document']"
+
+                        label="Nº do documento"
+                        v-mask="formSale.contato.tipo_doc ?  tiposDocComprador[formSale.contato.tipo_doc-5]?.mask : '###########'"
+                        hide-details="auto"
+                    >
+                      <template v-slot:prepend-inner>
+                        <Icon icon="material-symbols-light:id-card-outline" width="26"/>
+                      </template>
+                    </v-text-field>
+                  </v-col>
+                  <v-col cols="12" md="6">
+                    <v-date-input
+                        flat
+                        hide-detail="auto"
+                        prepend-icon=""
+                        hide-actions
+                        v-mask="'##/##/####'"
+                        :allowed-dates="permitirDatasNascimento"
+                        @change="(e)=>{formSale.contato.nascimento =  isValidDate(e.target._value)? new Date(converterData(e.target._value) + 'T00:00:00') : null}"
+                        v-model="formSale.contato.nascimento"
+                        :error-messages="formSale.errors['contato.nascimento']"
+                        variant="solo"
+                        class="my-select"
+                        placeholder="Data de Nascimento">
+                      <template #default>
+                        <Icon icon="uis:calendar" class="mr-2"/>
+                      </template>
+                    </v-date-input>
+                  </v-col>
+                </v-row>
+                <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
+                <v-checkbox
+                    @update:modelValue="(arg)=>{if(arg) addCompradorComoPassageiro(); else removerCompradorComoPassageiro()}"
+                    hide-details="auto"
+                    class="!tw-text-p tw-mt-3 !tw-text-sx"
+                    label="Adicionar como passageiro"
+                >
+                </v-checkbox>
+              </BaseCard>
+              <BaseCard title="Dados de quem irá viajar (IDA)" color="secondary" class="mt-3">
+                <PassegerForm v-for="(item,index) in formSale.dataComodos" :form="item" :key="index" :index="index"/>
+                <v-checkbox
+                    v-if="filtersSelected.type == 'ida-e-volta'"
+                    @update:modelValue="(arg)=>{if(arg) adicionarDadosIdaNaVolta(); else removerDadosIdaDaVolta()}"
+                    hide-details="auto"
+                    class="!tw-text-p tw-mt-3 !tw-text-sx"
+                    label="Adcionar dados da ida na volta"
+                >
+                </v-checkbox>
+              </BaseCard>
+              <BaseCard v-if="filtersSelected.type == 'ida-e-volta'" title="Dados de quem irá viajar (VOLTA)" color="secondary" class="mt-3">
+                <PassegerForm v-for="(item,index) in formSale.dataVolta?.dataComodos" :form="item" :key="index" :index="index"/>
+              </BaseCard>
+              <v-col cols="12">
+                <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
+                  <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 tw-text-white"  /><span class=" !tw-text-xs tw-text-white ml-1">Salvar e continuar comprando</span>
                 </v-btn>
-              </div>
-            </v-col>
+                <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
+              </v-col>
+              <v-col cols="12"  class="tw-flex tw-justify-between mt-3">
+                <v-btn variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="prevStep">
+                  <Icon icon="mdi:navigate-before" width="20"  class="mr-1 tw-text-white"  /> <span class=" !tw-text-xs tw-text-white mr-1"  >Voltar</span>
+                </v-btn>
+                <div class="tw-flex tw-justify-end tw-gap-3">
+                  <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="submitOrder">
+                    <span class=" !tw-text-xs tw-text-white ml-1"  >Avançar</span><Icon icon="mdi:navigate-next" width="20"  class="ml-1 tw-text-white"  />
+                  </v-btn>
+                </div>
+              </v-col>
+            </v-form>
+
           </v-col>
         </v-row>
       </v-tabs-window-item>
@@ -1367,7 +1392,7 @@ watch(()=>props.tab,()=>{
               <div class="tw-flex tw-justify-center tw-flex-col tw-items-center tw-text-center">
                 <Icon icon="icon-park-outline:ticket"  class="mr-2 tw-text-secondary !tw-text-[80px]"  />
                 <p class="tw-text-xl tw-text-secondary tw-font-bold my-2">Compra realizada com sucesso!</p>
-                <p> Olá, {{orderConfirmation.contato.nome}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
+                <p> Olá, {{authStore.user.name}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
                 <p><strong> {{orderConfirmation.description}}</strong></p>
                 <p><strong> {{formatCurrency(orderConfirmation.amount)}}</strong></p>
                 <p><strong> {{orderConfirmation.installments}}x  {{orderConfirmation.payment_method}}</strong></p>

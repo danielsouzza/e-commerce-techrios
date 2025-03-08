@@ -17,6 +17,7 @@ import {
 } from "../../Helper/Ultis.js";
 import {getApiBaseUrl} from "../../services/api.js";
 import { useToast } from "vue-toastification";
+import {showErrorNotification, showSuccessNotification} from "../../event-bus.js";
 
 
 const toast = useToast();
@@ -371,6 +372,7 @@ async  function initSale(){
   emit('continue', dataSale);
 }
 
+
 function onClickBtnSelect(){
   openRooms.value = !openRooms.value;
   if(openRooms.value){
@@ -445,7 +447,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <BaseCard :active="openRooms" @click="onClickBtnSelect" class="tw-cursor-pointer">
+  <BaseCard :active="openRooms" class="tw-cursor-pointer">
 
     <div class="tw-flex tw-flex-col " >
       <div v-if="dataVolta" class="tw-flex  tw-text-primary tw-px-2 tw-justify-between tw-rounded-lg tw-font-bold lg:tw-mr-5">

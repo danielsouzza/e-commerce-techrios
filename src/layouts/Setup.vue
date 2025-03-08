@@ -4,6 +4,7 @@ import Header from "./Header.vue";
 import {onMounted, ref} from "vue";
 import {emitter, SHOW_NOTIFICATION} from "../event-bus.js";
 import DialogNotification from "../components/shared/DialogNotification.vue";
+import {useLoadingStore} from "../store/states.js";
 
 const show = ref(false)
 const type = ref('success')
@@ -27,6 +28,19 @@ onMounted(() => {
     <Header class="mb-auto border-t-lg  !tw-border-secondary" />
     <slot/>
     <Footer class="mt-auto"/>
+    <v-overlay
+        :model-value="useLoadingStore().isLoading"
+        persistent
+        opacity="50%"
+        class="align-center justify-center"
+    >
+      <v-progress-circular
+          width="2"
+          color="white"
+          size="90"
+          indeterminate
+      ></v-progress-circular>
+    </v-overlay>
     <DialogNotification
         v-model="show"
         :message="message"

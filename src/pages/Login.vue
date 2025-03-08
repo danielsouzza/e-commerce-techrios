@@ -253,8 +253,8 @@ function goToHomePage(){
               block
           ></v-btn>
 
-          <div class="text-caption">
-            Não recebeu o código? <a class="text-decoration-underline" @click="handleSubmit" @click.prevent="form2fa.verification_code = ''">Reenviar</a>
+          <div class="text-caption ">
+            Não recebeu o código? <a class="text-decoration-underline tw-cursor-pointer" @click="handleSubmit" @click.prevent="form2fa.verification_code = ''">Reenviar</a>
           </div>
 
         </v-card>
@@ -310,7 +310,7 @@ function goToHomePage(){
 <!--          <div class="text-caption">-->
 <!--            Não recebeu o link? <a class="text-decoration-underline" @click="handleSubmitResetPassword" href="#" @click.prevent="">Reenviar</a>-->
 <!--          </div>-->
-          <div class="text-caption mt-2">
+          <div class="text-caption mt-2 tw-cursor-pointer">
             <a class="text-decoration-underline" @click="tab = 'login'" href="#" @click.prevent=""> Voltar ao login?</a>
           </div>
         </v-card>

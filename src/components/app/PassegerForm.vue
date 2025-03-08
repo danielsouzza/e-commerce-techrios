@@ -1,13 +1,14 @@
 <script setup>
 import {Icon} from "@iconify/vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
-import {converterData} from "../../Helper/Ultis.js";
+import {converterData, isValidDate} from "../../Helper/Ultis.js";
 
 const props = defineProps({
   form:Object,
   index:Number,
 })
 
+console.log(props.form)
 
 const tiposDoc = [
   { id:1, nome: 'RG', tamanho: 15, mask: '###############' },
@@ -25,6 +26,7 @@ const tiposDoc = [
     <v-col cols="6">
       <v-text-field
           v-model="form.nome"
+          :error-messages="form.errors.nome"
           variant="plain"
           label="Nome completo"
           hide-details="auto"
@@ -37,6 +39,7 @@ const tiposDoc = [
     <v-col  cols="6">
       <v-text-field
           v-model="form.telefone"
+          :error-messages="form.errors.telefone"
           v-mask="'(##) #####-####'"
           variant="plain"
           label="Telefone"
@@ -50,6 +53,7 @@ const tiposDoc = [
     <v-col cols="6" >
       <v-select
           v-model="form.tipo_doc"
+          :error-messages="form.errors.tipo_doc"
           variant="plain"
           label="Documento"
           item-title="nome"
@@ -62,6 +66,7 @@ const tiposDoc = [
     <v-col cols="6"  v-if="form.tipo_doc">
       <v-text-field
           v-model="form.document"
+          :error-messages="form.errors.document"
           variant="plain"
           label="Nº do documento"
           hide-details="auto"
@@ -75,12 +80,14 @@ const tiposDoc = [
     <v-col cols="6">
       <v-date-input
           flat
-          hide-details
+          hide-details="auto"
           prepend-icon=""
           hide-actions
+          :allowed-dates="permitirDatas"
           v-mask="'##/##/####'"
-          @change="(e)=>{ form.nascimento = new Date(converterData(e.target._value) + 'T00:00:00')}"
+          @change="(e)=>{form.nascimento =  isValidDate(e.target._value)? new Date(converterData(e.target._value) + 'T00:00:00') : null}"
           v-model="form.nascimento"
+          :error-messages="form.errors.nascimento"
           variant="solo"
           class="my-select"
           placeholder="Data de Nascimento">

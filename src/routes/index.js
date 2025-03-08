@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useCartStore } from "../store/CartStore.js";
 import { userAuthStore } from "../store/AuthStore.js";
+import {useLoadingStore} from "../store/states.js";
 
 const appName = import.meta.env.VITE_APP_NAME || 'Yjara Viagens';
 
@@ -85,6 +86,10 @@ const router = createRouter({
 
 router.afterEach((to) => {
     document.title = to.meta.title + " - " + appName;
+    const loadingStore = useLoadingStore();
+    setTimeout(() => {
+        loadingStore.stopLoading(); // Desativa o loading com um pequeno delay
+    }, 300);
 });
 
 router.beforeEach(async (to, from, next) => {
@@ -101,6 +106,9 @@ router.beforeEach(async (to, from, next) => {
             return next({ name: 'home' });
         }
     }
+
+    const loadingStore = useLoadingStore();
+    loadingStore.startLoading();
 
     next();
 });

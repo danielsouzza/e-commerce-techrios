@@ -7,7 +7,14 @@ import axios from "axios";
 import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
 import {useToast} from "vue-toastification";
-import {converterData, formatDateToServe, validarCPF, validarEmail} from "../Helper/Ultis.js";
+import {
+  converterData,
+  formatDateToServe,
+  isValidDate,
+  permitirDatasNascimento,
+  validarCPF,
+  validarEmail
+} from "../Helper/Ultis.js";
 import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
 import {VIcon} from "vuetify/components";
 
@@ -94,10 +101,10 @@ const validatePassword = () => {
 
 const passwordRules = computed(() => {
   return [
-    { rule: form.password?.length >= 8, message: 'Pelo menos 8 caracteres' },
-    { rule: /[A-Z]/.test(form.password), message: 'Pelo menos uma letra maiúscula' },
-    { rule: /[a-z]/.test(form.password), message: 'Pelo menos uma letra minúscula' },
-    { rule: /[0-9]/.test(form.password), message: 'Pelo menos um número' },
+    { rule: form.password?.length >= 8, message: 'A senha deve ter pelo menos 8 caracteres' },
+    { rule: /[A-Z]/.test(form.password), message: 'A senha deve ter pelo menos uma letra maiúscula' },
+    { rule: /[a-z]/.test(form.password), message: 'A senha deve ter pelo menos uma letra minúscula' },
+    { rule: /[0-9]/.test(form.password), message: 'A senha deve ter pelo menos um número' },
   ];
 });
 
@@ -116,19 +123,6 @@ function customFilter(item, queryText) {
   return textoNormalizado.includes(queryNormalizada);
 }
 
-function permitirDatas(data) {
-  const hoje = new Date();
-  hoje.setHours(0, 0, 0, 0);
-  const dataSelecionada = new Date(data);
-  dataSelecionada.setHours(0, 0, 0, 0);
-
-  return dataSelecionada < hoje;
-}
-
-function isValidDate(dateString) {
-  const date = new Date(converterData(dateString) + 'T00:00:00')
-  return !isNaN(date.getTime())
-}
 
 const validateForm = () => {
   form.errors = {};
@@ -158,8 +152,7 @@ const validateForm = () => {
   };
 
 
-  //  Validando os campos principais
-  validateField('name', form.name, 'Por favor, insira seu nome.');
+  validateField('name', form.name, 'Por favor, insira seu nome e sobrenome.');
   validateField('email', form.email, 'Por favor, insira seu email.');
   validateField('email_confirmation', form.email_confirmation, 'Por favor, confirme seu email.');
   validateField('password', form.password, 'Por favor, insira sua senha.');
@@ -178,7 +171,7 @@ const validateForm = () => {
   }
 
   if(form.email && !validarEmail(form.email)){
-    form.errors.emial = 'Email invalido!'
+    form.errors.email = 'Email invalido!'
   }
 
   if(form.email != form.email_confirmation){
@@ -196,7 +189,19 @@ const validateForm = () => {
   return Object.keys(form.errors).length === 0;
 };
 
+async function focusErro() {
+  nextTick(async () => {
+    const errors = await formRef.value.validate()
+    const erroredField = formRef.value?.$el.querySelector(".v-input.v-input--error input");
+    if (erroredField) {
+      erroredField.focus();
+    }
+  });
+}
+
+
 function handleSubmit() {
+  focusErro()
   const data = {
     ...form,
   }
@@ -285,6 +290,7 @@ onMounted(()=>{
             <div class="text-subtitle-1 text-medium-emphasis">Seu nome</div>
             <v-text-field
                 density="compact"
+                :focused="!!form.errors.name"
                 color="secondary"
                 hide-details="auto"
                 v-model="form.name"
@@ -319,7 +325,7 @@ onMounted(()=>{
                 prepend-icon=""
                 v-mask="'##/##/####'"
                 hide-actions
-                :allowed-dates="permitirDatas"
+                :allowed-dates="permitirDatasNascimento"
                 v-model="form.nascimento"
                 @change="(e)=>{form.nascimento =  isValidDate(e.target._value)? new Date(converterData(e.target._value) + 'T00:00:00') : null}"
                 :error-messages="form.errors['comprador.nascimento']"
@@ -547,6 +553,7 @@ onMounted(()=>{
 
     </v-card>
   </div>
+
 </template>
 
 <style scoped>
