@@ -1316,6 +1316,7 @@ watch(()=>props.tab,()=>{
                         <v-col cols="12"  md="6" >
                           <v-text-field
                               variant="plain"
+                              v-mask="'###'"
                               v-model="formPayment.credit_card.security_code"
                               label="CV"
                           ></v-text-field>
