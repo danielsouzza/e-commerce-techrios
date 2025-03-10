@@ -24,6 +24,7 @@ import {
   showErrorNotification,
   showSuccessNotification
 } from "../../event-bus.js";
+import TravelImages from "./TravelImages.vue";
 
 
 const toast = useToast();
@@ -467,14 +468,8 @@ onBeforeUnmount(() => {
       <div class="lg:tw-flex tw-justify-between tw-items-center ">
         <div class="tw-flex tw-justify-between tw-items-center  mt-3 tw-w-full mr-10">
           <div>
-            <v-img
-                class="bg-grey-lighten-2"
-                width="120px"
-                height="50px"
-                cover
-                rounded
-                :src="baseurl + dataIda.municipio_destino?.image"
-            ></v-img>
+            <TravelImages :images="dataIda.municipio_destino.images" class="!tw-w-[120px] !tw-h-[50px]"/>
+
           </div>
           <div class="tw-flex lg:tw-ml-5 tw-text-[10px] tw-gap-4 lg:tw-gap-6 lg:tw-text-sm">
             <div>
