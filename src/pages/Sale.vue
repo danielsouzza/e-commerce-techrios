@@ -426,13 +426,13 @@ function submitOrder(){
   formSale.processing = true
   if(validateForm()){
     waitServe.value = true
-    routes["order"](params).then(res => {
-      if(res.data.success){
-        orderResponse.value = res.data.data;
+    routes["order"](params).then(response => {
+      if(response.data.success){
+        orderResponse.value = response.data.data;
         cartStore.addItem(orderResponse.value)
         cartStore.loadCart()
         formPayment.order_id = orderResponse.value.id;
-        toast.success(res.data.message);
+        showSuccessNotification(response.data.message);
         nextStep()
       }
       waitServe.value = false
@@ -471,13 +471,13 @@ function addCart(){
   if(validateForm()){
     waitServe.value = true
     formSale.processing = true
-    routes["order"](params).then(res => {
-      if(res.data.success){
-        orderResponse.value = res.data.data;
+    routes["order"](params).then(response => {
+      if(response.data.success){
+        orderResponse.value = response.data.data;
         cartStore.addItem(orderResponse.value)
         cartStore.loadCart()
         formPayment.order_id = orderResponse.value.id;
-        toast.success(res.data.message);
+        showSuccessNotification(response.data.message);
         resetFormSale()
         prevStep()
       }
@@ -502,7 +502,7 @@ function checkStatusPayment(){
       }else{
         if(timeToPay.value == 0){
           clearInterval(intervalo);
-          toast.error('Tempo de venda expirou');
+          showErrorNotification('Tempo de venda expirou');
           whatPayment.value = false
           timeToPay.value = 30 * 60
           resetFormSale()
