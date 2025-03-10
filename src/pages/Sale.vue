@@ -27,14 +27,13 @@ import CartItem from "../components/app/Cart/CartItem.vue";
 import {userAuthStore} from "../store/AuthStore.js";
 import { useToast } from "vue-toastification";
 import {getApiBaseUrl} from "../services/api.js";
-import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
+import {closeAllCards, showErrorNotification, showSuccessNotification} from "../event-bus.js";
 
 
 const props = defineProps({
   tab:String,
 })
 
-const toast = useToast();
 const timeToPay = ref(30 * 60)
 const cartStore = useCartStore()
 const authStore = userAuthStore()
@@ -284,7 +283,7 @@ function nextStep(){
 function prevStep(){
   stepSale.value = stepSale.value - 1;
   if(stepSale.value === 1){
-    resetFormSale()
+    // resetFormSale()
   }
 }
 
@@ -480,6 +479,7 @@ function addCart(){
         showSuccessNotification(response.data.message);
         resetFormSale()
         prevStep()
+        closeAllCards()
       }
       waitServe.value = false
       formSale.processing = false

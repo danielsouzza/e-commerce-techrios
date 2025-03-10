@@ -4,7 +4,7 @@ import {api} from './api';
 export const routes = {
     'banners': (params={}) => api.get('/banners',{ params: params}),
     'empresa.theme': (params={}) => api.get('/empresa/tema',{ params: params}),
-    'filtros': () => api.get('/filtros'),
+    'filtros': (params={}) => api.get('/filtros',{ params: params}),
     'empresas': (params={}) => api.get('/empresa/empresas-com-dominio',{ params: params}),
     'municipios': (params={}) => api.get('/municipios',{ params: params}),
     'destinos-procurados': (params={}) => api.get('/destinos-procurados',{ params: params}),
@@ -35,6 +35,8 @@ export const routes = {
     'user.register':(params= {}) => api.post('/register',params),
     'user.delete':() => api.delete('/usuario'),
     'user.reset-password':(params= {}) => api.post('/login/recuperar-senha',params),
+    'user.validate-email':(params= {}) => api.post('/register/token',params),
+
     'user.reset-password-confirm':(params= {}) => api.post('/login/resetar-senha',params),
 
     'newletters':(params= {}) => api.post('/newsletter',params),

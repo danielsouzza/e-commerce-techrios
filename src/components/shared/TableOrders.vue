@@ -31,7 +31,7 @@ const orders = computed(()=>{
   myOrders.value.data?.forEach((item,index)=>{
     item.passagens_agrupadas.forEach( passage=>{
       items.push({
-        codigo: item.id+passage.viagem.id,
+        codigo: item.id+"-"+passage.viagem.id,
         viagem: passage.trecho.municipio_origem.nome +" - "+ passage.trecho.municipio_destino.nome,
         data:passage.viagem.saida,
         status: item.status,
@@ -125,7 +125,7 @@ onMounted(()=>{
                   <div v-for="(it,i) in item.detalhes.passageiros" class="tw-flex ">
                     <Icon icon="famicons:person-outline"  width="20"/>
                     <div class="ml-3">
-                      <div class="tw-font-bold tw-flex tw-items-center tw-gap-2">Passageiro {{i+1}} <span @click="getTicketPdf(it)" class="tw-flex tw-text-blue-500 tw-items-center tw-cursor-pointer">Baixar<Icon  icon="icon-park-outline:tickets-checked"  width="20" /></span></div>
+                      <div class="tw-font-bold tw-flex tw-items-center tw-gap-2">Passageiro {{i+1}} <span v-if="item.status == 'Pago'" @click="getTicketPdf(it)" class="tw-flex tw-text-blue-500 tw-items-center tw-cursor-pointer">Baixar<Icon  icon="icon-park-outline:tickets-checked"  width="20" /></span></div>
                       <div>{{it.passageiro.nome}}</div>
                       <div>Doc: {{it.passageiro.ndoc}}</div>
                     </div>

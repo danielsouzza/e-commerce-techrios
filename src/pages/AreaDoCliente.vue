@@ -1,21 +1,22 @@
 <script setup>
 
-import {computed, onMounted, reactive, ref} from "vue";
+import {computed, nextTick, onMounted, reactive, ref} from "vue";
 import {Icon} from "@iconify/vue";
 import TableOrders from "../components/shared/TableOrders.vue";
 import {routes} from "../services/fetch.js";
 import {VDateInput} from 'vuetify/labs/VDateInput'
 import axios from "axios";
 import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
-import {converterData, formatDateToServe} from "../Helper/Ultis.js";
+import {converterData, formatDateToServe, validarCPF, validarEmail} from "../Helper/Ultis.js";
 import router from "../routes/index.js";
-import {useToast} from "vue-toastification";
+import {useRoute} from "vue-router";
+import {getAppBaseUrl} from "../services/api.js";
 
 const props = defineProps({
   tab:String,
 })
 
-const toast = useToast();
+const route = useRoute();
 const auth = ref(null)
 const municipios = ref([]);
 const tab = ref(props.tab)
@@ -49,7 +50,7 @@ const tabs = [
 ]
 
 
-
+const formRef = ref()
 const formPassword = reactive({
   current_password:null,
   new_password:'',
@@ -65,6 +66,7 @@ const form = reactive({
   telefone:"",
   nascimento:null,
   password:null,
+  token:route.query.token,
   comprador:{
     nascimento:null,
     cpf_cnpj:"",
@@ -83,7 +85,7 @@ const form = reactive({
 function fillFormDataUser(){
   form.id = auth.value.id
   form.name = auth.value.name;
-  form.email = auth.value.email
+  form.email =  route.query.email ? route.query.email : auth.value.email
   form.telefone = auth.value.comprador.telefone
   form.comprador.telefone = auth.value.comprador.telefone
   form.nascimento = auth.value.comprador.nascimento ? new Date(auth.value.comprador.nascimento+'T00:00:00') : null
@@ -102,6 +104,90 @@ const titlePage = computed(()=>{
   return tabs.find(item=>item.value===tab.value).title;
 })
 
+async function focusErro() {
+  nextTick(async () => {
+    const errors = await formRef.value.validate()
+    const erroredField = formRef.value?.$el.querySelector(".v-input.v-input--error input");
+    if (erroredField) {
+      erroredField.focus();
+    }
+  });
+}
+const validateForm = () => {
+  form.errors = {};
+  const validateField = (field, value, errorMessage) => {
+    if (value === null || value === undefined || value === '') {
+      form.errors[field] = errorMessage;
+    } else {
+      delete form.errors[field];
+    }
+  };
+
+
+  const validarNomeSobrenome = (nome) => {
+    return nome.split(" ").length > 1 || "Digite nome e sobrenome";
+  };
+  const validatePhone = (field, value) => {
+    const phone =  value.replace(/\D/g, '');
+    const phoneRegex = /^[0-9]{10,11}$/; // Aceita 10 ou 11 dígitos numéricos
+
+    if (!phone) {
+      form.errors[field] = 'Por favor, insira um número de telefone.';
+    } else if (!phoneRegex.test(phone)) {
+      form.errors[field] = 'O telefone deve conter apenas números e ter 10 ou 11 dígitos.';
+    } else {
+      delete form.errors[field];
+    }
+  };
+
+
+  validateField('name', form.name, 'Por favor, insira seu nome e sobrenome.');
+  validateField('email', form.email, 'Por favor, insira seu email.');
+  validateField('comprador.nascimento', form.nascimento, 'Por favor, insira sua data de nascimento.');
+  validatePhone('telefone', form.telefone, 'Por favor, insira seu telefone.')
+  validateField(`comprador.cpf_cnpj`, form.comprador.cpf_cnpj, form.comprador.estrangeiro ? `Por favor, insira seu passaporte.` :`Por favor, insira seu cpf.`);
+  validateField(`comprador.xlgr`, form.comprador.xlgr, `Por favor, insira o logradouro.`);
+  validateField(`comprador.bairro`, form.comprador.bairro, `Por favor, insira o bairro.`);
+  validateField(`comprador.cmun`, form.comprador.cmun, `Por favor, escolha um municipío.`);
+  validateField(`comprador.cep`, form.comprador.cmun, `Por favor, escolha um cep.`);
+  validateField(`comprador.nro`, form.comprador.nro, `Por favor, insira o número.`);
+
+  if(form.name && !validarNomeSobrenome(form.name)){
+    form.errors.name = 'Digite nome e sobrenome'
+  }
+
+  if(form.email && !validarEmail(form.email)){
+    form.errors.email = 'Email invalido!'
+  }
+
+  if(auth.value.email != form.email && !form.token){
+    handleSubmitNewEmail()
+    form.errors.email = 'Email diferente do atual.'
+  }
+
+
+  if(!form.comprador.estrangeiro && !validarCPF(form.comprador.cpf_cnpj)){
+    form.errors['comprador.cpf_cnpj'] = 'Número de CPF inválido'
+  }
+
+  return Object.keys(form.errors).length === 0;
+};
+
+function handleSubmitNewEmail() {
+  routes['user.validate-email']({
+    email: form.email,
+    base_url:getAppBaseUrl()+'/area-do-cliente/perfil',
+  }).then((response) => {
+    if (response.data.success) {
+      showSuccessNotification(response.data.message);
+    }
+    form.processing = false
+  }).catch(error => {
+    form.processing = false
+    showErrorNotification(error.response.data.data.error);
+  })
+}
+
 function handleSubmit() {
   const data = {
     ...form,
@@ -109,14 +195,14 @@ function handleSubmit() {
   data.comprador.xnome = form.name
   data.comprador.telefone = form.telefone
   data.comprador.nascimento = formatDateToServe(data.nascimento)
-  console.log(data)
+  if(validateForm()){
+    routes['user.register'](data).then((response) => {
+      showSuccessNotification(response.data.message)
 
-  routes['user.register'](data).then((response) => {
-    showSuccessNotification(response.data.message)
-
-  }).catch((error) => {
-    showErrorNotification(error.response.data.data.error)
-  })
+    }).catch((error) => {
+      showErrorNotification(error.response.data.data.error)
+    })
+  }
 }
 
 function deleteAccount() {

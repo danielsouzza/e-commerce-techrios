@@ -6,7 +6,6 @@ import {VDateInput} from 'vuetify/labs/VDateInput'
 import axios from "axios";
 import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
-import {useToast} from "vue-toastification";
 import {
   converterData,
   formatDateToServe,
@@ -15,11 +14,12 @@ import {
   validarCPF,
   validarEmail
 } from "../Helper/Ultis.js";
-import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
+import {showErrorNotification} from "../event-bus.js";
 import {VIcon} from "vuetify/components";
+import {useRoute} from "vue-router";
 
+const route = useRoute();
 
-const toast = useToast();
 const visible1 = ref(false);
 const visible2 = ref(false);
 const loadCep = ref(false)
@@ -28,11 +28,11 @@ const formRef = ref()
 const municipios = ref([]);
 const form = reactive({
   name:"",
-  email: "",
-  email_confirmation: "",
+  email: route.query.email,
   password: "",
   password_confirmation: "",
   telefone:"",
+  token:route.query.token,
   comprador:{
     nascimento:null,
     cpf_cnpj:"",
@@ -72,7 +72,7 @@ function getCep(){
           form.comprador.cmun = parseInt(municipios.value.find(it=>it.codigo == response.data.ibge)?.codigo)
         })
       }else{
-        toast.error('Cep não encontrado');
+        showErrorNotification('Cep não encontrado');
         resetAddress()
       }
       loadCep.value = false
@@ -154,7 +154,6 @@ const validateForm = () => {
 
   validateField('name', form.name, 'Por favor, insira seu nome e sobrenome.');
   validateField('email', form.email, 'Por favor, insira seu email.');
-  validateField('email_confirmation', form.email_confirmation, 'Por favor, confirme seu email.');
   validateField('password', form.password, 'Por favor, insira sua senha.');
   validateField('comprador.nascimento', form.nascimento, 'Por favor, insira sua data de nascimento.');
   validateField('password_confirmation', form.password_confirmation, 'Por favor, confirme sua senha.');
@@ -174,9 +173,6 @@ const validateForm = () => {
     form.errors.email = 'Email invalido!'
   }
 
-  if(form.email != form.email_confirmation){
-    form.errors.email_confirmation = 'O email não confere'
-  }
 
   if(form.password_confirmation && !validatePassword()){
     form.errors.password_confirmation = 'A senha não confere'
@@ -451,7 +447,7 @@ onMounted(()=>{
         </div>
 
         <v-row class="my-5">
-          <v-col cols="12"  lg="6">
+          <v-col cols="12"  lg="12">
             <div class="text-subtitle-1 text-medium-emphasis">Seu email</div>
             <v-text-field
                 density="compact"
@@ -465,21 +461,7 @@ onMounted(()=>{
                 variant="outlined"
             ></v-text-field>
           </v-col>
-          <v-col cols="12"  lg="6">
-            <div class="text-subtitle-1 text-medium-emphasis">Confirme seu email</div>
 
-            <v-text-field
-                density="compact"
-                color="secondary"
-                v-model="form.email_confirmation"
-                :error-messages="form.errors.email_confirmation"
-                hide-details="auto"
-                :rules="[(v)=> v == form.email || 'Email não confere']"
-                placeholder="Digite o seu email novamente "
-                prepend-inner-icon="mdi-email-outline"
-                variant="outlined"
-            ></v-text-field>
-          </v-col>
           <v-col cols="12"  lg="6">
             <div class="text-subtitle-1 text-medium-emphasis">Sua senha</div>
 

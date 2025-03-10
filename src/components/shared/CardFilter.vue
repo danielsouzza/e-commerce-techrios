@@ -1,9 +1,10 @@
 <script setup>
 import {Icon} from "@iconify/vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
-import {computed, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import CustomDateInput from "./CustomDateInput.vue";
 import {converterData, formatDateToServe} from "../../Helper/Ultis.js";
+import {routes} from "../../services/fetch.js";
 
 
 const props = defineProps({
@@ -11,6 +12,8 @@ const props = defineProps({
   options:Object,
 })
 
+
+const filterOptions = ref([])
 const emit = defineEmits(['update:modelValue'])
 const form = ref(null);
 const hoje = new Date();
@@ -75,7 +78,17 @@ const validarDataVolta = computed(() => {
   return true;
 });
 
-
+function getFilterItems(){
+  const params = {
+    origem: props.modelValue.origem || '',
+    subdomain:  window.subdomain || ''
+  }
+  routes["filtros"](params).then(response => {
+    if(!response.data.data.success){
+      filterOptions.value = response.data.data;
+    }
+  })
+}
 function invertFilter(){
   const temp = props.modelValue.origem;
   props.modelValue.origem = props.modelValue.destino;
@@ -88,7 +101,7 @@ function changeTypeTravel(){
   // updateFilters()
 }
 
-
+onMounted(getFilterItems)
 
 </script>
 
@@ -120,7 +133,8 @@ function changeTypeTravel(){
                 placeholder="Origem"
                 class="my-select mt-1"
                 v-model="modelValue.origem"
-                :items="options.municipiosOrigem"
+                :items="filterOptions.municipiosOrigem"
+                @update:modelValue="getFilterItems"
                 :custom-filter="customFilter"
             >
               <template #prepend-inner>
@@ -143,7 +157,7 @@ function changeTypeTravel(){
                 variant="solo"
                 placeholder="Destino"
                 class="my-select mt-1 !tw-z-[1]"
-                :items="options.municipiosDestino"
+                :items="filterOptions.municipiosDestino"
                 :custom-filter="customFilter"
             >
               <template #prepend-inner>

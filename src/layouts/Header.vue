@@ -24,7 +24,7 @@ function goToSalePage(){
 }
 
 function goToLoginPage(){
-  router.replace({name: "login"})
+  window.location = "/login"
 }
 
 

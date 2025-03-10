@@ -43,7 +43,20 @@ const routes = [
         meta: { title: 'Login' }
     },
     {
-        path: '/reset-password',
+        path: '/validar-email',
+        component: () => import('../pages/ValidarEmail.vue'),
+        name: 'validar-email',
+        meta: { title: 'Validação de email' }
+    },
+    {
+        path: '/esqueci_minha_senha',
+        component: () => import('../pages/Login.vue'),
+        props: {tab:'reset-password'},
+        name: 'esqueci_minha_senha',
+        meta: { title: 'Esqueci minha senha' }
+    },
+    {
+        path: '/restaurar-senha',
         component: () => import('../pages/ResetPassword.vue'),
         name: 'reset-password',
         meta: { title: 'Redefinir senha' }

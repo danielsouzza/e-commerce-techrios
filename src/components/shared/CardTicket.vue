@@ -17,7 +17,13 @@ import {
 } from "../../Helper/Ultis.js";
 import {getApiBaseUrl} from "../../services/api.js";
 import { useToast } from "vue-toastification";
-import {showErrorNotification, showSuccessNotification} from "../../event-bus.js";
+import {
+  CLOSE_ALL_CARD_TICKETS,
+  emitter,
+  SHOW_NOTIFICATION,
+  showErrorNotification,
+  showSuccessNotification
+} from "../../event-bus.js";
 
 
 const toast = useToast();
@@ -333,10 +339,11 @@ async  function initSale(){
        rooms: data.data.comodos,
        formas_pagamento: data.formas_pagamento,
      }
-      onClickBtnSelect()
+      showSuccessNotification(response.data.message);
+      // onClickBtnSelect()
     }
   }).catch(error => {
-    console.log(error)
+    showErrorNotification(error.response.data.data.error);
   })
 
   if(step.value === 2){
@@ -438,6 +445,9 @@ watch(()=>props.dataIda.id_viagem,()=>{
 onMounted(() => {
   window.addEventListener('resize', updateWidth);
   getQuantityRoomsFree()
+  emitter.on(CLOSE_ALL_CARD_TICKETS, () => {
+    onClickBtnSelect()
+  })
 });
 
 onBeforeUnmount(() => {

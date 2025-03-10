@@ -1,16 +1,21 @@
 <script setup>
 
-import {reactive, ref} from "vue";
+import {reactive, ref, watch} from "vue";
 import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
 import {userAuthStore} from "../store/AuthStore.js";
 import {useCartStore} from "../store/CartStore.js";
 import {getAppBaseUrl} from "../services/api.js";
 import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
+import { useRouter} from "vue-router";
 
+
+const props  =  defineProps({
+  tab:String
+})
 
 const visible = ref(false);
-const tab = ref('login')
+const tab = ref( props.tab ?? 'login')
 
 const formReset = reactive({
   email: '',
@@ -126,6 +131,7 @@ function goToHomePage(){
   router.push({name: "home"})
 }
 
+
 </script>
 
 <template>
@@ -169,9 +175,9 @@ function goToHomePage(){
             <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
               Sua senha
               <a
-                  @click="tab = 'reset-password'"
+                  @click="router.replace({ path: '/esqueci_minha_senha' ,force:true})"
                   class="text-caption text-decoration-none text-blue"
-                  href="#"
+                  href="/esqueci_minha_senha"
                   rel="noopener noreferrer"
               >
                 Esqueci minha senha?</a>
@@ -207,7 +213,7 @@ function goToHomePage(){
           </v-form>
 
           <v-card-text class="text-center">
-            <RouterLink  :to="{name: 'register'}">
+            <RouterLink  :to="{name: 'validar-email'}">
               <div class="text-blue text-decoration-none">
                 Criar uma conta?<v-icon icon="mdi-chevron-right"></v-icon>
               </div>
