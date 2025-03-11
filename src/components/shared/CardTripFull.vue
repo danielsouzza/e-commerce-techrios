@@ -18,29 +18,20 @@ const props = defineProps({
 
 const baseurl = getApiBaseUrl().replaceAll("api", "");
 
-// Obtendo imagens corretamente e garantindo que haja pelo menos uma imagem
+const imagesRandom = computed(()=>{
+  const count =  props.data?.municipio_destino.images.length
+  if (count > 1) {
+    const randomIndex = Math.floor(Math.random() * count);
+    return [ props.data?.municipio_destino.images[randomIndex]];
+  }
+  return null;
+})
+
 const imagens = computed(() => {
-  const imgs = props.data?.municipio_destino.images?.map(img => img.path) || [];
+  const imgs = imagesRandom.value?.map(img => img.path) || [];
   return imgs.length > 0 ? imgs : [ "/images/default.jpg"];
 });
 
-// Índice da imagem atual
-const currentImageIndex = ref(0);
-
-// Troca a imagem a cada 6 segundos
-let intervalId = null;
-onMounted(() => {
-  if (imagens.value.length > 1) {
-    intervalId = setInterval(() => {
-      currentImageIndex.value = (currentImageIndex.value + 1) % imagens.value.length;
-    }, 6000);
-  }
-});
-
-// Limpa o intervalo quando o componente for destruído
-onUnmounted(() => {
-  if (intervalId) clearInterval(intervalId);
-});
 
 function goToSalePage() {
   if (props.dragging) return;
@@ -65,10 +56,7 @@ function goToSalePage() {
     <!-- Contêiner do Carrossel -->
     <div class="tw-w-full tw-h-[300px] md:tw-h-[500px] lg:tw-h-[405px] tw-overflow-hidden">
       <div
-          class="tw-flex tw-h-full tw-w-full tw-transition-transform tw-duration-700 tw-ease-in-out"
-          :style="{ transform: `translateX(-${currentImageIndex * 100}%)` }"
-      >
-        <!-- Imagens -->
+          class="tw-flex tw-h-full tw-w-full tw-transition-transform tw-duration-700 tw-ease-in-out">
         <div
             v-for="(image, index) in imagens"
             :key="index"

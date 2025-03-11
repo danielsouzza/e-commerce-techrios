@@ -1036,7 +1036,7 @@ watch(()=>props.tab,()=>{
                 <v-row class="tw-px-2">
                   <v-col cols="12" md="6">
                     <v-text-field
-                        variant="plain"
+                       variant="outlined"
                         v-model="formSale.contato.nome"
                         :error-messages="formSale.errors['contato.nome']"
                         label="Nome do comprador"
@@ -1049,7 +1049,7 @@ watch(()=>props.tab,()=>{
                   </v-col>
                   <v-col cols="12" md="6">
                     <v-text-field
-                        variant="plain"
+                       variant="outlined"
                         v-model="formSale.contato.email"
                         :error-messages="formSale.errors['contato.email']"
                         label="E-mail"
@@ -1063,7 +1063,7 @@ watch(()=>props.tab,()=>{
 
                   <v-col cols="12" md="6">
                     <v-text-field
-                        variant="plain"
+                       variant="outlined"
                         v-model="formSale.contato.telefone"
                         :error-messages="formSale.errors['contato.telefone']"
                         label="Telefone"
@@ -1079,7 +1079,7 @@ watch(()=>props.tab,()=>{
 
                   <v-col cols="6" >
                     <v-select
-                        variant="plain"
+                       variant="outlined"
                         label="Documento"
                         item-title="nome"
                         item-value="id"
@@ -1093,7 +1093,7 @@ watch(()=>props.tab,()=>{
 
                   <v-col cols="6"  v-if="formSale.contato.tipo_doc">
                     <v-text-field
-                        variant="plain"
+                       variant="outlined"
                         v-model="formSale.contato.document"
                         :error-messages="formSale.errors['contato.document']"
 
@@ -1117,8 +1117,7 @@ watch(()=>props.tab,()=>{
                         @change="(e)=>{formSale.contato.nascimento =  isValidDate(e.target._value)? new Date(converterData(e.target._value) + 'T00:00:00') : null}"
                         v-model="formSale.contato.nascimento"
                         :error-messages="formSale.errors['contato.nascimento']"
-                        variant="solo"
-                        class="my-select"
+                        variant="outlined"
                         placeholder="Data de Nascimento">
                       <template #default>
                         <Icon icon="uis:calendar" class="mr-2"/>
@@ -1211,6 +1210,7 @@ watch(()=>props.tab,()=>{
                       {{formatCurrency(useCartStore().getTotal() - (useCartStore().getTotal() * 0.04 ) )}} <span class="tw-text-p tw-text-[10px]"> no PIX</span><br>
                     </div>
                     <div class="tw-text-end" v-else>
+                      {{useCartStore().getTotal()}}
                       {{formatCurrency(useCartStore().getTotal())}}<br>
                     </div>
                   </v-col>
@@ -1439,7 +1439,4 @@ watch(()=>props.tab,()=>{
   --v-input-control-height: auto !important;
   --v-input-padding-top: 16px;
 }
-
-
-
 </style>

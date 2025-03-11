@@ -61,7 +61,7 @@ export const useCartStore = defineStore('cart', {
                     if(i.deleted_at){
                         return t
                     }
-                    return t + ((i.valor + (i.taxa_embarque ?? 0)) - (i.desconto?.desconto ?? 0))
+                    return t + (i.valor + (i.taxa_embarque ?? 0))
                 },0)
             },0)
         },
@@ -72,7 +72,7 @@ export const useCartStore = defineStore('cart', {
                     if(i.deleted_at){
                         return t
                     }
-                    return t + (i.valor  - (i.desconto?.desconto ?? 0))
+                    return t + (i.valor)
                 },0)
             },0)
         },

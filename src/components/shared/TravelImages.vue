@@ -2,12 +2,23 @@
 
 
 import {getApiBaseUrl} from "../../services/api.js";
+import {computed} from "vue";
 
 const props = defineProps({
   images:Array,
 })
 
 const baseurl = getApiBaseUrl().replaceAll('api','')
+
+
+const imagesRandom = computed(()=>{
+  const count = props.images.length
+  if (count > 1) {
+    const randomIndex = Math.floor(Math.random() * count);
+    return [props.images[randomIndex]];
+  }
+  return null;
+})
 
 
 </script>
@@ -21,22 +32,14 @@ const baseurl = getApiBaseUrl().replaceAll('api','')
       hide-delimiter-background
   >
     <v-carousel-item
-        v-for="(item,i) in images"
+
+
+        v-for="(item,i) in imagesRandom"
         cover
         :key="i"
         :src="baseurl + item.path"
     >
-      <template v-slot:placeholder>
-        <v-row
-            align="center"
-            justify="center"
-        >
-          <v-progress-circular
-              color="grey-lighten-5"
-              indeterminate
-          ></v-progress-circular>
-        </v-row>
-      </template>
+
     </v-carousel-item>
 
   </v-carousel>

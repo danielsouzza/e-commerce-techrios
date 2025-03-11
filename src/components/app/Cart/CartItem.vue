@@ -18,7 +18,7 @@ const valorTotal = computed(()=>{
     if(item.deleted_at){
       return acc
     }
-    return acc + item.valor - (item.desconto?.desconto ?? 0)
+    return acc + item.valor
   },0)
   const taxa  = props.data.passagem_pedidos.reduce((acc, item)=> {
     if(item.deleted_at){

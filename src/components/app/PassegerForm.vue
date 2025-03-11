@@ -22,12 +22,12 @@ const tiposDoc = [
 <template>
   <div class=" tw-font-bold tw-px-2 tw-text-gray-800 ">Passageiro {{index + 1}}</div>
 
-  <v-row class="tw-px-2">
+  <v-row class="tw-px-2 mt-2">
     <v-col cols="6">
       <v-text-field
           v-model="form.nome"
           :error-messages="form.errors.nome"
-          variant="plain"
+         variant="outlined"
           label="Nome completo"
           hide-details="auto"
       >
@@ -41,7 +41,7 @@ const tiposDoc = [
           v-model="form.telefone"
           :error-messages="form.errors.telefone"
           v-mask="'(##) #####-####'"
-          variant="plain"
+         variant="outlined"
           label="Telefone"
           hide-details="auto"
       >
@@ -54,7 +54,7 @@ const tiposDoc = [
       <v-select
           v-model="form.tipo_doc"
           :error-messages="form.errors.tipo_doc"
-          variant="plain"
+          variant="outlined"
           label="Documento"
           item-title="nome"
           item-value="id"
@@ -67,7 +67,7 @@ const tiposDoc = [
       <v-text-field
           v-model="form.document"
           :error-messages="form.errors.document"
-          variant="plain"
+         variant="outlined"
           label="Nº do documento"
           hide-details="auto"
           v-mask="form.tipo_doc ? tiposDoc[form.tipo_doc-1]?.mask : '###########' "
@@ -88,8 +88,8 @@ const tiposDoc = [
           @change="(e)=>{form.nascimento =  isValidDate(e.target._value)? new Date(converterData(e.target._value) + 'T00:00:00') : null}"
           v-model="form.nascimento"
           :error-messages="form.errors.nascimento"
-          variant="solo"
-          class="my-select"
+          variant="outlined"
+
           placeholder="Data de Nascimento">
         <template #default>
           <Icon icon="uis:calendar" class="mr-2"/>
@@ -99,20 +99,3 @@ const tiposDoc = [
   </v-row>
   <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
 </template>
-
-<style scoped>
-.my-select::v-deep(.v-field__input) {
-  min-height: 42px !important;
-  padding-top: 0!important;
-  padding-bottom: 0!important;
-  padding-inline: 0!important;
-}
-
-.my-select::v-deep(.v-field--appended){
-  padding-inline-end: 0 !important;
-}
-
-.my-select::v-deep( .v-field--prepended) {
-  padding-inline-start: 0 !important;
-}
-</style>

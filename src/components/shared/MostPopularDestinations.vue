@@ -2,7 +2,7 @@
 import 'vue3-carousel/dist/carousel.css'
 import {Carousel, Slide} from "vue3-carousel";
 import {routes} from "../../services/fetch.js";
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import {getApiBaseUrl} from "../../services/api.js";
 
 
@@ -31,6 +31,15 @@ const config = {
   },
 };
 
+function getImagaeRandom(imagens){
+  const count = imagens.length
+  if (count > 1) {
+    const randomIndex = Math.floor(Math.random() * count);
+    return imagens[randomIndex].path
+  }
+  return null;
+}
+
 function getDestinations(){
   routes["destinos-procurados"]().then(res => {
     data.value = res.data;
@@ -53,11 +62,10 @@ onMounted(()=>{
           <v-img
               cover
               gradient="to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 20%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0) 50%"
-              :lazy-src="`https://picsum.photos/10/6?image=${n * 5 + 10}`"
-              class="!tw-rounded-xl"
+              class="!tw-rounded-xl !tw-bg-gray-200"
               height="120"
               width="40"
-              :src="baseurl + data.municipio?.image"
+              :src="baseurl + getImagaeRandom(item.municipio.imagens)"
           >
             <div class="d-flex align-center justify-center tw-absolute tw-bottom-0 tw-text-white tw-p-2 tw-w-full">
              {{item.municipio.nome}}
@@ -68,10 +76,7 @@ onMounted(()=>{
                   class="fill-height ma-0"
                   justify="center"
               >
-                <v-progress-circular
-                    color="grey-lighten-5"
-                    indeterminate
-                ></v-progress-circular>
+
               </v-row>
             </template>
           </v-img>

@@ -84,8 +84,8 @@ const quantityRoomsFree = computed(() => {
       return acc + room.quantidade
     },0)
   }
-
 })
+
 function allRooms (data, rooms) {
   const totalSpaces = data.linhas * data.colunas;
   const linearRooms = Array(totalSpaces).fill(null);
@@ -128,9 +128,11 @@ function getQuantityRoomsFree() {
   routes['rooms.free'](params).then((response) => {
     if(step.value === 1){
       roomsFree.value.ida = response.data.data;
+
     }else{
       roomsFree.value.volta = response.data.data;
     }
+    console.log(roomsFree.value)
   });
 
 }
@@ -469,7 +471,6 @@ onBeforeUnmount(() => {
         <div class="tw-flex tw-justify-between tw-items-center  mt-3 tw-w-full mr-10">
           <div>
             <TravelImages :images="dataIda.municipio_destino.images" class="!tw-w-[120px] !tw-h-[50px]"/>
-
           </div>
           <div class="tw-flex lg:tw-ml-5 tw-text-[10px] tw-gap-4 lg:tw-gap-6 lg:tw-text-sm">
             <div>
@@ -495,9 +496,7 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
-
     <v-divider v-if="dataVolta" :thickness="1" class="border-opacity-100 tw-my-2 " ></v-divider>
-
     <div class="tw-flex tw-flex-col" v-if="dataVolta">
       <div class="tw-flex  tw-text-primary tw-justify-between tw-px-2 tw-rounded-lg tw-font-bold lg:tw-mr-5">
         <span>Volta</span>
@@ -506,14 +505,7 @@ onBeforeUnmount(() => {
       <div class="lg:tw-flex tw-justify-between tw-items-center " >
         <div class="tw-flex tw-justify-between tw-items-center  mt-3 tw-w-full mr-10">
           <div>
-            <v-img
-                class="bg-grey-lighten-2"
-                width="120px"
-                height="50px"
-                cover
-                rounded
-                :src="baseurl + dataVolta.municipio_destino?.image"
-            ></v-img>
+            <TravelImages :images="dataVolta.municipio_destino.images" class="!tw-w-[120px] !tw-h-[50px]"/>
           </div>
           <div class="tw-flex lg:tw-ml-5 tw-text-[10px] tw-gap-4 lg:tw-gap-6 lg:tw-text-sm">
             <div>
@@ -546,7 +538,8 @@ onBeforeUnmount(() => {
           <div class="tw-flex tw-flex-col my-3 tw-w-full" v-if="openRooms">
             <div v-if="dataIda?.desconto" class="lg:tw-flex  tw-items-center justify-end">
               <div class="tw-flex tw-justify-end tw-items-center   lg:tw-gap-3">
-                <div class="tw-text-[12px] lg:tw-text-sm">Restam <strong class="tw-font-extrabold">{{dataIda?.desconto?.restante}} LUGARES</strong> com esse preço</div>
+
+                <div class="tw-text-[12px] lg:tw-text-sm">Restam <strong class="tw-font-extrabold">{{quantityRoomsFree}} LUGARES</strong> </div>
               </div>
             </div>
             <div class="tw-flex tw-flex-col lg:tw-flex-col-reverse tw-justify-center tw-items-center ">
@@ -559,7 +552,7 @@ onBeforeUnmount(() => {
                 </v-col>
                 <v-col >
                   <div class="tw-flex  tw-items-center tw-gap-1  tw-text-sm">
-                    <div class="my-badge !tw-bg-secondary"></div>
+                    <div class="my-badge !tw-bg-[#3dccfd]"></div>
                     vendido
                   </div>
                 </v-col>
@@ -576,7 +569,7 @@ onBeforeUnmount(() => {
                     <div
                         v-for="(comodo, index) in matrizRooms.ida"
                         :key="index"
-                        :class="comodo?.id ? (comodo.is_ocupado ? '!tw-bg-secondary tw-cursor-not-allowed' : roomsSelected.dataIda.selectedsById?.includes(comodo) ? '!tw-bg-yellow-400' : 'tw-bg-green-400') : 'tw-bg-gray-200'"
+                        :class="comodo?.id ? (comodo.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataIda.selectedsById?.includes(comodo) ? '!tw-bg-yellow-400' : 'tw-bg-green-400') : 'tw-bg-gray-200'"
                         class="text-center tw-rounded-[5px] !tw-text-white tw-font-black tw-px-1 tw-py-[2px] tw-text-xs tw-h-[24px] tw-min-w-[30px] tw-cursor-pointer "
                         @click="comodo?.id && !comodo.is_ocupado ? onClickRoom(comodo,null) : ''"
                     >
@@ -593,10 +586,11 @@ onBeforeUnmount(() => {
                     <template v-for="item in dataIda.tipos_comodos">
                       <v-col v-if="item.id !== 4 && item.id !== 1 " :key="item.id" cols="12"  md="6" lg="4">
                         <v-card
+                            class="!tw-border-4 !tw-border-blue-400"
                             flat
                             @click="roomsFree.ida.find(it=>it.tipo_comodidade_id === item.id).quantidade > 0 ? onClickRoom(null,item.id) : ''"
                             :class="roomsSelected.dataIda.selectedsByType?.find(it=>item.id == it.type_comodo_id)?.quantidade > 0 ? '!tw-bg-yellow-400' :
-                            roomsFree.ida.find(it=>it.tipo_comodidade_id === item.id).quantidade === 0 ? '!tw-bg-secondary tw-cursor-not-allowed' : '!tw-bg-green-400'
+                            roomsFree.ida.find(it=>it.tipo_comodidade_id === item.id).quantidade === 0 ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : '!tw-bg-green-400'
                             "
                         >
                           <v-row class="tw-p-3 !tw-text-white">
@@ -620,7 +614,7 @@ onBeforeUnmount(() => {
                       <v-card
                           flat
                           @click="!item.is_ocupado ? onClickRoom(item, null) : ''"
-                          :class="(item.is_ocupado ? '!tw-bg-secondary tw-cursor-not-allowed' : roomsSelected.dataIda.selectedsById?.includes(item) ? '!tw-bg-yellow-400' : '!tw-bg-green-400')"
+                          :class="(item.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataIda.selectedsById?.includes(item) ? '!tw-bg-yellow-400' : '!tw-bg-green-400')"
                       >
                         <v-row class="tw-p-3 !tw-text-white">
                           <v-col cols="9" class=" tw-text-xs">
@@ -633,7 +627,7 @@ onBeforeUnmount(() => {
                             Valor
                           </v-col>
                           <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                            {{calcularValor(dataIda.valor)}}
+                            {{formatCurrency(item.comodo_trechos.valor)}}
                           </v-col>
                         </v-row>
                       </v-card>
@@ -712,7 +706,7 @@ onBeforeUnmount(() => {
           <div class="tw-flex tw-flex-col my-3 tw-w-full" v-if="openRooms">
             <div class="lg:tw-flex  tw-items-center justify-center">
               <div class="tw-flex tw-justify-between tw-items-center   lg:tw-gap-3">
-                <div class="tw-text-[12px] lg:tw-text-sm">Restam <strong class="tw-font-extrabold">{{quantityRoomsFree}} LUGARES</strong> com esse preço</div>
+                <div class="tw-text-[12px] lg:tw-text-sm">Restam <strong class="tw-font-extrabold">{{quantityRoomsFree}} LUGARES</strong> </div>
               </div>
             </div>
             <div class="tw-flex tw-flex-col lg:tw-flex-col-reverse tw-justify-center tw-items-center ">
@@ -725,7 +719,7 @@ onBeforeUnmount(() => {
                 </v-col>
                 <v-col >
                   <div class="tw-flex  tw-items-center tw-gap-1  tw-text-sm">
-                    <div class="my-badge !tw-bg-secondary"></div>
+                    <div class="my-badge !tw-bg-[#3dccfd]"></div>
                     vendido
                   </div>
                 </v-col>
@@ -742,7 +736,7 @@ onBeforeUnmount(() => {
                     <div
                         v-for="(comodo, index) in matrizRooms.volta"
                         :key="index"
-                        :class="comodo?.id ? (comodo.is_ocupado ? '!tw-bg-secondary tw-cursor-not-allowed' : roomsSelected.dataVolta.selectedsById?.includes(comodo) ? '!tw-bg-yellow-400' : 'tw-bg-green-400') : 'tw-bg-gray-200'"
+                        :class="comodo?.id ? (comodo.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataVolta.selectedsById?.includes(comodo) ? '!tw-bg-yellow-400' : 'tw-bg-green-400') : 'tw-bg-gray-200'"
                         class="text-center tw-rounded-[5px] !tw-text-white tw-font-black tw-px-1 tw-py-[2px] tw-text-xs tw-h-[24px] tw-min-w-[30px] tw-cursor-pointer "
                         @click="comodo?.id && !comodo.is_ocupado ? onClickRoom(comodo,null,'dataVolta') : ''"
                     >
@@ -759,10 +753,11 @@ onBeforeUnmount(() => {
                     <template v-for="item in dataVolta.tipos_comodos">
                       <v-col v-if="item.id !== 4 && item.id !== 1 " :key="item.id" cols="12"  md="6" lg="4">
                         <v-card
+                            class="!tw-border-4 !tw-border-blue-400"
                             flat
                             @click="roomsFree.volta.find(it=>it.tipo_comodidade_id === item.id)?.quantidade > 0 ? onClickRoom(null,item.id,'dataVolta') : ''"
                             :class="roomsSelected.dataVolta.selectedsByType?.find(it=>item.id == it.type_comodo_id)?.quantidade > 0 ? '!tw-bg-yellow-400' :
-                            roomsFree.volta.find(it=>it.tipo_comodidade_id === item.id)?.quantidade === 0 ? '!tw-bg-secondary tw-cursor-not-allowed' : '!tw-bg-green-400'
+                            roomsFree.volta.find(it=>it.tipo_comodidade_id === item.id)?.quantidade === 0 ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : '!tw-bg-green-400'
                             "
                         >
                           <v-row class="tw-p-3 !tw-text-white">
@@ -786,7 +781,7 @@ onBeforeUnmount(() => {
                       <v-card
                           flat
                           @click="!item.is_ocupado ? onClickRoom(item, null,'dataVolta') : ''"
-                          :class="(item.is_ocupado ? '!tw-bg-secondary tw-cursor-not-allowed' : roomsSelected.dataVolta.selectedsById?.includes(item) ? '!tw-bg-yellow-400' : '!tw-bg-green-400')"
+                          :class="(item.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataVolta.selectedsById?.includes(item) ? '!tw-bg-yellow-400' : '!tw-bg-green-400')"
                       >
                         <v-row class="tw-p-3 !tw-text-white">
                           <v-col cols="9" class=" tw-text-xs">

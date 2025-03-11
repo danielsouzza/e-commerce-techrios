@@ -137,6 +137,18 @@ onMounted(getFilterItems)
                 @update:modelValue="getFilterItems"
                 :custom-filter="customFilter"
             >
+              <template v-slot:selection="{ props, item }">
+                <v-list-item
+                    v-bind="props"
+                    :title="item.raw.nome+'/'+item.raw.uf"
+                ></v-list-item>
+              </template>
+              <template v-slot:item="{ props, item }">
+                <v-list-item
+                    v-bind="props"
+                    :title="item.raw.nome+'/'+item.raw.uf"
+                ></v-list-item>
+              </template>
               <template #prepend-inner>
                 <Icon icon="solar:map-arrow-up-bold" class="mr-2"/>
               </template>
@@ -160,8 +172,20 @@ onMounted(getFilterItems)
                 :items="filterOptions.municipiosDestino"
                 :custom-filter="customFilter"
             >
+              <template v-slot:selection="{ props, item }">
+                <v-list-item
+                    v-bind="props"
+                    :title="item.raw.nome+'/'+item.raw.uf"
+                ></v-list-item>
+              </template>
+              <template v-slot:item="{ props, item }">
+                <v-list-item
+                    v-bind="props"
+                    :title="item.raw.nome+'/'+item.raw.uf"
+                ></v-list-item>
+              </template>
               <template #prepend-inner>
-                <Icon icon="flowbite:map-pin-alt-solid" class="mr-2"/>
+                <Icon icon="solar:map-arrow-up-bold" class="mr-2"/>
               </template>
             </v-autocomplete>
           </div>
