@@ -32,13 +32,13 @@ import {Icon} from "@iconify/vue";
           <ListExpensiveItem title="Institucional" class="tw-w-full ">
             <ul>
               <li class="tw-pb-1 tw-font-normal">
-                <RouterLink  :to="{name: 'home'}">
+                <RouterLink  :to="{name: 'quem-somos'}">
                   Quem somos
                 </RouterLink>
               </li>
 
               <li class="tw-pb-1 tw-font-normal">
-                <RouterLink  :to="{name: 'home'}">
+                <RouterLink  :to="{name: 'vantagens'}">
                   Vantagens
                 </RouterLink>
               </li>
@@ -53,7 +53,7 @@ import {Icon} from "@iconify/vue";
                 </RouterLink>
               </li>
               <li class="tw-pb-1 tw-font-normal">
-                <RouterLink  :to="{name: 'home'}">
+                <RouterLink  :to="{name: 'politica-de-privacidade'}">
                   Politicas e privacidades
                 </RouterLink>
               </li>

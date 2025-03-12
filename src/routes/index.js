@@ -31,6 +31,24 @@ const routes = [
         meta: { title: 'Institucional' }
     },
     {
+        path: '/quem-somos',
+        component: () => import('../pages/QuemSomos.vue'),
+        name: 'quem-somos',
+        meta: { title: 'Quem somos' }
+    },
+    {
+        path: '/politica-de-privacidade',
+        component: () => import('../pages/PoliitcasPrivaciadedades.vue'),
+        name: 'politica-de-privacidade',
+        meta: { title: 'Políticas de Privacidades' }
+    },
+    {
+        path: '/vantagens',
+        component: () => import('../pages/Vantagens.vue'),
+        name: 'vantagens',
+        meta: { title: 'Vantagens' }
+    },
+    {
         path: '/viagens-imbativeis',
         component: () => import('../pages/PrecosEmbativeis.vue'),
         name: 'viagens-imbativeis',
