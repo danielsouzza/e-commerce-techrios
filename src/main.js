@@ -18,7 +18,6 @@ import * as directives from 'vuetify/directives'
 import VueTheMask from 'vue-the-mask'
 import { createPinia } from 'pinia'
 import '@mdi/font/css/materialdesignicons.css';
-import "vue-toastification/dist/index.css";
 import { pt } from 'vuetify/locale'
 
 import router from './routes'
