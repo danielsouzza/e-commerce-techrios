@@ -46,14 +46,15 @@ onMounted(() => {
           show-arrows="hover"
           hide-delimiter-background
       >
-        <div v-if="slides.length > 0 && !imagesLoaded " class="carousel-placeholder !tw-h-[170px] lg:!tw-h-[500px]" ></div>
+        <div v-if="slides.length == 0 || !imagesLoaded " class="carousel-placeholder !tw-h-[170px] lg:!tw-h-[500px]" ></div>
 
         <a v-for="(item, i) in slides" :key="i" :href="item.redirect_url" target="_blank">
           <v-carousel-item
               class="my-carousel !tw-h-[170px] lg:!tw-h-full"
               cover
               :src="item.image_url"
-              @loadstart="imageLoaded"
+              alt="banner principal"
+              @load="imageLoaded"
           >
             <template v-slot:placeholder>
               <v-row align="center" class="fill-height ma-0" justify="center">

@@ -3,11 +3,9 @@
 import {computed, reactive, ref} from "vue";
 import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
-import { useToast } from "vue-toastification";
 import {useRoute} from "vue-router";
 import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
 
-const toast = useToast();
 const tab = ref('reset-password')
 const route = useRoute();
 const visible1 = ref(false);

@@ -8,8 +8,7 @@ import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
 import {
   converterData,
-  formatDateToServe,
-  isValidDate,
+  formatDateToServe, isValidDate,
   permitirDatasNascimento,
   validarCPF,
   validarEmail

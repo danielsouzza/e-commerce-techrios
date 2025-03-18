@@ -6,6 +6,10 @@ import {computed} from "vue";
 
 const props = defineProps({
   images:Array,
+  alt:{
+    type:String,
+    default:'Image do município de destino'
+  }
 })
 
 const baseurl = getApiBaseUrl().replaceAll('api','')
@@ -32,14 +36,12 @@ const imagesRandom = computed(()=>{
       hide-delimiter-background
   >
     <v-carousel-item
-
-
         v-for="(item,i) in imagesRandom"
         cover
         :key="i"
         :src="baseurl + item.path"
+        :alt="alt"
     >
-
     </v-carousel-item>
 
   </v-carousel>

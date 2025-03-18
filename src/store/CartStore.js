@@ -77,6 +77,10 @@ export const useCartStore = defineStore('cart', {
             },0)
         },
 
+        getCountTickets(){
+            return this.order?.passagens_agrupadas?.length
+        },
+
         getTotalTaxa(){
             return this.order?.passagens_agrupadas?.reduce((total, item) => {
                 return total + item.passagem_pedidos.reduce((t, i) => {

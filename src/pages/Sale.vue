@@ -25,7 +25,6 @@ import {useCartStore} from "../store/CartStore.js";
 import router from "../routes/index.js";
 import CartItem from "../components/app/Cart/CartItem.vue";
 import {userAuthStore} from "../store/AuthStore.js";
-import { useToast } from "vue-toastification";
 import {getApiBaseUrl} from "../services/api.js";
 import {closeAllCards, showErrorNotification, showSuccessNotification} from "../event-bus.js";
 

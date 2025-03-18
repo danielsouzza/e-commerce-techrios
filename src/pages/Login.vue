@@ -1,13 +1,12 @@
 <script setup>
 
-import {reactive, ref, watch} from "vue";
+import {reactive, ref} from "vue";
 import {routes} from "../services/fetch.js";
 import router from "../routes/index.js";
 import {userAuthStore} from "../store/AuthStore.js";
 import {useCartStore} from "../store/CartStore.js";
 import {getAppBaseUrl} from "../services/api.js";
 import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
-import { useRouter} from "vue-router";
 
 
 const props  =  defineProps({

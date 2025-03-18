@@ -7,7 +7,7 @@ import {routes} from "../services/fetch.js";
 import {VDateInput} from 'vuetify/labs/VDateInput'
 import axios from "axios";
 import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
-import {converterData, formatDateToServe, validarCPF, validarEmail} from "../Helper/Ultis.js";
+import { formatDateToServe, validarCPF, validarEmail} from "../Helper/Ultis.js";
 import router from "../routes/index.js";
 import {useRoute} from "vue-router";
 import {getAppBaseUrl} from "../services/api.js";

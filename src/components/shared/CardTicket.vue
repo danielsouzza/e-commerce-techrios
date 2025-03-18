@@ -16,18 +16,15 @@ import {
   gerarStringTiposComodos
 } from "../../Helper/Ultis.js";
 import {getApiBaseUrl} from "../../services/api.js";
-import { useToast } from "vue-toastification";
 import {
   CLOSE_ALL_CARD_TICKETS,
   emitter,
-  SHOW_NOTIFICATION,
   showErrorNotification,
   showSuccessNotification
 } from "../../event-bus.js";
 import TravelImages from "./TravelImages.vue";
 
 
-const toast = useToast();
 const props = defineProps({
   modelValue: Object,
   dataIda: Object,
@@ -58,7 +55,6 @@ const roomsSelected = ref({
 })
 
 const step = ref(1)
-const baseurl = getApiBaseUrl().replaceAll('api','')
 const matrizRooms = ref({
   ida:[],
   volta:[]
@@ -132,7 +128,6 @@ function getQuantityRoomsFree() {
     }else{
       roomsFree.value.volta = response.data.data;
     }
-    console.log(roomsFree.value)
   });
 
 }
@@ -176,8 +171,6 @@ function qunatidadeTotalPassagens(typeTravel='dataIda'){
   const totalByType = roomsSelected.value[typeTravel].selectedsByType.reduce((i,j)=>{
     return i + j.quantidade
   },0)
-
-  console.log(roomsSelected.value[typeTravel].selectedsById)
   const totalById = roomsSelected.value[typeTravel].selectedsById.reduce((i,j)=>{
     return i + j.quantidade
   },0)
@@ -224,7 +217,7 @@ function onClickRoom(room, type,typeTravel='dataIda') {
       }
     }
   }catch (error){
-    toast.error(error.message);
+    showErrorNotification(error.message);
   }
 
 }
@@ -244,7 +237,7 @@ function incrementComodo(type, typeTravel='dataIda') {
       type_comodo.quantidade++
     }
   }catch (error){
-    toast.error(error.message);
+    showErrorNotification(error.message);
   }
 
 }
@@ -470,7 +463,7 @@ onBeforeUnmount(() => {
       <div class="lg:tw-flex tw-justify-between tw-items-center ">
         <div class="tw-flex tw-justify-between tw-items-center  mt-3 tw-w-full mr-10">
           <div>
-            <TravelImages :images="dataIda.municipio_destino.images" class="!tw-w-[120px] !tw-h-[50px]"/>
+            <TravelImages :alt="dataIda.municipio_destino.nome" :images="dataIda.municipio_destino.images" class="bg-grey-lighten-2 !tw-w-[120px] !tw-h-[50px]"/>
           </div>
           <div class="tw-flex lg:tw-ml-5 tw-text-[10px] tw-gap-4 lg:tw-gap-6 lg:tw-text-sm">
             <div>
@@ -505,7 +498,7 @@ onBeforeUnmount(() => {
       <div class="lg:tw-flex tw-justify-between tw-items-center " >
         <div class="tw-flex tw-justify-between tw-items-center  mt-3 tw-w-full mr-10">
           <div>
-            <TravelImages :images="dataVolta.municipio_destino.images" class="!tw-w-[120px] !tw-h-[50px]"/>
+            <TravelImages :alt="dataVolta.municipio_destino.nome"  :images="dataVolta.municipio_destino.images" class="!tw-w-[120px] !tw-h-[50px]"/>
           </div>
           <div class="tw-flex lg:tw-ml-5 tw-text-[10px] tw-gap-4 lg:tw-gap-6 lg:tw-text-sm">
             <div>

@@ -4,11 +4,19 @@ import 'vuetify/styles'
 import './assets/style.css';
 import App from './App.vue'
 import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
+import {
+    VApp, VAppBar, VAutocomplete, VBtn, VBtnToggle, VCard, VCardActions,
+    VCardText, VCardTitle, VCarousel, VCarouselItem, VCheckbox, VChip, VCol,
+    VContainer, VDataTable, VDialog, VDivider, VExpandTransition, VForm, VIcon, VImg,
+    VLayout, VList, VListGroup, VListItem, VMenu, VNavigationDrawer, VOtpInput, VAvatar,
+    VOverlay, VProgressCircular, VProgressLinear, VResponsive, VRow, VSelect, VSheet,
+    VSkeletonLoader, VSpacer, VTab, VTabs, VTabsWindow, VTabsWindowItem, VTextField, VToolbar, VTooltip,
+    VWindow, VWindowItem, VBadge
+} from 'vuetify/components';
+
 import * as directives from 'vuetify/directives'
 import VueTheMask from 'vue-the-mask'
 import { createPinia } from 'pinia'
-import Toast from "vue-toastification";
 import '@mdi/font/css/materialdesignicons.css';
 import "vue-toastification/dist/index.css";
 import { pt } from 'vuetify/locale'
@@ -69,7 +77,12 @@ async function fetchTheme() {
             locale: 'pt',
             messages:{pt}
         },
-        components,
+        components:{
+            VBtn, VCard, VWindow, VWindowItem, VCheckbox, VContainer, VAutocomplete, VCardActions, VSpacer, VListItem, VList,VListGroup,
+            VBtnToggle,VMenu,VLayout, VApp, VAppBar, VNavigationDrawer, VToolbar, VTabsWindow, VTabsWindowItem, VResponsive, VRow, VCol,
+            VDivider, VDialog, VForm, VTextField, VSelect, VProgressLinear, VProgressCircular, VIcon, VSheet, VOtpInput, VCardText, VSkeletonLoader,
+            VCardTitle, VChip, VOverlay, VCarousel, VCarouselItem, VImg,VTooltip,VExpandTransition,VDataTable,VTabs,VTab,VAvatar,VBadge
+        },
         directives,
         theme: {
             defaultTheme: 'customTheme',
@@ -84,10 +97,7 @@ async function fetchTheme() {
     app.use(createPinia());
     app.use(VueTheMask);
     app.use(router);
-    app.use(Toast,{})
     app.use(vuetify);
-
     app.provide('themeConfig', themeConfig);
-
     app.mount('#app');
 })();

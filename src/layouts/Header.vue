@@ -8,6 +8,7 @@ import {routes} from "../services/fetch.js";
 import Cart from "../components/app/Cart/Cart.vue";
 import {userAuthStore} from "../store/AuthStore.js";
 import router from "../routes/index.js";
+import {useCartStore} from "../store/CartStore.js";
 
 const authStore = userAuthStore()
 const appsdrawer = ref(false);
@@ -90,7 +91,16 @@ onMounted(()=>{
                 <div class="navigation d-lg-flex d-none">
                   <Navigation />
                 </div>
-                <v-btn variant="outlined" color="secondary"  icon  size="small"   class="d-lg-flex d-none !tw-font-extrabold" @click="showCart = true">
+                <v-badge
+                    v-if="useCartStore().getCountTickets() > 0"
+                    color="info"
+                    :content="useCartStore().getCountTickets()"
+                >
+                  <v-btn variant="outlined" color="secondary"  icon  size="small"   class="d-lg-flex d-none !tw-font-extrabold" @click="showCart = true">
+                    <Icon icon="solar:cart-3-broken" width="20"  class=" " />
+                  </v-btn>
+                </v-badge>
+                <v-btn v-else variant="outlined" color="secondary"  icon  size="small"   class="d-lg-flex d-none !tw-font-extrabold" @click="showCart = true">
                   <Icon icon="solar:cart-3-broken" width="20"  class=" " />
                 </v-btn>
                 <v-menu
@@ -102,10 +112,7 @@ onMounted(()=>{
                       <Icon icon="mdi:account-circle-outline" width="25"  class="mr-2"/> {{getFirstAndLastName()}}
                     </v-btn>
                   </template>
-
                   <v-card class="mt-1">
-
-
                     <v-list>
                       <v-list-item>
                         <RouterLink  :to="{name: 'area-do-cliente',params:{tab:'perfil'}}">
@@ -147,8 +154,6 @@ onMounted(()=>{
                 </template>
 
                 <v-card class="mt-1">
-
-
                   <v-list>
                     <v-list-item>
                       <RouterLink  :to="{name: 'area-do-cliente',params:{tab:'perfil'}}">
@@ -179,7 +184,6 @@ onMounted(()=>{
             </v-toolbar>
           </v-container>
         </v-app-bar>
-
       </v-layout>
     </div>
 
