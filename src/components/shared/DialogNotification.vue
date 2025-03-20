@@ -1,6 +1,7 @@
 <script setup>
 import { ref, watch, computed } from 'vue';
 import { VIcon } from 'vuetify/components';
+import {Icon} from "@iconify/vue";
 
 const props = defineProps({
   modelValue: Boolean,
@@ -21,10 +22,16 @@ const show = ref(props.modelValue);
 const progress = ref(100);
 let interval = null;
 
-const colors = computed(() => ({
-  bg: props.type === 'success' ? 'green' : 'red',
-  icon: props.type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle'
-}));
+const colors = computed(() => {
+  switch(props.type) {
+    case 'success':
+      return { bg: 'green', icon: 'icon-park-solid:success' };
+    case 'info':
+      return { bg: 'blue', icon: 'gg:info' };
+    default:
+      return { bg: 'red', icon: 'mi:circle-error' };
+  }
+});
 
 
 const startProgress = () => {
@@ -51,7 +58,7 @@ const closeNotification = () => {
 </script>
 
 <template>
-  <v-overlay  v-model="show"  @click="closeNotification" class="!tw-top-[30%] !tw-left-[42.5%]">
+  <v-overlay  v-model="show"  @click="closeNotification" class="!tw-top-[10%] !tw-left-[42.5%]">
     <transition name="slide-fade">
       <div
           v-if="show"
@@ -60,8 +67,9 @@ const closeNotification = () => {
       >
         <div class="tw-w-full tw-flex tw-flex-col tw-items-center tw-pb-3 tw-text-center">
           <v-icon class="close-btn" icon="mdi-close" @click="emit('update:modelValue', false)"></v-icon>
-          <v-icon class="icon" :icon="colors.icon"></v-icon>
-          <span class="message">{{ message }}</span>
+          <Icon :icon="colors.icon" width="30" class="icon"  />
+<!--          <v-icon class="icon" :icon="colors.icon"></v-icon>-->
+          <span class="message mt-2">{{ message }}</span>
         </div>
 
         <div class="progress-bar" :style="{ width: `${progress}%` }"></div>

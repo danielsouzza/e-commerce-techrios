@@ -41,7 +41,7 @@ onMounted(()=>{
 
   <v-card  color="primary" rounded="0"  class="!tw-py-6">
     <div class="maxWidth tw-flex  !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
-      <div class="text-center lg:tw-text-start tw-py-2 px-5 tw-text-2xl  tw-text-secondary"><strong class="tw-font-bold"> Rios de Ofertas</strong> </div>
+      <div class="text-center lg:tw-text-start tw-py-2 px-5 tw-text-2xl  tw-text-secondary"><strong class="tw-font-bold">Super Ofertas</strong> </div>
     </div>
   </v-card>
 

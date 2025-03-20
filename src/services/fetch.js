@@ -40,6 +40,7 @@ export const routes = {
     'user.reset-password-confirm':(params= {}) => api.post('/login/resetar-senha',params),
 
     'newletters':(params= {}) => api.post('/newsletter',params),
+    'user.notification':(params= {}) => api.post('/trechos-viagem/notificar-trecho',params),
 
 
 }

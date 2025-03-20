@@ -70,7 +70,7 @@ onMounted(()=>{
          Rios de ofertas para<br>
          você navegar!
        </div>
-       <RouterLink  :to="{name: 'rios-de-ofertas'}">
+       <RouterLink  :to="{name: 'super-ofertas'}">
          <v-btn color="secondary" class="my-5" variant="outlined" rounded>
            <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs" >VER MAIS VIAGENS
              <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>

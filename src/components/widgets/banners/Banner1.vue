@@ -48,10 +48,11 @@ onMounted(() => {
       >
         <div v-if="slides.length == 0 || !imagesLoaded " class="carousel-placeholder !tw-h-[170px] lg:!tw-h-[500px]" ></div>
 
-        <a v-for="(item, i) in slides" :key="i" :href="item.redirect_url" target="_blank">
+        <a v-for="(item, i) in slides" :key="i" :href="item.redirect_url" :target="item.target">
           <v-carousel-item
               class="my-carousel !tw-h-[170px] lg:!tw-h-full"
               cover
+              :class="item.redirect_url ? 'tw-cursor-pointer' : ''"
               :src="item.image_url"
               alt="banner principal"
               @load="imageLoaded"

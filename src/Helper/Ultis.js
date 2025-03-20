@@ -69,7 +69,7 @@ function formatDateToServe(inputDate) {
 function getMonicipioLabel(codigo, municipios, filtersData) {
     const municipioList = filtersData[municipios];
     if (!municipioList || !Array.isArray(municipioList)) return '';
-    const municipio = municipioList.find(it => it.codigo == codigo);
+    const municipio = municipioList.find(it => it.slug == codigo);
     return municipioLabel(municipio);
 }
 

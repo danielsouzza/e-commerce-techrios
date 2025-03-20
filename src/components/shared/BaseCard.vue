@@ -30,6 +30,7 @@ const classes = computed(()=>{
   <v-container class=" !tw-p-0 !tw-mx-0">
     <v-card flat  rounded="lg"  >
       <div v-if="title" :class="'!tw-bg-'+color" class="tw-text-xs tw-font-extrabold  !tw-text-white tw-px-4 tw-py-2 pb-5 tw-uppercase" >{{title}}</div>
+
       <v-card
           :class="classes"
           :variant="active ? 'outlined': 'flat' "

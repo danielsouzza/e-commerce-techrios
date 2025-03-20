@@ -8,7 +8,7 @@ const scrollToBottom = () => {
 </script>
 
 <template>
-  <RouterLink  :to="{name: 'rios-de-ofertas'}">
+  <RouterLink  :to="{name: 'super-ofertas'}">
     <v-btn class="hidden-sm-and-down" :ripple="false" rounded="sm" variant="text">
       <span class="tw-text-p">SUPER OFERTAS</span>
     </v-btn>

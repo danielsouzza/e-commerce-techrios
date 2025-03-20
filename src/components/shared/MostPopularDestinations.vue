@@ -4,6 +4,8 @@ import {Carousel, Slide} from "vue3-carousel";
 import {routes} from "../../services/fetch.js";
 import {computed, onMounted, ref} from "vue";
 import {getApiBaseUrl} from "../../services/api.js";
+import router from "../../routes/index.js";
+import {formatDateToServe} from "../../Helper/Ultis.js";
 
 
 const data = ref([])
@@ -46,6 +48,12 @@ function getDestinations(){
   })
 }
 
+function goToMostPopularPage(item){
+  router.push({name: "destinos-mais-procurados",query: {
+      destino: item.municipio.codigo,
+    }})
+}
+
 onMounted(()=>{
   getDestinations();
 })
@@ -58,7 +66,7 @@ onMounted(()=>{
     <div class="maxWidth">
       <v-card-title class="tw-text-center !tw-px-0  lg:tw-text-start !tw-font-black tw-text-primary !tw-text-2xl !tw-py-5">Destinos mais procurados</v-card-title>
       <Carousel v-bind="config" class="tw-w-[100vw] lg:tw-w-full tw-mb-10 my-carrousel">
-        <Slide v-for="(item, n) in data" :key="item.id" >
+        <Slide v-for="(item, n) in data" :key="item.id"  @click="goToMostPopularPage(item)" class="tw-cursor-pointer">
           <v-img
               cover
               gradient="to top, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.6) 20%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0) 50%"
@@ -76,7 +84,6 @@ onMounted(()=>{
                   class="fill-height ma-0"
                   justify="center"
               >
-
               </v-row>
             </template>
           </v-img>

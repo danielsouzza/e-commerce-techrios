@@ -13,16 +13,22 @@ const routes = [
         meta: { title: 'Home' }
     },
     {
-        path: '/rios-de-ofertas',
+        path: '/super-ofertas',
         component: () => import('../pages/RiosDeOfertas.vue'),
-        name: 'rios-de-ofertas',
-        meta: { title: 'Rios de Ofertas' }
+        name: 'super-ofertas',
+        meta: { title: 'Super Ofertas' }
     },
     {
         path: '/viagens-em-destaque',
         component: () => import('../pages/Destaques.vue'),
         name: 'viagens-em-destaque',
         meta: { title: 'Viagens em Destaque' }
+    },
+    {
+        path: '/destinos-mais-procurados',
+        component: () => import('../pages/MaisBuscados.vue'),
+        name: 'destinos-mais-procurados',
+        meta: { title: 'Destinos Mais procurados' }
     },
     {
         path: '/institucional',

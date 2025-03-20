@@ -78,12 +78,14 @@ const validarDataVolta = computed(() => {
 });
 
 function getFilterItems(){
+  props.modelValue.destino = null
   const params = {
     origem: props.modelValue.origem || '',
     subdomain:  window.subdomain || ''
   }
   routes["filtros"](params).then(response => {
     if(!response.data.data.success){
+
       filterOptions.value = response.data.data;
     }
   })
@@ -125,7 +127,7 @@ onMounted(getFilterItems)
                 flat
                 menu-icon=""
                 hide-details="auto"
-                item-value="codigo"
+                item-value="slug"
                 item-title="nome"
                 variant="solo"
                 :rules="[v => !!v || 'Esse campo é obrigatório']"
@@ -160,7 +162,7 @@ onMounted(getFilterItems)
             <v-autocomplete
                 flat
                 menu-icon=""
-                item-value="codigo"
+                item-value="slug"
                 item-title="nome"
                 v-model="modelValue.destino"
                 :rules="[v => !!v || 'Esse campo é obrigatório']"

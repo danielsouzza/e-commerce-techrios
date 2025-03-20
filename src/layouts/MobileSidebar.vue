@@ -32,7 +32,7 @@ function logout() {
         </div>
         <v-list class="">
             <v-list-item rounded="md">
-              <RouterLink  :to="{name: 'rios-de-ofertas'}">
+              <RouterLink  :to="{name: 'super-ofertas'}">
                 <v-btn   rounded="sm" variant="text">
                   <span class="tw-text-p">SUPER OFERTAS</span>
                 </v-btn>

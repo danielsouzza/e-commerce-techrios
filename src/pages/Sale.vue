@@ -17,7 +17,6 @@ import {
   getMonicipioLabel, isValidDate, permitirDatasNascimento, validarCPF, validarEmail
 } from "../Helper/Ultis.js";
 import PassegerForm from "../components/app/PassegerForm.vue";
-import {VDateInput} from 'vuetify/labs/VDateInput'
 import CardPayment from "../components/shared/CardPayment.vue";
 import CopyToClipboard from "../components/shared/CopyToClipboard.vue";
 import VueQrcode from "vue-qrcode";
@@ -26,13 +25,14 @@ import router from "../routes/index.js";
 import CartItem from "../components/app/Cart/CartItem.vue";
 import {userAuthStore} from "../store/AuthStore.js";
 import {getApiBaseUrl} from "../services/api.js";
-import {closeAllCards, showErrorNotification, showSuccessNotification} from "../event-bus.js";
+import {closeAllCards, showErrorNotification, showInfoNotification, showSuccessNotification} from "../event-bus.js";
 
 
 const props = defineProps({
   tab:String,
 })
 
+const showFormNotification = ref(false)
 const timeToPay = ref(30 * 60)
 const cartStore = useCartStore()
 const authStore = userAuthStore()
@@ -89,10 +89,16 @@ const formSale = reactive({
   errors:{},
   processing:false
 })
-const tiposDocComprador = [
-  { id:5, nome: 'CPF', tamanho: 0, mask: '###.###.###-##' },
-  { id:6, nome: 'CNPJ', tamanho: 11, mask: '##.###.###/####-##' },
-];
+
+const formNotification = reactive({
+  email:null,
+  telefone: null,
+  url:getApiBaseUrl()+'/comprar-passagem/escolher-passagem',
+  municipio_origem_id:null,
+  municipio_destino_id:null,
+  errors:{}
+})
+
 const nextDays = ref([])
 const years = computed(() => {
       const currentYear = new Date().getFullYear();
@@ -161,8 +167,8 @@ const updateWidth = () => {
 };
 
 const updateFilters = () => {
-  filtersSelected.value.origem = parseInt(route.query.origem) || null;
-  filtersSelected.value.destino = parseInt(route.query.destino) || null;
+  filtersSelected.value.origem = route.query.origem || null;
+  filtersSelected.value.destino = route.query.destino || null;
   filtersSelected.value.type = route.query.type;
   filtersSelected.value.dataIda = new Date(route.query.dataIda + 'T00:00:00') || new Date().toISOString().split('T')[0];
   filtersSelected.value.dataVolta = route.query.dataVolta ? new Date(route.query.dataVolta + 'T00:00:00') : null;
@@ -222,6 +228,16 @@ function getTrechos(){
   params.append('subdomain', window.subdomain || '')
   waitServe.value = true
   routes["trechos-viagem"](params).then(response => {
+
+    if(response.data.data.trechos.data.length === 0){
+      showFormNotification.value = true
+    }
+
+    if(filtersSelected.value.type == "ida-e-volta"  && response.data.data.tipo == "ida" && response.data.data.trechos.data.length > 0){
+      showInfoNotification('Infelizmente não temos viajem de volta para o trecho escolhidos, mas temos viagem somente de ida');
+      filtersSelected.value.type = 'somente-ida'
+
+    }
     trechosWithTravels.value = response.data
     const date = filtersSelected.value.dataIda.getDate()
     const first = nextDays.value[0].getDate()
@@ -379,9 +395,9 @@ const validateForm = () => {
 
   validateField('contato.nome', formSale.contato.nome, 'Por favor, insira seu nome e sobrenome.',formSale);
   validateField('contato.email', formSale.contato.nome, 'Por favor, insira seu email.',formSale);
-  validateField('contato.tipo_doc', formSale.contato.tipo_doc, 'Por favor, escolha um tipo de documento.',formSale);
+  // validateField('contato.tipo_doc', formSale.contato.tipo_doc, 'Por favor, escolha um tipo de documento.',formSale);
   validateField('contato.document', formSale.contato.document, 'Por favor, insira número do documento.',formSale);
-  validateField('contato.nascimento', formSale.contato.nascimento, 'Por favor, insira uma data de nascimento.',formSale);
+  // validateField('contato.nascimento', formSale.contato.nascimento, 'Por favor, insira uma data de nascimento.',formSale);
   validateField('contato.telefone', formSale.contato.telefone, 'Por favor, insira um número de telefone.',formSale);
 
   return !hasError
@@ -657,7 +673,7 @@ function showMoreticket(){
 }
 
 function getTicketPdf(){
-  const baseurl = getApiBaseUrl().replaceAll('api','')
+  const baseUrl = getApiBaseUrl().replaceAll('api','')
   const pathToReplace = "/var/www/storage/app/public/";
   const newPathPrefix = `${baseUrl}/storage/`;
 
@@ -700,6 +716,61 @@ watch(()=>props.tab,()=>{
 </script>
 
 <template>
+  <v-dialog max-width="600" v-model="showFormNotification">
+    <template v-slot:default="{ isActive }">
+      <v-card title="Trecho indisponível">
+        <v-card-text>
+          Opa, parece que o trecho que está procurando ainda não está disponível, mas já estamos informando as Empresas parceiras para liberarem as viagens.
+          Informe o seu Email e seu WhatsApp que iremos lhe avisar assim que estiver disponível.
+        </v-card-text>
+        <v-card-item>
+          <v-row class="tw-px-4">
+            <v-col cols="12">
+              <v-text-field
+                  v-model="formNotification.telefone"
+                  :error-messages="formNotification.errors.telefone"
+                  v-mask="'(##) #####-####'"
+                  variant="outlined"
+                  label="Telefone"
+                  hide-details="auto"
+              >
+                <template v-slot:prepend-inner>
+                  <Icon icon="mdi-light:phone" width="26"/>
+                </template>
+              </v-text-field>
+            </v-col>
+            <v-col cols="12">
+              <v-text-field
+                  variant="outlined"
+                  v-model="formNotification.email"
+                  :error-messages="formNotification.errors.email"
+                  label="E-mail"
+                  hide-details="auto"
+              >
+                <template v-slot:prepend-inner>
+                  <Icon icon="mdi-light:email" width="26"/>
+                </template>
+              </v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-item>
+
+        <v-card-actions>
+
+          <v-btn
+              text="Não quero ser avisado"
+              @click="showFormNotification = false"
+          ></v-btn>
+          <v-btn
+              variant="flat"
+              color="primary"
+              text="Quero ser avisado"
+              @click=""
+          ></v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
+  </v-dialog>
   <v-card  color="primary" rounded="0"  class="!tw-py-6">
     <div class="maxWidth tw-flex lg:!tw-mb-[70px] !tw-mb-[70px] !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
       <div class="text-center lg:tw-text-start tw-py-4 px-5 lg:tw-text-lg">
@@ -1031,14 +1102,29 @@ watch(()=>props.tab,()=>{
           </v-col>
           <v-col cols="12" md="9">
             <v-form ref="formRef">
-              <BaseCard title="Dados de quem está comprando" color="secondary">
+
+              <BaseCard title="Dados de quem irá viajar (IDA)" color="secondary" >
+                <PassegerForm v-for="(item,index) in formSale.dataComodos" :form="item" :key="index" :index="index"/>
+                <v-checkbox
+                    v-if="filtersSelected.type == 'ida-e-volta'"
+                    @update:modelValue="(arg)=>{if(arg) adicionarDadosIdaNaVolta(); else removerDadosIdaDaVolta()}"
+                    hide-details="auto"
+                    class="!tw-text-p tw-mt-3 !tw-text-sx"
+                    label="Adcionar dados da ida na volta"
+                >
+                </v-checkbox>
+              </BaseCard>
+              <BaseCard v-if="filtersSelected.type == 'ida-e-volta'" title="Dados de quem irá viajar (VOLTA)" color="secondary" class="mt-3">
+                <PassegerForm v-for="(item,index) in formSale.dataVolta?.dataComodos" :form="item" :key="index" :index="index"/>
+              </BaseCard>
+              <BaseCard title="Dados para contato" color="secondary" class="mt-3">
                 <v-row class="tw-px-2">
                   <v-col cols="12" md="6">
                     <v-text-field
-                       variant="outlined"
+                        variant="outlined"
                         v-model="formSale.contato.nome"
                         :error-messages="formSale.errors['contato.nome']"
-                        label="Nome do comprador"
+                        label="Nome para contato"
                         hide-details="auto"
                     >
                       <template v-slot:prepend-inner>
@@ -1048,7 +1134,7 @@ watch(()=>props.tab,()=>{
                   </v-col>
                   <v-col cols="12" md="6">
                     <v-text-field
-                       variant="outlined"
+                        variant="outlined"
                         v-model="formSale.contato.email"
                         :error-messages="formSale.errors['contato.email']"
                         label="E-mail"
@@ -1062,7 +1148,7 @@ watch(()=>props.tab,()=>{
 
                   <v-col cols="12" md="6">
                     <v-text-field
-                       variant="outlined"
+                        variant="outlined"
                         v-model="formSale.contato.telefone"
                         :error-messages="formSale.errors['contato.telefone']"
                         label="Telefone"
@@ -1075,53 +1161,19 @@ watch(()=>props.tab,()=>{
                     </v-text-field>
                   </v-col>
 
-
-                  <v-col cols="6" >
-                    <v-select
-                       variant="outlined"
-                        label="Documento"
-                        item-title="nome"
-                        item-value="id"
-                        v-model="formSale.contato.tipo_doc"
-                        :error-messages="formSale.errors['contato.tipo_doc']"
-                        hide-details="auto"
-                        :items="tiposDocComprador"
-                    >
-                    </v-select>
-                  </v-col>
-
-                  <v-col cols="6"  v-if="formSale.contato.tipo_doc">
+                  <v-col cols="6"  >
                     <v-text-field
-                       variant="outlined"
+                        variant="outlined"
                         v-model="formSale.contato.document"
                         :error-messages="formSale.errors['contato.document']"
-
                         label="Nº do documento"
-                        v-mask="formSale.contato.tipo_doc ?  tiposDocComprador[formSale.contato.tipo_doc-5]?.mask : '###########'"
+                        v-mask="'###.###.###-##'"
                         hide-details="auto"
                     >
                       <template v-slot:prepend-inner>
                         <Icon icon="material-symbols-light:id-card-outline" width="26"/>
                       </template>
                     </v-text-field>
-                  </v-col>
-                  <v-col cols="12" md="6">
-                    <v-date-input
-                        flat
-                        hide-detail="auto"
-                        prepend-icon=""
-                        hide-actions
-                        v-mask="'##/##/####'"
-                        :allowed-dates="permitirDatasNascimento"
-                        @change="(e)=>{formSale.contato.nascimento =  isValidDate(e.target._value)? new Date(converterData(e.target._value) + 'T00:00:00') : null}"
-                        v-model="formSale.contato.nascimento"
-                        :error-messages="formSale.errors['contato.nascimento']"
-                        variant="outlined"
-                        placeholder="Data de Nascimento">
-                      <template #default>
-                        <Icon icon="uis:calendar" class="mr-2"/>
-                      </template>
-                    </v-date-input>
                   </v-col>
                 </v-row>
                 <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
@@ -1132,20 +1184,6 @@ watch(()=>props.tab,()=>{
                     label="Adicionar como passageiro"
                 >
                 </v-checkbox>
-              </BaseCard>
-              <BaseCard title="Dados de quem irá viajar (IDA)" color="secondary" class="mt-3">
-                <PassegerForm v-for="(item,index) in formSale.dataComodos" :form="item" :key="index" :index="index"/>
-                <v-checkbox
-                    v-if="filtersSelected.type == 'ida-e-volta'"
-                    @update:modelValue="(arg)=>{if(arg) adicionarDadosIdaNaVolta(); else removerDadosIdaDaVolta()}"
-                    hide-details="auto"
-                    class="!tw-text-p tw-mt-3 !tw-text-sx"
-                    label="Adcionar dados da ida na volta"
-                >
-                </v-checkbox>
-              </BaseCard>
-              <BaseCard v-if="filtersSelected.type == 'ida-e-volta'" title="Dados de quem irá viajar (VOLTA)" color="secondary" class="mt-3">
-                <PassegerForm v-for="(item,index) in formSale.dataVolta?.dataComodos" :form="item" :key="index" :index="index"/>
               </BaseCard>
               <v-col cols="12">
                 <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
@@ -1164,7 +1202,6 @@ watch(()=>props.tab,()=>{
                 </div>
               </v-col>
             </v-form>
-
           </v-col>
         </v-row>
       </v-tabs-window-item>
@@ -1434,8 +1471,5 @@ watch(()=>props.tab,()=>{
 </template>
 
 <style scoped>
-.v-input--density-default {
-  --v-input-control-height: auto !important;
-  --v-input-padding-top: 16px;
-}
+
 </style>

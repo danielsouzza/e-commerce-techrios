@@ -45,7 +45,7 @@ onMounted(() => {
         v-model="show"
         :message="message"
         :type="type"
-        :timeout="4000"
+        :timeout="5000"
     >
     </DialogNotification>
   </div>

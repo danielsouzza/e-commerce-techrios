@@ -16,6 +16,10 @@ export function showErrorNotification(message) {
     emitter.emit(SHOW_NOTIFICATION, {type: 'error', message})
 }
 
+export function showInfoNotification(message) {
+    emitter.emit(SHOW_NOTIFICATION, {type: 'info', message})
+}
+
 export function closeAllCards(){
     emitter.emit(CLOSE_ALL_CARD_TICKETS)
 }
