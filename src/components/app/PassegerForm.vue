@@ -1,6 +1,7 @@
 <script setup>
 import {Icon} from "@iconify/vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
+import {converterData, isValidDate, permitirDatasNascimento} from "../../Helper/Ultis.js";
 
 const props = defineProps({
   form:Object,
@@ -82,7 +83,7 @@ const tiposDoc = [
           hide-details="auto"
           prepend-icon=""
           hide-actions
-          :allowed-dates="permitirDatas"
+          :allowed-dates="permitirDatasNascimento"
           v-mask="'##/##/####'"
           @change="(e)=>{form.nascimento =  isValidDate(e.target._value)? new Date(converterData(e.target._value) + 'T00:00:00') : null}"
           v-model="form.nascimento"

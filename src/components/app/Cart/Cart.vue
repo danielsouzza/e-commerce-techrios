@@ -56,15 +56,14 @@ watch(()=>props.auth,()=>{
       <v-col cols="6"  class="tw-text-end tw-text-lg tw-font-bold">
         {{formatCurrency(useCartStore().getTotal())}}
       </v-col>
-      <v-col>
-        <v-btn @click="useCartStore().clearCart()" variant="outlined" color="prmary" rounded="lg" class="tw-w-full" size="large">
-          <Icon icon="mynaui:cart-x" class="mr-2" width="30"/>
+      <v-col md="4">
+        <v-btn @click="useCartStore().clearCart()" variant="text" color="prmary" rounded="lg" class="tw-w-full" size="large">
           Limpar carrinho
         </v-btn>
       </v-col>
       <v-col  >
         <RouterLink :to="{name:'sale',params:{tab:'pagamento'}}">
-          <v-btn color="primary" rounded="lg" class="tw-w-full" size="large">Processar pedido</v-btn>
+          <v-btn color="primary" rounded="lg" class="tw-w-full" size="large"> Finalizar compra </v-btn>
         </RouterLink>
       </v-col>
 

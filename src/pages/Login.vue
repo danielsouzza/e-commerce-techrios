@@ -213,9 +213,9 @@ function goToHomePage(){
 
           <v-card-text class="text-center">
             <RouterLink  :to="{name: 'validar-email'}">
-              <div class="text-blue text-decoration-none">
+              <v-btn variant="tonal" color="secondary">
                 Criar uma conta?<v-icon icon="mdi-chevron-right"></v-icon>
-              </div>
+              </v-btn>
             </RouterLink>
           </v-card-text>
         </v-card>

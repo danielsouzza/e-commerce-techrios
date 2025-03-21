@@ -5,7 +5,29 @@ import CardNewLetters from "../components/shared/CardNewLetters.vue";
 import MostPopularDestinations from "../components/shared/MostPopularDestinations.vue";
 import {userAuthStore} from "../store/AuthStore.js";
 import {Icon} from "@iconify/vue";
+import {routes} from "../services/fetch.js";
+import {onMounted, ref} from "vue";
+import {getAppBaseUrl} from "../services/api.js";
 
+const empresas = ref([])
+
+function getEmpresas(){
+  routes["empresas"]({flag:1}).then(res => {
+    if(!res.data.data.success){
+      empresas.value = res.data.data
+    }
+  })
+}
+
+function gotToPage(item){
+  const urlObj = new URL(getAppBaseUrl());
+  urlObj.hostname = `${item.domain}.${urlObj.hostname}`;
+  window.location =  urlObj.toString();
+}
+
+onMounted(()=>{
+  getEmpresas()
+})
 
 </script>
 
@@ -108,18 +130,37 @@ import {Icon} from "@iconify/vue";
             </ListExpensiveItem>
             <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 lg:!tw-hidden" color="secondary"></v-divider>
             <v-card class="mt-5 tw-w-full">
-              <v-list  class="py-0 px-0 ">
-                <v-list-group >
-                  <template v-slot:activator="{ props }">
-                    <v-list-item v-bind="props">
-                      <template v-slot:title>
-                        <p ><small>Sites das embarcações</small></p>
-                      </template>
-                    </v-list-item>
-                  </template>
-                  <v-list-item title=""></v-list-item>
-                </v-list-group>
-              </v-list>
+              <v-autocomplete
+                  flat
+                  menu-icon=""
+                  hide-details="auto"
+                  item-value="id"
+                  item-title="xfant"
+                  variant="solo"
+                  return-object
+                  @update:modelValue="gotToPage"
+                  placeholder="Sites das embarcações"
+                  class="my-select mt-1"
+                  :items="empresas"
+              >
+
+              </v-autocomplete>
+<!--              <v-list  class="py-0 px-0 ">-->
+<!--                <v-list-group >-->
+<!--                  <template v-slot:activator="{ props }">-->
+<!--                    <v-list-item v-bind="props">-->
+<!--                      <template v-slot:title>-->
+<!--                        <p ><small>Sites das embarcações</small></p>-->
+<!--                      </template>-->
+<!--                    </v-list-item>-->
+<!--                  </template>-->
+<!--                  <v-list-item v-for="item in empresas" title="">-->
+<!--                    <RouterLink  :to="{name: 'home'}">-->
+<!--                      {{item.xfant}}-->
+<!--                    </RouterLink>-->
+<!--                  </v-list-item>-->
+<!--                </v-list-group>-->
+<!--              </v-list>-->
             </v-card>
           </div>
         </div>

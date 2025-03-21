@@ -68,7 +68,7 @@ onMounted(()=>{
 </script>
 
 <template>
-  <div class=" tw-flex tw-flex-col  tw-gap-10 lg:tw-flex-row-reverse  lg:tw-items-start tw-justify-center !tw-mt-5" v-if="trechosWithTravels.data?.trechos?.data.length > 0">
+  <div class=" tw-flex tw-flex-col  tw-gap-10 lg:tw-flex-row-reverse  lg:tw-items-start tw-justify-center !tw-mt-5" >
    <div class="tw-flex tw-flex-col tw-items-center lg:tw-flex-col-reverse">
      <div class="tw-flex tw-flex-col tw-w-full tw-items-center lg:tw-items-start">
        <div class=" tw-text-[25px] tw-font-extrabold tw-text-center lg:tw-text-start lg:tw-text-[35px] tw-text-primary " style="line-height: 35px">
@@ -92,6 +92,7 @@ onMounted(()=>{
            variant="solo"
            v-model="origem"
            item-value="codigo"
+           clearable
            item-title="nome"
            return-object
            placeholder="Alterar ponto de partida"
@@ -103,7 +104,7 @@ onMounted(()=>{
      </div>
    </div>
     <div class="lg:!tw-w-[75%] ">
-      <Carousel  v-bind="config" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-mb-4 my-carrousel">
+      <Carousel v-if="trechosWithTravels.data?.trechos?.data.length > 0"  v-bind="config" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-mb-4 my-carrousel">
         <Slide v-for="(item, n) in trechosWithTravels.data?.trechos?.data" :key="item.id">
           <CardTicket :data="item" :active="currentSlide === n -1"/>
         </Slide>
@@ -111,6 +112,11 @@ onMounted(()=>{
           <Pagination class="!tw-bottom-[-30px] "/>
         </template>
       </Carousel>
+      <div v-else class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
+        <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
+        <p class="tw-text-p mt-1"> Opa, parece que o trecho que está procurando não tem nenhuma promoção.</p>
+<!--        <v-btn @click="showFormNotification = true" variant="tonal" color="secondary" class="mt-3">Avise-me</v-btn>-->
+      </div>
     </div>
   </div>
 </template>

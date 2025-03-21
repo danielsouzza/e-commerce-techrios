@@ -50,11 +50,6 @@ export const useCartStore = defineStore('cart', {
             },0)
         },
 
-        clearCartLocal() {
-            this.order = null;
-            localStorage.removeItem('cart');
-        },
-
         getTotal(){
             return this.order?.passagens_agrupadas?.reduce((total, item) => {
                 return total + item.passagem_pedidos.reduce((t, i) => {
@@ -90,6 +85,33 @@ export const useCartStore = defineStore('cart', {
                     return t + ( i.taxa_embarque ?? 0)
                 },0)
             },0)
+        },
+
+        removerItem(item){
+
+            routes["order.delete"](item.pedido, item).then(response => {
+                this.order.passagens_agrupadas.forEach(group => {
+                    if(group.viagem.id == item.viagem_id){
+                        const comodoIndex = group.passagem_pedidos.findIndex(it=>item.comodos_ids.includes(it.comodo_id))
+                        if(comodoIndex >= 0){
+                            group.passagem_pedidos.splice(comodoIndex,1)
+                        }
+                    }
+                })
+                this.addItem(this.order)
+                if(this.getTotalTickets() === 0){
+                    this.clearCartLocal()
+                }
+                this.loadCart();
+            });
+
+
+        },
+
+        clearCartLocal() {
+            this.order = null;
+            localStorage.removeItem('cart');
+
         },
 
         async clearCart() {

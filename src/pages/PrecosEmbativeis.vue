@@ -10,7 +10,7 @@ import IconsBoat from "../components/ui-components/IconsBoat.vue";
 
 const loading = ref(true);
 const filtersSelected = ref({
-  quantia:8,origem:null,
+  quantia:8,destino:null,
 })
 const trechosWithTravels = ref([])
 const municipios = ref([])
@@ -18,7 +18,7 @@ const municipios = ref([])
 function getTrechosWithTravels() {
   const params = new URLSearchParams()
   params.append('com_desconto', 1)
-  params.append('origem', filtersSelected.value.origem ||'')
+  params.append('destino', filtersSelected.value.destino ||'')
   params.append('quantia', filtersSelected.value.quantia)
   params.append('subdomain', window.subdomain || '')
 
@@ -35,10 +35,15 @@ function showMoreticket(){
   getTrechosWithTravels()
 }
 
-function getMunicipios(search='') {
-  routes['municipios']({search:search}).then((response) => {
-
-    municipios.value = response.data.data;
+function getMunicipios(search=''){
+  const params = {
+    search:search,
+    com_desconto:1
+  }
+  routes["filtros"](params).then(response => {
+    if(!response.data.data.success){
+      municipios.value = response.data.data.municipiosDestino;
+    }
   })
 }
 
@@ -62,13 +67,13 @@ onMounted(()=>{
     <v-row v-if="trechosWithTravels.data?.trechos?.data.length > 0"   class="my-3">
       <v-col cols="12"  >
         <div class="tw-mb-3 ">
-          <div class="tw-flex tw-text-p   "><IconsBoat/> <span  class="tw-ml-3 tw-flex tw-flex-wrap">Viagens saindo de:<span class="tw-text-primary tw-font-black" > {{municipioLabel(origem)}}</span></span></div>
+          <div class="tw-flex tw-text-p   "><IconsBoat/> <span  class="tw-ml-3 tw-flex tw-flex-wrap">Viagens saindo de</span></div>
           <v-autocomplete
               flat
               hide-details
               variant="solo"
-              v-model="filtersSelected.origem"
-              item-value="codigo"
+              v-model="filtersSelected.destino"
+              item-value="slug"
               item-title="nome"
               placeholder="Alterar ponto de partida"
               class="my-select mt-1"

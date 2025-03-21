@@ -8,13 +8,13 @@ import BaseCard from "../components/shared/BaseCard.vue";
 import CardTicket from "../components/shared/CardTicket.vue";
 import CardFilter from "../components/shared/CardFilter.vue";
 import {
-  calcularValor, converterData,
+  calcularValor,
   formatarTempoViagem,
   formatCurrency,
   formatDate, formatDateToServe,
   formatMoney,
   gerarStringTiposComodos,
-  getMonicipioLabel, isValidDate, permitirDatasNascimento, validarCPF, validarEmail
+  getMonicipioLabel,
 } from "../Helper/Ultis.js";
 import PassegerForm from "../components/app/PassegerForm.vue";
 import CardPayment from "../components/shared/CardPayment.vue";
@@ -24,7 +24,7 @@ import {useCartStore} from "../store/CartStore.js";
 import router from "../routes/index.js";
 import CartItem from "../components/app/Cart/CartItem.vue";
 import {userAuthStore} from "../store/AuthStore.js";
-import {getApiBaseUrl} from "../services/api.js";
+import {getApiBaseUrl, getAppBaseUrl} from "../services/api.js";
 import {closeAllCards, showErrorNotification, showInfoNotification, showSuccessNotification} from "../event-bus.js";
 
 
@@ -33,6 +33,7 @@ const props = defineProps({
 })
 
 const showFormNotification = ref(false)
+const percentToPay = ref(0)
 const timeToPay = ref(30 * 60)
 const cartStore = useCartStore()
 const authStore = userAuthStore()
@@ -81,7 +82,6 @@ const formSale = reactive({
     email:'',
     telefone:'',
     tipo_doc:null,
-    data_nascimento:null,
     document:"",
   },
   dataComodos:[],
@@ -91,12 +91,13 @@ const formSale = reactive({
 })
 
 const formNotification = reactive({
-  email:null,
-  telefone: null,
-  url:getApiBaseUrl()+'/comprar-passagem/escolher-passagem',
+  email: authStore.user?.email ?? null,
+  telefone: authStore.user?.comprador.telefone ?? null,
+  url:getAppBaseUrl()+'/comprar-passagem/escolher-passagem',
   municipio_origem_id:null,
   municipio_destino_id:null,
-  errors:{}
+  errors:{},
+  processing:false
 })
 
 const nextDays = ref([])
@@ -142,6 +143,10 @@ const iniciarTemporizador = () => {
   intervalo = setInterval(() => {
     if (timeToPay.value > 0) {
       timeToPay.value--;
+      percentToPay.value += 100 / 60;
+      if (percentToPay.value >= 100) {
+        percentToPay.value = 1;
+      }
     } else {
       clearInterval(intervalo);
     }
@@ -229,10 +234,6 @@ function getTrechos(){
   waitServe.value = true
   routes["trechos-viagem"](params).then(response => {
 
-    if(response.data.data.trechos.data.length === 0){
-      showFormNotification.value = true
-    }
-
     if(filtersSelected.value.type == "ida-e-volta"  && response.data.data.tipo == "ida" && response.data.data.trechos.data.length > 0){
       showInfoNotification('Infelizmente não temos viajem de volta para o trecho escolhidos, mas temos viagem somente de ida');
       filtersSelected.value.type = 'somente-ida'
@@ -259,7 +260,9 @@ function getTrechos(){
     );
   }).catch(error => {
     waitServe.value = false
-    showErrorNotification(error.response.data.data.error);
+    if(error.response.data.data?.error){
+      showErrorNotification(error.response.data.data?.error);
+    }
   })
 }
 
@@ -390,7 +393,7 @@ const validateForm = () => {
     validateField('tipo_doc', it.tipo_doc, 'Por favor, escolha um tipo de documento.',it);
     validateField('document', it.document, 'Por favor, insira número do documento.',it);
     validateField('nascimento', it.nascimento, 'Por favor, insira uma data de nascimento.',it);
-    validateField('telefone', it.telefone, 'Por favor, insira um número de telefone.',it);
+    // validateField('telefone', it.telefone, 'Por favor, insira um número de telefone.',it);
   })
 
   validateField('contato.nome', formSale.contato.nome, 'Por favor, insira seu nome e sobrenome.',formSale);
@@ -446,7 +449,7 @@ function submitOrder(){
         cartStore.addItem(orderResponse.value)
         cartStore.loadCart()
         formPayment.order_id = orderResponse.value.id;
-        showSuccessNotification(response.data.message);
+        // showSuccessNotification(response.data.message);
         nextStep()
       }
       waitServe.value = false
@@ -559,7 +562,7 @@ function submitPaymentPix(){
       paymentPending.value = res.data.data;
       waitServe.value = false
       whatPayment.value = true
-      showSuccessNotification(res.data.message);
+      // showSuccessNotification(res.data.message);
       nextStep()
       iniciarTemporizador()
       checkStatusPayment()
@@ -571,6 +574,28 @@ function submitPaymentPix(){
   })
 }
 
+function submitFormNotification(){
+  const origem = filtersData.value.municipiosOrigem.find(it=>it.slug == filtersSelected.value.origem)?.id
+  const destino = filtersData.value.municipiosDestino.find(it=>it.slug == filtersSelected.value.destino)?.id
+  formNotification.municipio_origem_id = origem
+  formNotification.municipio_destino_id = destino
+  if(formNotification.email || formNotification.telefone){
+    formNotification.processing = true
+    routes["notification"](formNotification).then(response => {
+      if(response.data.success){
+        showSuccessNotification(response.data.message)
+      }
+      showFormNotification.value = false
+      formNotification.processing = false
+    }).catch(error=>{
+      showFormNotification.value = false
+      formNotification.processing = false
+    })
+  }else{
+    formNotification.errors['message'] = 'Por favor preencha pelo menos um dos comapos de contato'
+  }
+
+}
 function identificarCpfOuCnpj(valor) {
   if (typeof valor !== "string") return 0;
 
@@ -758,14 +783,16 @@ watch(()=>props.tab,()=>{
         <v-card-actions>
 
           <v-btn
-              text="Não quero ser avisado"
+              text="cancelar"
               @click="showFormNotification = false"
           ></v-btn>
           <v-btn
+              :disabled="formNotification.processing"
+              :loading="formNotification.processing"
               variant="flat"
               color="primary"
-              text="Quero ser avisado"
-              @click=""
+              text="confirmar"
+              @click="submitFormNotification"
           ></v-btn>
         </v-card-actions>
       </v-card>
@@ -877,9 +904,9 @@ watch(()=>props.tab,()=>{
                           menu-icon=""
                           hide-details="auto"
                           item-value="id"
-                          item-title="xnomr"
+                          item-title="xfant"
                           variant="solo"
-                          placeholder="Origem"
+                          placeholder="Empresas"
                           class="my-select mt-1"
                           v-model="filtersSelected.empresa"
                           :items="empresas"
@@ -963,7 +990,7 @@ watch(()=>props.tab,()=>{
                     menu-icon=""
                     hide-details="auto"
                     item-value="id"
-                    item-title="xnome"
+                    item-title="xfant"
                     variant="solo"
                     clearable
                     v-model="filtersSelected.empresa"
@@ -1004,7 +1031,10 @@ watch(()=>props.tab,()=>{
             </div>
             <div v-else class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
               <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
-              <p class="tw-text-p mt-1">Nenhuma passagem encontrada</p>
+              <p class="tw-text-p mt-1"> Opa, parece que o trecho que está procurando ainda não está disponível, mas já estamos informando as Empresas parceiras para liberarem as viagens.
+                Informe o seu Email e seu WhatsApp que iremos lhe avisar assim que estiver disponível.
+              </p>
+              <v-btn @click="showFormNotification = true" variant="tonal" color="secondary" class="mt-3">Avise-me</v-btn>
             </div>
 
             <v-btn @click="showMoreticket" v-if="filtersSelected.quantia <= trechosWithTravels.data?.trechos.total" flat variant="plain" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
@@ -1103,7 +1133,7 @@ watch(()=>props.tab,()=>{
           <v-col cols="12" md="9">
             <v-form ref="formRef">
 
-              <BaseCard title="Dados de quem irá viajar (IDA)" color="secondary" >
+              <BaseCard title="Dados de quem irá viajar (IDA)" >
                 <PassegerForm v-for="(item,index) in formSale.dataComodos" :form="item" :key="index" :index="index"/>
                 <v-checkbox
                     v-if="filtersSelected.type == 'ida-e-volta'"
@@ -1114,10 +1144,10 @@ watch(()=>props.tab,()=>{
                 >
                 </v-checkbox>
               </BaseCard>
-              <BaseCard v-if="filtersSelected.type == 'ida-e-volta'" title="Dados de quem irá viajar (VOLTA)" color="secondary" class="mt-3">
+              <BaseCard v-if="filtersSelected.type == 'ida-e-volta'" title="Dados de quem irá viajar (VOLTA)" class="mt-3">
                 <PassegerForm v-for="(item,index) in formSale.dataVolta?.dataComodos" :form="item" :key="index" :index="index"/>
               </BaseCard>
-              <BaseCard title="Dados para contato" color="secondary" class="mt-3">
+              <BaseCard title="Dados para contato"  class="mt-3">
                 <v-row class="tw-px-2">
                   <v-col cols="12" md="6">
                     <v-text-field
@@ -1176,18 +1206,18 @@ watch(()=>props.tab,()=>{
                     </v-text-field>
                   </v-col>
                 </v-row>
-                <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
-                <v-checkbox
-                    @update:modelValue="(arg)=>{if(arg) addCompradorComoPassageiro(); else removerCompradorComoPassageiro()}"
-                    hide-details="auto"
-                    class="!tw-text-p tw-mt-3 !tw-text-sx"
-                    label="Adicionar como passageiro"
-                >
-                </v-checkbox>
+<!--                <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>-->
+<!--                <v-checkbox-->
+<!--                    @update:modelValue="(arg)=>{if(arg) addCompradorComoPassageiro(); else removerCompradorComoPassageiro()}"-->
+<!--                    hide-details="auto"-->
+<!--                    class="!tw-text-p tw-mt-3 !tw-text-sx"-->
+<!--                    label="Adicionar como passageiro"-->
+<!--                >-->
+<!--                </v-checkbox>-->
               </BaseCard>
               <v-col cols="12">
-                <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
-                  <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 tw-text-white"  /><span class=" !tw-text-xs tw-text-white ml-1">Salvar e continuar comprando</span>
+                <v-btn variant="tonal" color="success" rounded  class="!tw-flex lg:!tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
+                  <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 "  /><span class=" !tw-text-xs  ml-1">Adicionar ao carrinho</span>
                 </v-btn>
                 <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
               </v-col>
@@ -1195,9 +1225,12 @@ watch(()=>props.tab,()=>{
                 <v-btn variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="prevStep">
                   <Icon icon="mdi:navigate-before" width="20"  class="mr-1 tw-text-white"  /> <span class=" !tw-text-xs tw-text-white mr-1"  >Voltar</span>
                 </v-btn>
+                <v-btn variant="tonal" color="success" rounded  class="lg:!tw-flex !tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
+                  <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 "  /><span class=" !tw-text-xs  ml-1">Adicionar ao carrinho</span>
+                </v-btn>
                 <div class="tw-flex tw-justify-end tw-gap-3">
                   <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="submitOrder">
-                    <span class=" !tw-text-xs tw-text-white ml-1"  >Avançar</span><Icon icon="mdi:navigate-next" width="20"  class="ml-1 tw-text-white"  />
+                    <span class=" !tw-text-xs tw-text-white ml-1"  >Ir para o pagamento</span><Icon icon="mdi:navigate-next" width="20"  class="ml-1 tw-text-white"  />
                   </v-btn>
                 </div>
               </v-col>
@@ -1366,12 +1399,20 @@ watch(()=>props.tab,()=>{
                 </div>
                 <div v-else class="tw-flex tw-flex-col tw-w-full">
                   <p class="tw-text-p my-3"> Para realizar pagamento com cartão de credito é nescessário realizar o login.</p>
+                  <div class="tw-flex tw-gap-3">
+                    <RouterLink :to="{name:'login'}">
+                      <v-btn  flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+                        <span class="tw-text-white tw-flex"><Icon icon="solar:login-linear" class="mr-2 tw-text-xl"/>Login</span>
+                      </v-btn>
+                    </RouterLink>
+                    <RouterLink :to="{name:'validar-email'}">
+                      <v-btn  variant="tonal" color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+                        <span class="tw-flex"><Icon icon="solar:login-linear" class="mr-2 tw-text-xl"/>Criar conta</span>
+                      </v-btn>
+                    </RouterLink>
+                  </div>
 
-                  <RouterLink :to="{name:'login'}">
-                    <v-btn  flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
-                      <span class="tw-text-white tw-flex"><Icon icon="solar:login-linear" class="mr-2 tw-text-xl"/>Login</span>
-                    </v-btn>
-                  </RouterLink>
+
                 </div>
 
               </CardPayment>
@@ -1387,17 +1428,19 @@ watch(()=>props.tab,()=>{
           <v-col cols="12" v-if="formPayment.payment_method_id == 6" >
             <BaseCard title="Confirmação da compra"  class="mt-3">
               <v-progress-linear
+                  :model-value="percentToPay"
+                  height="10"
+                  striped
                   :active="whatPayment"
-                  :indeterminate="whatPayment"
                   color="secondary"
                   absolute
                   bottom
               ></v-progress-linear>
-              <div>
+              <div class="tw-flex mt-3 justify-end">
                <v-chip> {{ formatarTempo() }}</v-chip>
               </div>
               <div class="tw-flex tw-justify-center tw-flex-col tw-items-center">
-                <p class="tw-text-p tw-text-sm">Sua compra foi concluída com sucesso. Você receberá um e-mail de confirmação com mais detalhes</p>
+                <p class="tw-text-p tw-text-sm">Pedido realizado com sucesso. Você receberá um e-mail de confirmação com mais detalhes</p>
                 <p class="tw-text-lg tw-font-bold my-2">Realize o pagamento através do QR Code abaixo.</p>
                 <VueQrcode :value="paymentPending.pix_copia_cola" :size="200" />
                 <p class="tw-text-lg tw-font-bold my-2">PIX Copiar e Colar</p>

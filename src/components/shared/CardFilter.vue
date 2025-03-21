@@ -16,7 +16,7 @@ const filterOptions = ref([])
 const emit = defineEmits(['update:modelValue'])
 const form = ref(null);
 const hoje = new Date();
-hoje.setHours(0, 0, 0, 0);
+// hoje.setHours(0, 0, 0, 0);
 
 
 function removeAcentos(str) {
@@ -61,7 +61,7 @@ function permitirDatasVolta(data) {
   const dataSelecionada = new Date(data);
   dataSelecionada.setHours(0, 0, 0, 0);
   if (props.modelValue.dataIda) {
-    return dataSelecionada.getDate() >= props.modelValue.dataIda.getDate();
+    return dataSelecionada >= props.modelValue.dataIda;
   }
   return dataSelecionada >= hoje;
 }
@@ -78,14 +78,14 @@ const validarDataVolta = computed(() => {
 });
 
 function getFilterItems(){
-  props.modelValue.destino = null
+
   const params = {
     origem: props.modelValue.origem || '',
     subdomain:  window.subdomain || ''
   }
   routes["filtros"](params).then(response => {
     if(!response.data.data.success){
-
+      props.modelValue.destino = null
       filterOptions.value = response.data.data;
     }
   })

@@ -6,6 +6,7 @@ import {Icon} from "@iconify/vue";
 import {routes} from "../../../services/fetch.js";
 import {getApiBaseUrl} from "../../../services/api.js";
 import {useCartStore} from "../../../store/CartStore.js";
+import TravelImages from "../../shared/TravelImages.vue";
 
 const props = defineProps({
   data:Object
@@ -35,11 +36,11 @@ function onOpenRooms(){
 }
 
 
-function removerRoom(params){
-  routes["order.delete"](params.pedido,params).then(response => {
-    useCartStore().loadCart()
-  })
-}
+// function removerRoom(params){
+//   routes["order.delete"](params.pedido,params).then(response => {
+//     useCartStore().loadCart()
+//   })
+// }
 
 </script>
 
@@ -48,14 +49,7 @@ function removerRoom(params){
     <div class="tw-flex  mt-3 tw-w-full ">
 
       <div class="tw-mr-5">
-        <v-img
-            width="120px"
-            height="50px"
-            class="bg-grey-lighten-2"
-            cover
-            rounded
-            :src="baseurl + data.municipio_destino?.image"
-        ></v-img>
+        <TravelImages :alt="data.trecho.municipio_destino?.nome" :images="data.trecho.municipio_destino?.images?? []" class="bg-grey-lighten-2 !tw-w-[120px] !tw-h-[50px]"/>
       </div>
       <v-row>
         <v-col cols="6" class="pb-0 !tw-font-bold">
@@ -88,8 +82,8 @@ function removerRoom(params){
               {{item.comodo.numeracao}} -  {{item.passageiro?.nome}}
               <Icon
                   v-if="!item.deleted_at"
-                  @click="removerRoom({pedido:item.pedido_id,comodos_ids:[item.comodo.id],})"
-                  icon="mdi:close-box" width="25"  class="mr-1 "/>
+                  @click="useCartStore().removerItem({pedido:item.pedido_id,comodos_ids:[item.comodo.id],viagem_id:data.viagem.id})"
+                  icon="mdi:close-box" width="25"  class="mr-1 tw-cursor-pointer !tw-text-red-500"/>
               <span v-else >Removido</span>
             </div>
           </v-card>

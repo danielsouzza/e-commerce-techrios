@@ -572,8 +572,8 @@ onBeforeUnmount(() => {
                     </div>
                   </div>
                   <div class="mt-2 lg:tw-hidden " >
-                    <div class="tw-flex  lg:tw-justify-start tw-w-full tw-font-bold">Mais viajante?</div>
-                    <div class="tw-text-p tw-text-sm">selecione outro lugar.</div>
+                    <div class="tw-flex  lg:tw-justify-start tw-w-full tw-font-bold">Mais passageiros?</div>
+                    <div class="tw-text-p tw-text-sm">selecione outro cômodo.</div>
                   </div>
                 </Boat>
                 <v-container v-if="hasCamarotesAndRede">
@@ -634,7 +634,7 @@ onBeforeUnmount(() => {
             <v-divider  :thickness="1" class="border-opacity-100 tw-my-2 tw-hidden lg:tw-block mt-5 "></v-divider>
             <v-row>
               <v-col cols="12" md="12">
-                <div class="tw-flex tw-justify-center lg:tw-justify-start tw-w-full tw-font-bold">Lugares selecionados</div>
+                <div class="tw-flex tw-justify-center lg:tw-justify-start tw-w-full tw-font-bold">Cômodos selecionados</div>
                 <div class=" mt-3" v-if="roomsSelected.dataIda.selectedsById?.length > 0">
                   <v-row v-for="room in roomsSelected.dataIda.selectedsById" :key="room.id" class="tw-flex tw-justify-center tw-items-center tw-gap-1 tw-text-xs  lg:tw-text-[16px] tw-text-p  !tw-m-0" >
                     <v-col cols="8" class="tw-flex tw-items-center tw-gap-1 !tw-p-0">
@@ -665,12 +665,12 @@ onBeforeUnmount(() => {
                   </v-row>
                 </div>
                 <div v-if="roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0" class="tw-flex  tw-items-center tw-gap-1  tw-text-xs tw-text-p  !tw-m-0">
-                  Nenhum lugar selecionado
+                  Nenhum cômodo selecionado
                 </div>
               </v-col>
               <v-col cols="12" md="4" class="tw-hidden lg:tw-block ">
-                <div class="tw-flex tw-justify-center  lg:tw-justify-start tw-w-full tw-font-bold">Mais viajante?</div>
-                <div class="tw-text-p tw-text-xs ">selecione outro lugar.</div>
+                <div class="tw-flex tw-justify-center  lg:tw-justify-start tw-w-full tw-font-bold">Mais passageiros?</div>
+                <div class="tw-text-p tw-text-xs ">selecione outro cômodo.</div>
               </v-col>
             </v-row>
           </div>
@@ -723,7 +723,7 @@ onBeforeUnmount(() => {
                   </div>
                   <div class="mt-2 lg:tw-hidden " >
                     <div class="tw-flex  lg:tw-justify-start tw-w-full tw-font-bold">Mais viajante?</div>
-                    <div class="tw-text-p tw-text-sm">selecione outro lugar.</div>
+                    <div class="tw-text-p tw-text-sm">selecione outro cômodo.</div>
                   </div>
                 </Boat>
                 <v-container v-if="hasCamarotesAndRede">
@@ -784,7 +784,7 @@ onBeforeUnmount(() => {
             <v-divider  :thickness="1" class="border-opacity-100 tw-my-2 tw-hidden lg:tw-block mt-5 " ></v-divider>
             <v-row >
               <v-col cols="12" md="12">
-                <div class="tw-flex tw-justify-center lg:tw-justify-start tw-w-full tw-font-bold">Lugares selecionados</div>
+                <div class="tw-flex tw-justify-center lg:tw-justify-start tw-w-full tw-font-bold">Cômodos selecionados</div>
                 <div class=" mt-3" v-if="roomsSelected.dataVolta.selectedsById?.length > 0">
                   <v-row v-for="room in roomsSelected.dataVolta.selectedsById" :key="room.id" class="tw-flex tw-justify-center tw-items-center tw-gap-1 tw-text-xs lg:tw-text-[16px] tw-text-p  !tw-m-0" >
                     <v-col cols="8" class="tw-flex tw-items-center tw-gap-1 !tw-p-0">
@@ -815,12 +815,12 @@ onBeforeUnmount(() => {
                   </v-row>
                 </div>
                 <div v-if="roomsSelected.dataVolta.selectedsByType?.length === 0 && roomsSelected.dataVolta.selectedsById?.length === 0" class="tw-flex  tw-items-center tw-gap-1 tw-text-xs tw-text-p  !tw-m-0">
-                  Nenhum lugar selecionado
+                  Nenhum cômodo selecionado
                 </div>
               </v-col>
               <v-col cols="12"  class="tw-hidden lg:tw-block">
-                <div class="tw-flex tw-justify-center lg:tw-justify-start tw-w-full tw-font-bold">Mais viajante?</div>
-                <div class="tw-text-p tw-text-xs">selecione outro lugar.</div>
+                <div class="tw-flex tw-justify-center lg:tw-justify-start tw-w-full tw-font-bold">Mais passageiros?</div>
+                <div class="tw-text-p tw-text-xs">selecione outro cômodo.</div>
               </v-col>
             </v-row>
           </div>
