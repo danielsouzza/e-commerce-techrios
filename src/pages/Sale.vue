@@ -296,6 +296,7 @@ function formatDates(date) {
 
 function nextStep(){
   stepSale.value = stepSale.value + 1;
+  scrollBehavior()
 }
 
 function prevStep(){
@@ -724,6 +725,10 @@ function loadData(){
     generateNextDays()
     getTrechosWithTravels()
   }
+}
+
+function scrollBehavior(){
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 onMounted(() => {
