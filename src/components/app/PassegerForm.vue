@@ -8,7 +8,7 @@ const props = defineProps({
   index:Number,
 })
 
-console.log(props.form)
+const emits = defineEmits(['addToContact','removeToContact'])
 
 const tiposDoc = [
   { id:1, nome: 'RG', tamanho: 15, mask: '###############' },
@@ -98,4 +98,12 @@ const tiposDoc = [
     </v-col>
   </v-row>
   <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
+  <v-checkbox
+      v-model="form.isContact"
+      @update:modelValue="(arg)=>{if(arg) emits('addToContact',index); else emits('removeToContact',index)}"
+      hide-details="auto"
+      class="!tw-text-p tw-mt-3 !tw-text-sx"
+      label="Adicionar como contato"
+  >
+  </v-checkbox>
 </template>

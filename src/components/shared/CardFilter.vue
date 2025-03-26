@@ -16,7 +16,7 @@ const filterOptions = ref([])
 const emit = defineEmits(['update:modelValue'])
 const form = ref(null);
 const hoje = new Date();
-// hoje.setHours(0, 0, 0, 0);
+hoje.setHours(0, 0, 0, 0);
 
 
 function removeAcentos(str) {
@@ -50,7 +50,6 @@ const validarDataIda = computed(() => {
 
 function permitirDatasIda(data) {
   const dataSelecionada = new Date(data);
-  dataSelecionada.setHours(0, 0, 0, 0);
   if (props.modelValue.type === 'ida-e-volta' && props.modelValue.dataVolta) {
     return dataSelecionada >= hoje && dataSelecionada <= props.modelValue.dataVolta;
   }
@@ -61,7 +60,7 @@ function permitirDatasVolta(data) {
   const dataSelecionada = new Date(data);
   dataSelecionada.setHours(0, 0, 0, 0);
   if (props.modelValue.dataIda) {
-    return dataSelecionada >= props.modelValue.dataIda;
+    return dataSelecionada >= props.modelValue.dataIda.setHours(0, 0, 0, 0);
   }
   return dataSelecionada >= hoje;
 }
@@ -85,8 +84,10 @@ function getFilterItems(){
   }
   routes["filtros"](params).then(response => {
     if(!response.data.data.success){
-      props.modelValue.destino = null
       filterOptions.value = response.data.data;
+      if(filterOptions.value.municipiosDestino.findIndex(it=>it.slug == props.modelValue.destino) < 0){
+        props.modelValue.destino = null
+      }
     }
   })
 }

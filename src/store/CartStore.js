@@ -24,7 +24,15 @@ export const useCartStore = defineStore('cart', {
                 })
             } else {
                 const localCart = localStorage.getItem('cart');
-                this.order = localCart ? JSON.parse(localCart) : null;
+                if(localCart){
+                    this.order = JSON.parse(localCart)
+                    this.order.passagens_agrupadas = this.order.passagens_agrupadas.filter(
+                        passagem => passagem.passagem_pedidos.length > 0
+                    );
+
+                }else {
+                    this.order =  null;
+                }
             }
         },
 

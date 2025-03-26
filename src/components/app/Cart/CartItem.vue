@@ -79,7 +79,12 @@ function onOpenRooms(){
         <v-col v-for="item in data.passagem_pedidos" cols="12" class="pt-0">
           <v-card variant="tonal" color="primary" >
             <div  class="  tw-px-2 tw-py-[2px] tw-h-full  my-1 tw-flex tw-items-center tw-justify-between">
-              {{item.comodo.numeracao}} -  {{item.passageiro?.nome}}
+             <div class="tw-flex tw-items-center">
+               <Icon v-if="item.comodo.tipo_comodidade_id == 4" icon="material-symbols:bedroom-child-outline-rounded"  width="22"/>
+               <Icon v-if="item.comodo.tipo_comodidade_id == 1" icon="mdi:seat-passenger"  width="22"/>
+               <img v-if="item.comodo.tipo_comodidade_id == 2" src="/assets/images/icons/baiano.svg" width="30" :alt="item.comodo.nome">
+                <span class="ml-2">({{ item.comodo.tipo_comodidade.nome}}) {{item.comodo.numeracao }} -  {{item.passageiro?.nome}}</span>
+             </div>
               <Icon
                   v-if="!item.deleted_at"
                   @click="useCartStore().removerItem({pedido:item.pedido_id,comodos_ids:[item.comodo.id],viagem_id:data.viagem.id})"

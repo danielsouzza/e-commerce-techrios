@@ -348,6 +348,7 @@ function populateComodos(rooms, trecho) {
       embarque: parseInt(formatMoney(trecho.taxa_de_embarque)),
       valor: item.comodo_trechos?.valor ?? parseFloat(formatMoney(trecho.valor)),
       telefone: '',
+      isContact:false,
       errors: {}
     };
 
@@ -398,9 +399,9 @@ const validateForm = () => {
   })
 
   validateField('contato.nome', formSale.contato.nome, 'Por favor, insira seu nome e sobrenome.',formSale);
-  validateField('contato.email', formSale.contato.nome, 'Por favor, insira seu email.',formSale);
+  validateField('contato.email', formSale.contato.email, 'Por favor, insira seu email.',formSale);
   // validateField('contato.tipo_doc', formSale.contato.tipo_doc, 'Por favor, escolha um tipo de documento.',formSale);
-  validateField('contato.document', formSale.contato.document, 'Por favor, insira número do documento.',formSale);
+  // validateField('contato.document', formSale.contato.document, 'Por favor, insira número do documento.',formSale);
   // validateField('contato.nascimento', formSale.contato.nascimento, 'Por favor, insira uma data de nascimento.',formSale);
   validateField('contato.telefone', formSale.contato.telefone, 'Por favor, insira um número de telefone.',formSale);
 
@@ -642,41 +643,58 @@ function updateFormattedDate(value,type) {
   }
   formPayment.credit_card.expiration_date = `${month}/${year}`;
 }
-function addCompradorComoPassageiro(){
-  const contato = formSale.contato;
-  formSale.dataComodos[0].tipo_doc = contato.tipo_doc;
-  formSale.dataComodos[0].nome = contato.nome;
-  formSale.dataComodos[0].document = contato.document;
-  formSale.dataComodos[0].nascimento = contato.nascimento;
-  formSale.dataComodos[0].telefone = contato.telefone;
-  if(filtersSelected.value.type == 'ida-e-volta'){
-    formSale.dataVolta.dataComodos[0].tipo_doc = contato.tipo_doc;
-    formSale.dataVolta.dataComodos[0].nome = contato.nome;
-    formSale.dataVolta.dataComodos[0].document = contato.document;
-    formSale.dataVolta.dataComodos[0].nascimento = contato.nascimento;
-    formSale.dataVolta.dataComodos[0].telefone = contato.telefone;
+function addPassegerToContact(index,type){
+  let passeger = null
+
+  formSale.dataComodos.forEach((it,idx)=>{
+
+    if(idx != index || type=='volta'){
+      it.isContact = false
+    }
+  })
+  formSale.dataVolta?.dataComodos.forEach((it,idx)=>{
+    if(idx != index || type=='ida'){
+    it.isContact = false
+
+    }
+  })
+
+  if(type == 'ida'){
+    passeger = formSale.dataComodos[index]
+  }else{
+    passeger = formSale.dataVolta.dataComodos[index]
   }
+  formSale.contato.nome = passeger.nome;
+  formSale.contato.telefone = passeger.telefone;
 }
 
+function removePassegerToContact(){
+  formSale.contato.nome = null;
+  formSale.contato.telefone = null;
+}
+
+
 function adicionarDadosIdaNaVolta(){
-  formSale.dataComodos.forEach((it,i)=>{
-    formSale.dataVolta.dataComodos[i].tipo_doc = it.tipo_doc;
-    formSale.dataVolta.dataComodos[i].nome = it.nome;
-    formSale.dataVolta.dataComodos[i].document = it.document;
-    formSale.dataVolta.dataComodos[i].nascimento = it.nascimento;
-    formSale.dataVolta.dataComodos[i].telefone = it.telefone;
+  formSale.dataVolta?.dataComodos.forEach((it,i)=>{
+    it.tipo_doc = formSale.dataComodos[i].tipo_doc;
+    it.nome = formSale.dataComodos[i].nome;
+    it.document = formSale.dataComodos[i].document;
+    it.nascimento = formSale.dataComodos[i].nascimento;
+    it.telefone = formSale.dataComodos[i].telefone;
   })
 }
 
 function removerDadosIdaDaVolta(){
-  formSale.dataVolta.dataComodos.forEach((it,i)=>{
-    formSale.dataVolta.dataComodos[i].tipo_doc = 1;
-    formSale.dataVolta.dataComodos[i].nome = null ;
-    formSale.dataVolta.dataComodos[i].document = null ;
-    formSale.dataVolta.dataComodos[i].nascimento = null ;
-    formSale.dataVolta.dataComodos[i].telefone = null ;
+  formSale.dataVolta.dataComodos.forEach((it)=>{
+    it.tipo_doc = null;
+    it.nome = null ;
+    it.document = null ;
+    it.nascimento = null ;
+    it.telefone = null ;
   })
 }
+
+
 
 function removerCompradorComoPassageiro(){
   formSale.dataComodos[0].tipo_doc = 1;
@@ -1114,7 +1132,7 @@ watch(()=>props.tab,()=>{
                     {{ formatCurrency(formSale.total_passagems) }}
                   </v-col>
                   <v-col v-if="formSale.total_taxas" cols="6" class="tw-flex tw-items-center !tw-pt-0  tw-text-xs ">
-                    <Icon icon="icon-park-outline:doc-search-two" class="mr-2" width="15"/>Taxa de serviço
+                    <Icon icon="icon-park-outline:doc-search-two" class="mr-2" width="15"/>Taxa de embarque
                   </v-col>
                   <v-col v-if="formSale.total_taxas" cols="6" class="tw-flex tw-items-center !tw-pt-0  tw-text-xs  tw-justify-end">
                     {{ formatCurrency(formSale.total_taxas) }}
@@ -1139,7 +1157,9 @@ watch(()=>props.tab,()=>{
             <v-form ref="formRef">
 
               <BaseCard title="Dados de quem irá viajar (IDA)" >
-                <PassegerForm v-for="(item,index) in formSale.dataComodos" :form="item" :key="index" :index="index"/>
+                <PassegerForm v-for="(item,index) in formSale.dataComodos" :form="item" :key="index" :index="index" @add-to-contact="(index)=>addPassegerToContact(index,'ida')" @remove-to-contact="removePassegerToContact"/>
+                <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
+
                 <v-checkbox
                     v-if="filtersSelected.type == 'ida-e-volta'"
                     @update:modelValue="(arg)=>{if(arg) adicionarDadosIdaNaVolta(); else removerDadosIdaDaVolta()}"
@@ -1150,7 +1170,7 @@ watch(()=>props.tab,()=>{
                 </v-checkbox>
               </BaseCard>
               <BaseCard v-if="filtersSelected.type == 'ida-e-volta'" title="Dados de quem irá viajar (VOLTA)" class="mt-3">
-                <PassegerForm v-for="(item,index) in formSale.dataVolta?.dataComodos" :form="item" :key="index" :index="index"/>
+                <PassegerForm v-for="(item,index) in formSale.dataVolta?.dataComodos" :form="item" :key="index" :index="index" @add-to-contact="(index)=>addPassegerToContact(index,'volta')" @remove-to-contact="removePassegerToContact"/>
               </BaseCard>
               <BaseCard title="Dados para contato"  class="mt-3">
                 <v-row class="tw-px-2">
@@ -1192,21 +1212,6 @@ watch(()=>props.tab,()=>{
                     >
                       <template v-slot:prepend-inner>
                         <Icon icon="mdi-light:phone" width="26"/>
-                      </template>
-                    </v-text-field>
-                  </v-col>
-
-                  <v-col cols="6"  >
-                    <v-text-field
-                        variant="outlined"
-                        v-model="formSale.contato.document"
-                        :error-messages="formSale.errors['contato.document']"
-                        label="Nº do documento"
-                        v-mask="'###.###.###-##'"
-                        hide-details="auto"
-                    >
-                      <template v-slot:prepend-inner>
-                        <Icon icon="material-symbols-light:id-card-outline" width="26"/>
                       </template>
                     </v-text-field>
                   </v-col>
@@ -1268,7 +1273,7 @@ watch(()=>props.tab,()=>{
                     +{{formatCurrency(useCartStore().getTotalTickets())}}
                   </v-col>
                   <v-col cols="6" class="pt-0" v-if="useCartStore().getTotalTaxa()" >
-                    Taxa de serviço
+                    Taxa de embarque
                   </v-col>
                   <v-col cols="6" class="pt-0" v-if="useCartStore().getTotalTaxa()">
                     +{{formatCurrency(useCartStore().getTotalTaxa())}}
@@ -1284,7 +1289,6 @@ watch(()=>props.tab,()=>{
                       {{formatCurrency(useCartStore().getTotal() - (useCartStore().getTotal() * 0.04 ) )}} <span class="tw-text-p tw-text-[10px]"> no PIX</span><br>
                     </div>
                     <div class="tw-text-end" v-else>
-                      {{useCartStore().getTotal()}}
                       {{formatCurrency(useCartStore().getTotal())}}<br>
                     </div>
                   </v-col>
@@ -1422,7 +1426,7 @@ watch(()=>props.tab,()=>{
 
               </CardPayment>
             </BaseCard>
-            <v-btn variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 mt-3"  @click="prevStep">
+            <v-btn v-if="formSale.dataComodos.length > 0" variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 mt-3"  @click="prevStep">
               <Icon icon="mdi:navigate-before" width="20"  class="mr-1 tw-text-white"  /> <span class=" !tw-text-xs tw-text-white mr-1"  >Voltar</span>
             </v-btn>
           </v-col>

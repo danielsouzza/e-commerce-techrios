@@ -477,7 +477,7 @@ onBeforeUnmount(() => {
               Duração <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{formatarTempoViagem(dataIda.tempo_viagem)}}</span>
             </div>
             <div>
-              Tipo <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{gerarStringTiposComodos(dataIda.tipos_comodos)}}</span>
+              Tipo <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{dataIda.tipo_embarcacao}}</span>
             </div>
           </div>
         </div>
