@@ -6,6 +6,7 @@ export function getApiBaseUrl() {
 }
 
 export function getAppBaseUrl() {
+    console.log(import.meta.env.VITE_APP_URL)
     return import.meta.env.VITE_APP_URL;
 }
 
