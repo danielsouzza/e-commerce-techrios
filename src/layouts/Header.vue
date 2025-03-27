@@ -99,11 +99,11 @@ onMounted(()=>{
                     :content="useCartStore().getCountTickets()"
                 >
                   <v-btn variant="outlined" color="secondary"  icon  size="small"   class="d-lg-flex d-none !tw-font-extrabold" @click="showCart = true">
-                    <Icon icon="solar:cart-3-broken" width="20"  class=" " />
+                    <Icon icon="mdi:cart-outline" width="20"  class=" " />
                   </v-btn>
                 </v-badge>
                 <v-btn v-else variant="outlined" color="secondary"  icon  size="small"   class="d-lg-flex d-none !tw-font-extrabold" @click="showCart = true">
-                  <Icon icon="solar:cart-3-broken" width="20"  class=" " />
+                  <Icon icon="mdi:cart-outline" width="20"  class=" " />
                 </v-btn>
 
                 <v-btn  v-if="!isAuthenticated"  @click="goToLoginPage" variant="outlined" color="secondary" rounded class=" d-lg-flex d-none !tw-font-extrabold ">

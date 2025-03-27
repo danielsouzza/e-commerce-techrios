@@ -22,6 +22,7 @@ import {
 } from "../../event-bus.js";
 import TravelImages from "./TravelImages.vue";
 import LoadingWrapper from "./LoadingWrapper.vue";
+import {useLoadingStore} from "../../store/states.js";
 
 const Boat = defineAsyncComponent({
   loader:()=>import('./Boat.vue'),
@@ -35,6 +36,7 @@ const props = defineProps({
 
 })
 const emit = defineEmits(['continue','chooseBack'])
+const loadingStore = useLoadingStore();
 
 const rooms = ref({
   ida:[],
@@ -329,6 +331,7 @@ async  function initSale(){
      subdomain:  window.subdomain || ''
 
   };
+  loadingStore.startLoading();
 
   await routes['rooms.init-vendas'](params).then((response) => {
     const data = response.data.data;
@@ -342,6 +345,7 @@ async  function initSale(){
       // onClickBtnSelect()
     }
   }).catch(error => {
+    loadingStore.stopLoading();
     showErrorNotification(error.response.data.data.error);
   })
 
@@ -370,11 +374,14 @@ async  function initSale(){
         // showSuccessNotification(response.data.message);
       }
     }).catch(error => {
+      loadingStore.stopLoading();
+
       showErrorNotification(error.response.data.data.error);
     })
 
   }
 
+  loadingStore.stopLoading();
   emit('continue', dataSale);
 }
 
@@ -416,6 +423,7 @@ function generateLayout() {
 }
 
 function nextStep(){
+  scrollToStartDiv()
   if(roomsSelected.value.dataIda.selectedsById.length > 0 || roomsSelected.value.dataIda.selectedsByType.length > 0){
     step.value = 2
     getRoomsByTrecho()
@@ -424,6 +432,7 @@ function nextStep(){
 }
 
 function beforeStep(){
+  scrollToStartDiv()
   step.value = 1
   getRoomsByTrecho()
   getQuantityRoomsFree()
@@ -442,6 +451,12 @@ watch(()=>props.dataIda.id_viagem,()=>{
   }
 })
 
+function scrollToStartDiv(){
+  const minhaDiv = document.getElementById("cardTicket-"  + props.dataIda.id_viagem + (props.dataVolta?.id_viagem ?? 0));
+  minhaDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+
+}
+
 onMounted(() => {
   window.addEventListener('resize', updateWidth);
   getQuantityRoomsFree()
@@ -457,7 +472,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <BaseCard :active="openRooms" >
+  <BaseCard :active="openRooms" :id="'cardTicket-' + dataIda.id_viagem + (dataVolta?.id_viagem ?? 0)">
 
     <div class="tw-flex tw-flex-col " >
       <div v-if="dataVolta" class="tw-flex  tw-text-primary tw-px-2 tw-justify-between tw-rounded-lg tw-font-bold lg:tw-mr-5">
@@ -599,7 +614,7 @@ onBeforeUnmount(() => {
                               Valor
                             </v-col>
                             <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                              {{formatCurrency(formatMoney(dataIda.valor))}}
+                              {{formatCurrency(calcularValor(formatMoney(dataIda.valor), dataIda.desconto?.desconto,0.04))}}
                             </v-col>
                           </v-row>
                         </v-card>
@@ -650,7 +665,7 @@ onBeforeUnmount(() => {
                         </div>
                       </div>
                     </v-col>
-                    <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? calcularValor(room.comodo_trechos?.valor) : calcularValor(formatMoney(dataIda.valor),dataIda.desconto?.desconto)}} <Icon @click="onClickRoom(room, null)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /></v-col>
+                    <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? formatCurrency(calcularValor(room.comodo_trechos?.valor,0.04)) : formatCurrency(calcularValor(formatMoney(dataIda.valor),dataIda.desconto?.desconto,0.04))}} <Icon @click="onClickRoom(room, null)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /></v-col>
                   </v-row>
                 </div>
                 <div class=" mt-3" v-if="roomsSelected.dataIda.selectedsByType?.length > 0">
@@ -661,7 +676,7 @@ onBeforeUnmount(() => {
                       </div>
                     </v-col>
                     <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end ">  <Icon @click="incrementComodo(room.type_comodo_id )" icon="ph:plus-fill"  width="20"  class="mr-3" /> {{ room.quantidade}} <Icon @click="decrementComodo(room.type_comodo_id )" icon="ph:minus-fill"  width="20"  class="ml-3" /></v-col>
-                    <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">    {{calcularValorPix(dataIda)}} <Icon @click="onClickRoom(null,room.type_comodo_id)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /> </v-col>
+                    <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">     {{formatCurrency(room.quantidade * calcularValor( formatMoney( dataIda.valor), dataIda.desconto?.desconto,0.04))}} <Icon @click="onClickRoom(null,room.type_comodo_id)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /> </v-col>
                   </v-row>
                 </div>
                 <div v-if="roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0" class="tw-flex  tw-items-center tw-gap-1  tw-text-xs tw-text-p  !tw-m-0">

@@ -3,6 +3,7 @@ import mitt from 'mitt'
 export const SHOW_ERROR_DIALOG = 'SHOW_ERROR_DIALOG'
 export const SHOW_NOTIFICATION = 'SHOW_NOTIFICATION'
 export const CLOSE_ALL_CARD_TICKETS = 'CLOSE_ALL_CARD_TICKETS'
+export const SCROLL_BEHAVIOR = 'SCROLL_BEHAVIOR'
 export const emitter = mitt()
 
 export function showErrorDialog(message) {
@@ -18,6 +19,10 @@ export function showErrorNotification(message) {
 
 export function showInfoNotification(message) {
     emitter.emit(SHOW_NOTIFICATION, {type: 'info', message})
+}
+
+export function scrollBehavior(message) {
+    emitter.emit(SCROLL_BEHAVIOR)
 }
 
 export function closeAllCards(){

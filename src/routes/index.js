@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useCartStore } from "../store/CartStore.js";
 import { userAuthStore } from "../store/AuthStore.js";
 import {useLoadingStore} from "../store/states.js";
+import {scrollBehavior} from "../event-bus.js";
 
 const appName = import.meta.env.VITE_APP_NAME || 'Yjara Viagens';
 
@@ -115,21 +116,15 @@ const routes = [
 
 const router = createRouter({
     history: createWebHistory(),
-    routes,
-    scrollBehavior(to, from, savedPosition) {
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve({ top: 0, behavior: 'smooth' });
-            }, 100);
-        });
-    }
+    routes
 })
 
 router.afterEach((to) => {
     document.title = to.meta.title + " - " + appName;
     const loadingStore = useLoadingStore();
     setTimeout(() => {
-        loadingStore.stopLoading(); // Desativa o loading com um pequeno delay
+        loadingStore.stopLoading();
+        scrollBehavior()
     }, 300);
 });
 

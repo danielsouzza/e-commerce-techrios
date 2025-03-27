@@ -2,7 +2,7 @@
 import Footer from "./Footer.vue";
 import Header from "./Header.vue";
 import {onMounted, ref} from "vue";
-import {emitter, SHOW_NOTIFICATION} from "../event-bus.js";
+import {emitter, SCROLL_BEHAVIOR, SHOW_NOTIFICATION} from "../event-bus.js";
 import DialogNotification from "../components/shared/DialogNotification.vue";
 import {useLoadingStore} from "../store/states.js";
 
@@ -10,14 +10,21 @@ const show = ref(false)
 const type = ref('success')
 const message = ref('')
 
-
+function scrollBehavior(){
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 600);
+}
 
 onMounted(() => {
   emitter.on(SHOW_NOTIFICATION, ({type: t, message: msg}) => {
     show.value = true;
     type.value = t;
     message.value = msg;
+  })
 
+  emitter.on(SCROLL_BEHAVIOR, () => {
+    scrollBehavior()
   })
 })
 

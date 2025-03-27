@@ -1,7 +1,7 @@
 <script setup>
 
 import {Icon} from "@iconify/vue";
-import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
+import {computed, nextTick, onMounted, onUnmounted, reactive, ref, watch} from "vue";
 import {useRoute} from "vue-router";
 import {routes} from "../services/fetch.js";
 import BaseCard from "../components/shared/BaseCard.vue";
@@ -25,9 +25,8 @@ import router from "../routes/index.js";
 import CartItem from "../components/app/Cart/CartItem.vue";
 import {userAuthStore} from "../store/AuthStore.js";
 import {getApiBaseUrl, getAppBaseUrl} from "../services/api.js";
-import {closeAllCards, showErrorNotification, showInfoNotification, showSuccessNotification} from "../event-bus.js";
-
-
+import {closeAllCards, showErrorNotification, showInfoNotification, showSuccessNotification, scrollBehavior} from "../event-bus.js";
+import {useLoadingStore} from "../store/states.js";
 const props = defineProps({
   tab:String,
 })
@@ -37,6 +36,7 @@ const percentToPay = ref(0)
 const timeToPay = ref(30 * 60)
 const cartStore = useCartStore()
 const authStore = userAuthStore()
+const loadingStore = useLoadingStore();
 const route = useRoute();
 const whatPayment = ref(false)
 const windowWidth = ref(window.innerWidth);
@@ -47,8 +47,8 @@ const paymentPending = ref(null)
 const empresas = ref([])
 const orderConfirmation = ref(null)
 const trechosWithTravels = ref([])
-const waitServe = ref(false)
 const formRef = ref()
+let checkTimeout = null;
 const formPayment = reactive({
   order_id:null,
   payment_method_id:6,
@@ -231,7 +231,7 @@ function getTrechos(){
   params.append('quantia', filtersSelected.value.quantia || '')
   params.append('empresa', filtersSelected.value.empresa || '')
   params.append('subdomain', window.subdomain || '')
-  waitServe.value = true
+ loadingStore.startLoading();
   routes["trechos-viagem"](params).then(response => {
 
     if(filtersSelected.value.type == "ida-e-volta"  && response.data.data.tipo == "ida" && response.data.data.trechos.data.length > 0){
@@ -246,7 +246,7 @@ function getTrechos(){
     if(date === first || date === last){
       generateNextDays();
     }
-    waitServe.value = false
+    loadingStore.stopLoading();
     router.push(
         {
           name: "sale",
@@ -259,7 +259,7 @@ function getTrechos(){
         }
     );
   }).catch(error => {
-    waitServe.value = false
+    loadingStore.stopLoading();
     if(error.response.data.data?.error){
       showErrorNotification(error.response.data.data?.error);
     }
@@ -444,7 +444,7 @@ function submitOrder(){
   focusErro()
   formSale.processing = true
   if(validateForm()){
-    waitServe.value = true
+   loadingStore.startLoading();
     routes["order"](params).then(response => {
       if(response.data.success){
         orderResponse.value = response.data.data;
@@ -454,12 +454,14 @@ function submitOrder(){
         // showSuccessNotification(response.data.message);
         nextStep()
       }
-      waitServe.value = false
+      loadingStore.stopLoading();
       formSale.processing = false
+      scrollBehavior()
     }).catch(error=>{
-      waitServe.value = false
+      loadingStore.stopLoading();
       formSale.processing = false
       showErrorNotification(error.response.data.data.error);
+      scrollBehavior()
     })
   }
 }
@@ -488,7 +490,7 @@ function addCart(){
   }
   focusErro()
   if(validateForm()){
-    waitServe.value = true
+   loadingStore.startLoading();
     formSale.processing = true
     routes["order"](params).then(response => {
       if(response.data.success){
@@ -500,48 +502,55 @@ function addCart(){
         resetFormSale()
         prevStep()
         closeAllCards()
+        scrollBehavior()
       }
-      waitServe.value = false
+      loadingStore.stopLoading();
       formSale.processing = false
     }).catch(error=>{
       formSale.processing = false
-      waitServe.value = false
+      loadingStore.stopLoading();
+      scrollBehavior()
       showErrorNotification(error.response.data.data.error);
     })
   }
 }
 
-function checkStatusPayment(){
+function checkStatusPayment() {
   routes["payment.status"](cartStore.order?.id).then(res => {
-    if(res.data.success){
+    if (res.data.success) {
       orderConfirmation.value = res.data.data;
-      if(orderConfirmation.value.status == "Pago"){
-        stepSale.value = 5
-        whatPayment.value = false
-        cartStore.clearCartLocal()
-      }else{
-        if(timeToPay.value == 0){
-          clearInterval(intervalo);
+      if (orderConfirmation.value.status === "Pago") {
+        stepSale.value = 5;
+        whatPayment.value = false;
+        cartStore.clearCartLocal();
+      } else {
+        if (timeToPay.value === 0) {
           showErrorNotification('Tempo de venda expirou');
-          whatPayment.value = false
-          timeToPay.value = 30 * 60
-          resetFormSale()
-        }else{
-          setTimeout(()=>checkStatusPayment(),10000)
+          whatPayment.value = false;
+          timeToPay.value = 30 * 60;
+          resetFormSale();
+        } else {
+          checkTimeout = setTimeout(() => checkStatusPayment(), 10000);
         }
       }
     }
-
-  }).catch(err=>{
-    whatPayment.value = false
-  })
+  }).catch(() => {
+    whatPayment.value = false;
+  });
 }
 
 function submitPaymentCredit(){
-  formPayment.order_id = cartStore.order?.id.toString()
-  formPayment.credit_card.installment_quantity = formPayment.credit_card.installment_quantity.value
-  waitServe.value = true
-  routes["payment.credito"](formPayment).then(res => {
+  const data = {
+    ...formPayment,
+    order_id:cartStore.order?.id.toString(),
+    credit_card:{
+      ...formPayment.credit_card,
+      installment_quantity: formPayment.credit_card.installment_quantity.value,
+      card_number:formPayment.credit_card.card_number.replaceAll(' ','')
+    }
+  }
+ loadingStore.startLoading();
+  routes["payment.credito"](data).then(res => {
     if(res.data.success){
       orderConfirmation.value = res.data.data;
       stepSale.value = 5
@@ -549,20 +558,20 @@ function submitPaymentCredit(){
       showSuccessNotification(res.data.message);
 
     }
-    waitServe.value = false
+    loadingStore.stopLoading();
   }).catch(error=>{
-    waitServe.value = false
+    loadingStore.stopLoading();
     showErrorNotification(error.response.data.data.error);
     stepSale.value = 3
   })
 }
 
 function submitPaymentPix(){
-  waitServe.value = true
+ loadingStore.startLoading();
   routes["payment.pix"]({order_id:useCartStore().order?.id}).then(res => {
     if(res.data.success){
       paymentPending.value = res.data.data;
-      waitServe.value = false
+      loadingStore.stopLoading();
       whatPayment.value = true
       // showSuccessNotification(res.data.message);
       nextStep()
@@ -570,7 +579,7 @@ function submitPaymentPix(){
       checkStatusPayment()
     }
   }).catch(error=>{
-    waitServe.value = false
+    loadingStore.stopLoading();
     whatPayment.value = false
     showErrorNotification(error.response.data.data.error);
   })
@@ -695,22 +704,6 @@ function removerDadosIdaDaVolta(){
 }
 
 
-
-function removerCompradorComoPassageiro(){
-  formSale.dataComodos[0].tipo_doc = 1;
-  formSale.dataComodos[0].nome = null;
-  formSale.dataComodos[0].document = null;
-  formSale.dataComodos[0].nascimento = null;
-  formSale.dataComodos[0].telefone = null;
-  if(filtersSelected.value.type == 'ida-e-volta'){
-    formSale.dataVolta.dataComodos[0].tipo_doc = null;
-    formSale.dataVolta.dataComodos[0].nome = null;
-    formSale.dataVolta.dataComodos[0].document = null;
-    formSale.dataVolta.dataComodos[0].nascimento = null;
-    formSale.dataVolta.dataComodos[0].telefone = null;
-  }
-}
-
 function showMoreticket(){
   filtersSelected.value.quantia += 5
   getTrechosWithTravels()
@@ -745,15 +738,19 @@ function loadData(){
   }
 }
 
-function scrollBehavior(){
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
+
 
 onMounted(() => {
   getFilterItems()
   loadData()
   getEmpresas()
   window.addEventListener('resize', updateWidth);
+});
+
+onUnmounted(() => {
+  if (checkTimeout) {
+    clearTimeout(checkTimeout);
+  }
 });
 
 watch(()=>props.tab,()=>{
@@ -1145,8 +1142,8 @@ watch(()=>props.tab,()=>{
                   </v-col>
                   <v-col cols="6" class="tw-flex tw-items-center  !tw-font-black tw-text-[17px] !tw-text-primary tw-justify-end">
                     <div class="tw-text-end">
-                      {{calcularValor(formSale.total_passagems + formSale.total_taxas )}}<br>
-                      <p class="tw-text-xs tw-text-gray-500 tw-font-light">ou até 6x de {{formatCurrency((formSale.total_passagems + formSale.total_taxas)/6)}} no cartão</p>
+                      {{formatCurrency(calcularValor(formSale.total_passagems + formSale.total_taxas, null, 0.04 ))}} <span class="tw-whitespace-nowrap w-text-p tw-text-[10px]"> no PIX</span><br>
+                      <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(formSale.total_passagems + formSale.total_taxas)}} no cartão</p>
                     </div>
                   </v-col>
                 </v-row>
@@ -1350,16 +1347,16 @@ watch(()=>props.tab,()=>{
                 <div v-if="userAuthStore().isAuthenticated()" class="tw-w-full tw-flex tw-flex-col">
                   <v-row class="mt-3" >
                     <v-col cols="12" >
-                      <v-text-field variant="plain" v-model="formPayment.credit_card.holder" label="Nome no cartão"/>
+                      <v-text-field variant="outlined" v-model="formPayment.credit_card.holder" label="Nome no cartão"/>
                     </v-col>
                     <v-col cols="12" >
-                      <v-text-field  variant="plain" v-model="formPayment.credit_card.card_number" label="Numero do cartão"/>
+                      <v-text-field  variant="outlined" v-model="formPayment.credit_card.card_number" v-mask="'#### #### #### ####'" label="Numero do cartão"/>
                     </v-col>
                     <v-col>
                       <v-row justify="center">
                         <v-col cols="12" md="6" >
                           <v-select
-                              variant="plain"
+                              variant="outlined"
                               :items="months"
                               @update:modelValue="(args)=>updateFormattedDate(args, 'month')"
                               label="Mês"
@@ -1367,7 +1364,7 @@ watch(()=>props.tab,()=>{
                         </v-col>
                         <v-col cols="12"  md="6" >
                           <v-select
-                              variant="plain"
+                              variant="outlined"
                               @update:modelValue="(args)=>updateFormattedDate(args, 'year')"
                               :items="years"
                               label="Ano"
@@ -1375,25 +1372,29 @@ watch(()=>props.tab,()=>{
                         </v-col>
                         <v-col cols="12"  md="6">
                           <v-select
-                              variant="plain"
+                              variant="outlined"
+                              hide-details="auto"
                               v-model="formPayment.credit_card.installment_quantity"
                               :items="pacerls"
+
                               item-value="value"
                               item-title="value"
                               return-object
                               label="Parcelas"
                           >
                             <template v-slot:selection="{ item, index }">
-                              <v-list-item v-bind="props" title="" >{{item.raw.value}}x {{(formatCurrency((cart.getTotal() + (cart.getTotal() * item.raw.pencet) )/ item.raw.value )) }}</v-list-item>
+                              <div>{{item.raw.value}}x {{(formatCurrency((cart.getTotal() + (cart.getTotal() * item.raw.pencet) )/ item.raw.value )) }}</div>
                             </template>
                             <template v-slot:item="{ props, item }">
-                              <v-list-item v-bind="props" title="" >{{item.raw.value}}x {{(formatCurrency((cart.getTotal() + (cart.getTotal() * item.raw.pencet) )/ item.raw.value )) }}</v-list-item>
+
+                              <v-list-item class="!tw-my-0 !tw-py-0" v-bind="props" title="" >{{item.raw.value}}x {{(formatCurrency((cart.getTotal() + (cart.getTotal() * item.raw.pencet) )/ item.raw.value )) }}</v-list-item>
                             </template>
                           </v-select>
                         </v-col>
-                        <v-col cols="12"  md="6" >
+                        <v-col cols="12"  md="6"  >
                           <v-text-field
-                              variant="plain"
+                              variant="outlined"
+                              hide-details="auto"
                               v-mask="'###'"
                               v-model="formPayment.credit_card.security_code"
                               label="CV"
@@ -1485,10 +1486,6 @@ watch(()=>props.tab,()=>{
                 <p><strong> {{orderConfirmation.description}}</strong></p>
                 <p><strong> {{formatCurrency(orderConfirmation.amount)}}</strong></p>
                 <p><strong> {{orderConfirmation.installments}}x  {{orderConfirmation.payment_method}}</strong></p>
-                <div class="tw-flex tw-justify-center tw-items-center tw-gap-1  py-2">
-                  <div class="!tw-rounded-[3px] !tw-text-[10px] tw-text-secondary tw-bg-secondary/10 tw-flex tw-p-2 tw-items-center tw-font-bold"><Icon icon="lets-icons:print" width="15"  class="mr-1 tw-text-black" />PASSAGEM IMPRESSA</div>
-                  <div class="!tw-rounded-[3px] !tw-text-[10px] tw-text-secondary tw-bg-secondary/10 tw-flex tw-p-2 tw-items-center tw-font-bold"><Icon icon="tdesign:qrcode" width="15"  class="mr-1 tw-text-black" />PASSAGEM NO CELULAR</div>
-                </div>
               </div>
             </BaseCard>
           </v-col>
@@ -1507,19 +1504,6 @@ watch(()=>props.tab,()=>{
       </v-tabs-window-item>
     </v-tabs-window>
   </div>
-  <v-overlay
-      :model-value="waitServe"
-      persistent
-      opacity="50%"
-      class="align-center justify-center"
-  >
-    <v-progress-circular
-        width="2"
-        color="white"
-        size="90"
-        indeterminate
-    ></v-progress-circular>
-  </v-overlay>
 </template>
 
 <style scoped>

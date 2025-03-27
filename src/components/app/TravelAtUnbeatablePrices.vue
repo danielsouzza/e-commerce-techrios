@@ -40,16 +40,22 @@ const config = {
 };
 
 
-function getMunicipios(search='') {
-  routes['municipios']({search:search}).then((response) => {
-    municipios.value = response.data.data;
+function getMunicipios(search=''){
+  const params = {
+    search:search,
+    com_desconto:1
+  }
+  routes["filtros"](params).then(response => {
+    if(!response.data.data.success){
+      municipios.value = response.data.data.municipiosDestino;
+    }
   })
 }
 
 function getTrechosWithTravels() {
   const params = new URLSearchParams()
   params.append('com_desconto', 1)
-  params.append('origem', origem.value?.codigo || '')
+  params.append('origem', origem.value?.slug || '')
   params.append('quantia', 3)
   params.append('subdomain', window.subdomain || '')
 

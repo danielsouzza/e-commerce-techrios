@@ -107,7 +107,7 @@ function calcularValor(valor, desconto = null, percent = 0) {
     let desc  = desconto ? desconto : 0;
     let valorComDesconto = valor - desc;
     let valorFinal = valorComDesconto - (valorComDesconto * percent);
-    return formatCurrency(valorFinal);
+    return (valorFinal);
 }
 
 function converterData(data) {
