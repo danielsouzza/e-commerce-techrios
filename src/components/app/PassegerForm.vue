@@ -8,7 +8,7 @@ const props = defineProps({
   index:Number,
 })
 
-const emits = defineEmits(['addToContact','removeToContact'])
+const emits = defineEmits(['addToContact','removeToContact', 'remover','addComodoRelated'])
 
 const tiposDoc = [
   { id:1, nome: 'RG', tamanho: 15, mask: '###############' },
@@ -20,7 +20,14 @@ const tiposDoc = [
 </script>
 
 <template>
-  <div class=" tw-font-bold tw-px-2 tw-text-gray-800 ">Passageiro {{index + 1}}</div>
+  <v-divider  :thickness="1" class="border-opacity-100 my-3 " v-if="index>0" ></v-divider>
+  <div class=" tw-font-bold tw-px-2 tw-text-gray-800 tw-flex tw-items-center tw-justify-between">
+    <div>Passageiro {{index + 1}}</div>
+    <div v-if="form.qtd_comodos_filhos < form.comodos_filhos"  @click="emits('addComodoRelated')" class="tw-flex tw-items-center">
+      {{form.qtd_comodos_filhos}} / {{form.comodos_filhos}} <Icon icon="carbon:passenger-plus"  width="25"  class="tw-cursor-pointer ml-3 tw-text-green-500" />
+    </div>
+    <Icon v-if="form.comodo_relacionado != null" @click="emits('remover',index)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" />
+  </div>
 
   <v-row class="tw-px-2 mt-2">
     <v-col cols="6">
@@ -97,7 +104,6 @@ const tiposDoc = [
       </v-date-input>
     </v-col>
   </v-row>
-  <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
   <v-checkbox
       v-model="form.isContact"
       @update:modelValue="(arg)=>{if(arg) emits('addToContact',index); else emits('removeToContact',index)}"

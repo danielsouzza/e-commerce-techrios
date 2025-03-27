@@ -89,7 +89,6 @@ const formSale = reactive({
   errors:{},
   processing:false
 })
-
 const formNotification = reactive({
   email: authStore.user?.email ?? null,
   telefone: authStore.user?.comprador.telefone ?? null,
@@ -99,7 +98,6 @@ const formNotification = reactive({
   errors:{},
   processing:false
 })
-
 const nextDays = ref([])
 const years = computed(() => {
       const currentYear = new Date().getFullYear();
@@ -306,6 +304,38 @@ function prevStep(){
   }
 }
 
+function removerPasseger(index,type){
+  if(type == 'ida'){
+    const item =  formSale.dataComodos[index]
+    const comodo_pivot_index = formSale.dataComodos.findIndex(it=>it.comodo == item.comodo_relacionado)
+    if(comodo_pivot_index > -1){
+      formSale.dataComodos[comodo_pivot_index].qtd_comodos_filhos--
+    }
+    formSale.dataComodos.splice(index,1)
+  }else{
+    const item =  formSale.dataVolta.dataComodos[index]
+    const comodo_pivot_index = formSale.dataVolta.dataComodos.findIndex(it=>it.comodo == item.comodo_relacionado)
+    if(comodo_pivot_index > -1){
+      formSale.dataVolta.dataComodos[comodo_pivot_index].qtd_comodos_filhos--
+    }
+    formSale.dataVolta?.dataComodos.splice(index,1)
+  }
+}
+
+function addComodoRelated(index,type){
+  if(type == 'ida'){
+    const item =  formSale.dataComodos[index]
+    formSale.dataComodos[index].qtd_comodos_filhos++
+    formSale.dataComodos.push({...item, comodo_relacionado: item.comodo, comodos_filhos: 1 })
+
+  }else{
+    const item =  formSale.dataVolta.dataComodos[index]
+    formSale.dataVolta.dataComodos[index].qtd_comodos_filhos++
+    formSale.dataVolta?.dataComodos.push({...item, comodo_relacionado: item.comodo, comodos_filhos: 1,qtd_comodos_filhos: 1, })
+  }
+}
+
+
 function saveTicket(items) {
   const totalIda = calculateTotal(items.dataIda);
 
@@ -347,15 +377,16 @@ function populateComodos(rooms, trecho) {
       tipo_comodidade: item.tipo_comodidade,
       embarque: parseInt(formatMoney(trecho.taxa_de_embarque)),
       valor: item.comodo_trechos?.valor ?? parseFloat(formatMoney(trecho.valor)),
+
       telefone: '',
       isContact:false,
       errors: {}
     };
 
-    comodos.push({ ...baseComodo, comodo_relacionado: null, comodos_filhos: item.quantidade });
+    comodos.push({ ...baseComodo, comodo_relacionado: null, comodos_filhos: item.quantidade, qtd_comodos_filhos: item.quantidade,});
 
     for (let i = 1; i < item.quantidade; i++) {
-      comodos.push({ ...baseComodo, comodo_relacionado: item.id, comodos_filhos: 1 });
+      comodos.push({ ...baseComodo, comodo_relacionado: item.id, comodos_filhos: 1,qtd_comodos_filhos: 1, });
     }
   });
 
@@ -395,14 +426,10 @@ const validateForm = () => {
     validateField('tipo_doc', it.tipo_doc, 'Por favor, escolha um tipo de documento.',it);
     validateField('document', it.document, 'Por favor, insira número do documento.',it);
     validateField('nascimento', it.nascimento, 'Por favor, insira uma data de nascimento.',it);
-    // validateField('telefone', it.telefone, 'Por favor, insira um número de telefone.',it);
   })
 
   validateField('contato.nome', formSale.contato.nome, 'Por favor, insira seu nome e sobrenome.',formSale);
   validateField('contato.email', formSale.contato.email, 'Por favor, insira seu email.',formSale);
-  // validateField('contato.tipo_doc', formSale.contato.tipo_doc, 'Por favor, escolha um tipo de documento.',formSale);
-  // validateField('contato.document', formSale.contato.document, 'Por favor, insira número do documento.',formSale);
-  // validateField('contato.nascimento', formSale.contato.nascimento, 'Por favor, insira uma data de nascimento.',formSale);
   validateField('contato.telefone', formSale.contato.telefone, 'Por favor, insira um número de telefone.',formSale);
 
   return !hasError
@@ -682,7 +709,6 @@ function removePassegerToContact(){
   formSale.contato.telefone = null;
 }
 
-
 function adicionarDadosIdaNaVolta(){
   formSale.dataVolta?.dataComodos.forEach((it,i)=>{
     it.tipo_doc = formSale.dataComodos[i].tipo_doc;
@@ -702,7 +728,6 @@ function removerDadosIdaDaVolta(){
     it.telefone = null ;
   })
 }
-
 
 function showMoreticket(){
   filtersSelected.value.quantia += 5
@@ -1154,8 +1179,16 @@ watch(()=>props.tab,()=>{
             <v-form ref="formRef">
 
               <BaseCard title="Dados de quem irá viajar (IDA)" >
-                <PassegerForm v-for="(item,index) in formSale.dataComodos" :form="item" :key="index" :index="index" @add-to-contact="(index)=>addPassegerToContact(index,'ida')" @remove-to-contact="removePassegerToContact"/>
-                <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
+                <PassegerForm
+                    v-for="(item,index) in formSale.dataComodos"
+                    :form="item"
+                    :key="index"
+                    :index="index"
+                    @remover="(args)=>removerPasseger(index,'ida')"
+                    @addComodoRelated="(args)=>addComodoRelated(index,'ida')"
+                    @add-to-contact="(index)=>addPassegerToContact(index,'ida')"
+                    @remove-to-contact="removePassegerToContact"/>
+                <v-divider  :thickness="1" class="border-opacity-100 my-3  "  v-if="filtersSelected.type == 'ida-e-volta'" ></v-divider>
 
                 <v-checkbox
                     v-if="filtersSelected.type == 'ida-e-volta'"
@@ -1167,7 +1200,13 @@ watch(()=>props.tab,()=>{
                 </v-checkbox>
               </BaseCard>
               <BaseCard v-if="filtersSelected.type == 'ida-e-volta'" title="Dados de quem irá viajar (VOLTA)" class="mt-3">
-                <PassegerForm v-for="(item,index) in formSale.dataVolta?.dataComodos" :form="item" :key="index" :index="index" @add-to-contact="(index)=>addPassegerToContact(index,'volta')" @remove-to-contact="removePassegerToContact"/>
+                <PassegerForm
+                    v-for="(item,index) in formSale.dataVolta?.dataComodos"
+                    :form="item" :key="index" :index="index"
+                    @remover="(args)=>removerPasseger(index,'volta')"
+                    @addComodoRelated="(args)=>addComodoRelated(index,'volta')"
+                    @add-to-contact="(index)=>addPassegerToContact(index,'volta')"
+                    @remove-to-contact="removePassegerToContact"/>
               </BaseCard>
               <BaseCard title="Dados para contato"  class="mt-3">
                 <v-row class="tw-px-2">
@@ -1213,14 +1252,6 @@ watch(()=>props.tab,()=>{
                     </v-text-field>
                   </v-col>
                 </v-row>
-<!--                <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>-->
-<!--                <v-checkbox-->
-<!--                    @update:modelValue="(arg)=>{if(arg) addCompradorComoPassageiro(); else removerCompradorComoPassageiro()}"-->
-<!--                    hide-details="auto"-->
-<!--                    class="!tw-text-p tw-mt-3 !tw-text-sx"-->
-<!--                    label="Adicionar como passageiro"-->
-<!--                >-->
-<!--                </v-checkbox>-->
               </BaseCard>
               <v-col cols="12">
                 <v-btn variant="tonal" color="success" rounded  class="!tw-flex lg:!tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
@@ -1421,10 +1452,7 @@ watch(()=>props.tab,()=>{
                       </v-btn>
                     </RouterLink>
                   </div>
-
-
                 </div>
-
               </CardPayment>
             </BaseCard>
             <v-btn v-if="formSale.dataComodos.length > 0" variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 mt-3"  @click="prevStep">
@@ -1469,10 +1497,6 @@ watch(()=>props.tab,()=>{
                 <p class="tw-text-xl tw-text-secondary tw-font-bold my-2">Compra realizada com sucesso!</p>
                 <p> Olá, {{orderConfirmation.contato.nome}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
                 <p><strong>Pedido {{orderConfirmation.id}}</strong></p>
-                <div class="tw-flex tw-justify-center tw-items-center tw-gap-1  py-2">
-                  <div class="!tw-rounded-[3px] !tw-text-[10px] tw-text-secondary tw-bg-secondary/10 tw-flex tw-p-2 tw-items-center tw-font-bold"><Icon icon="lets-icons:print" width="15"  class="mr-1 tw-text-black" />PASSAGEM IMPRESSA</div>
-                  <div class="!tw-rounded-[3px] !tw-text-[10px] tw-text-secondary tw-bg-secondary/10 tw-flex tw-p-2 tw-items-center tw-font-bold"><Icon icon="tdesign:qrcode" width="15"  class="mr-1 tw-text-black" />PASSAGEM NO CELULAR</div>
-                </div>
               </div>
             </BaseCard>
           </v-col>

@@ -16,6 +16,7 @@ const props = defineProps({
   tab:String,
 })
 
+
 const route = useRoute();
 const auth = ref(null)
 const municipios = ref([]);
@@ -46,10 +47,7 @@ const tabs = [
     link:{name:'pedidos'},
     icon:'fluent:delete-20-regular',
     value:'excluir-conta'
-  }
-]
-
-
+  }]
 const formRef = ref()
 const formPassword = reactive({
   current_password:null,
@@ -58,7 +56,6 @@ const formPassword = reactive({
   errors:{}
 
 })
-
 const form = reactive({
   id:null,
   name:"",
@@ -82,6 +79,28 @@ const form = reactive({
   processing:false
 })
 
+const windowWidth = ref(window.innerWidth);
+const titlePage = computed(()=>{
+  return tabs.find(item=>item.value===tab.value).title;
+})
+
+const passwordRules = computed(() => {
+  return [
+    { rule: formPassword.new_password?.length >= 8, message: 'Pelo menos 8 caracteres' },
+    { rule: /[A-Z]/.test(formPassword.new_password), message: 'Pelo menos uma letra maiúscula' },
+    { rule: /[a-z]/.test(formPassword.new_password), message: 'Pelo menos uma letra minúscula' },
+    { rule: /[0-9]/.test(formPassword.new_password), message: 'Pelo menos um número' },
+  ];
+});
+async function focusErro() {
+  nextTick(async () => {
+    const errors = await formRef.value.validate()
+    const erroredField = formRef.value?.$el.querySelector(".v-input.v-input--error input");
+    if (erroredField) {
+      erroredField.focus();
+    }
+  });
+}
 function fillFormDataUser(){
   form.id = auth.value.id
   form.name = auth.value.name;
@@ -97,21 +116,6 @@ function fillFormDataUser(){
   form.comprador.cmun = auth.value.comprador.cmun
   form.comprador.cep = auth.value.comprador.cep
   form.comprador.cpf_cnpj = auth.value.comprador.cpf_cnpj
-}
-
-const windowWidth = ref(window.innerWidth);
-const titlePage = computed(()=>{
-  return tabs.find(item=>item.value===tab.value).title;
-})
-
-async function focusErro() {
-  nextTick(async () => {
-    const errors = await formRef.value.validate()
-    const erroredField = formRef.value?.$el.querySelector(".v-input.v-input--error input");
-    if (erroredField) {
-      erroredField.focus();
-    }
-  });
 }
 const validateForm = () => {
   form.errors = {};
@@ -129,7 +133,7 @@ const validateForm = () => {
   };
   const validatePhone = (field, value) => {
     const phone =  value.replace(/\D/g, '');
-    const phoneRegex = /^[0-9]{10,11}$/; // Aceita 10 ou 11 dígitos numéricos
+    const phoneRegex = /^[0-9]{10,11}$/;
 
     if (!phone) {
       form.errors[field] = 'Por favor, insira um número de telefone.';
@@ -240,14 +244,6 @@ const validatePassword = () => {
   return isValid && formPassword.new_password === formPassword.password_confirmation;
 };
 
-const passwordRules = computed(() => {
-  return [
-    { rule: formPassword.new_password?.length >= 8, message: 'Pelo menos 8 caracteres' },
-    { rule: /[A-Z]/.test(formPassword.new_password), message: 'Pelo menos uma letra maiúscula' },
-    { rule: /[a-z]/.test(formPassword.new_password), message: 'Pelo menos uma letra minúscula' },
-    { rule: /[0-9]/.test(formPassword.new_password), message: 'Pelo menos um número' },
-  ];
-});
 
 function submitFormPassword(){
   if(validatePassword()){
@@ -264,14 +260,14 @@ function permitirDatas(data) {
 }
 
 
-onMounted(()=>{
-  getMunicipios();
-})
+
 
 onMounted(()=>{
+  getMunicipios();
   getUser();
   window.addEventListener('resize', updateWidth);
 })
+
 
 </script>
 
