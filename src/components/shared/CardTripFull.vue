@@ -20,7 +20,7 @@ const baseurl = getApiBaseUrl().replaceAll("api", "");
 
 const imagesRandom = computed(()=>{
   const count =  props.data?.municipio_destino.images.length
-  if (count > 1) {
+  if (count > 0) {
     const randomIndex = Math.floor(Math.random() * count);
     return [ props.data?.municipio_destino.images[randomIndex]];
   }

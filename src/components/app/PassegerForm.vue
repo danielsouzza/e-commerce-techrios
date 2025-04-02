@@ -30,7 +30,7 @@ const tiposDoc = [
   </div>
 
   <v-row class="tw-px-2 mt-2">
-    <v-col cols="6">
+    <v-col cols="12" md="6">
       <v-text-field
           v-model="form.nome"
           :error-messages="form.errors.nome"
@@ -43,7 +43,7 @@ const tiposDoc = [
         </template>
       </v-text-field>
     </v-col>
-    <v-col  cols="6">
+    <v-col   cols="12" md="6">
       <v-text-field
           v-model="form.telefone"
           :error-messages="form.errors.telefone"
@@ -57,7 +57,7 @@ const tiposDoc = [
         </template>
       </v-text-field>
     </v-col>
-    <v-col cols="6" >
+    <v-col  cols="12" md="6" >
       <v-select
           v-model="form.tipo_doc"
           :error-messages="form.errors.tipo_doc"
@@ -70,7 +70,7 @@ const tiposDoc = [
       >
       </v-select>
     </v-col>
-    <v-col cols="6"  v-if="form.tipo_doc">
+    <v-col  cols="12" md="6"  v-if="form.tipo_doc">
       <v-text-field
           v-model="form.document"
           :error-messages="form.errors.document"
@@ -84,7 +84,7 @@ const tiposDoc = [
         </template>
       </v-text-field>
     </v-col>
-    <v-col cols="6">
+    <v-col  cols="12" md="6">
       <v-date-input
           flat
           hide-details="auto"

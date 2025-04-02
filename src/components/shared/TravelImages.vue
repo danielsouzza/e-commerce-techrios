@@ -17,7 +17,7 @@ const baseurl = getApiBaseUrl().replaceAll('api','')
 
 const imagesRandom = computed(()=>{
   const count = props.images.length
-  if (count > 1) {
+  if (count > 0) {
     const randomIndex = Math.floor(Math.random() * count);
     return [props.images[randomIndex]];
   }
@@ -36,6 +36,7 @@ const imagesRandom = computed(()=>{
       hide-delimiter-background
   >
     <v-carousel-item
+        class="tw-cursor-pointer"
         v-for="(item,i) in imagesRandom"
         cover
         :key="i"

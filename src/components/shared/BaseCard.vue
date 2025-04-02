@@ -16,7 +16,7 @@ const props = defineProps({
 })
 
 const classes = computed(()=>{
-  const borderColor =  '!tw-border-' + props.color
+  const borderColor =  '!tw-border-gray-200'
   return [
     borderColor,
     props.active ? '!tw-border-2' : '',
@@ -33,9 +33,9 @@ const classes = computed(()=>{
 
       <v-card
           :class="classes"
-          :variant="active ? 'outlined': 'flat' "
+          :variant="'outlined' "
           elevation="0"
-          class=" !tw-bg-white pa-3"
+          class=" !tw-bg-white px-3"
           rounded="lg"  >
         <slot></slot>
       </v-card>

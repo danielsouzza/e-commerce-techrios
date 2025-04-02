@@ -46,10 +46,6 @@ function gerarStringTiposComodos(tiposComodos) {
     return "";
 }
 
-function generateCtaByType(types){
-
-}
-
 function formatDate(dateString) {
     if (!dateString) return null
     const date = new Date(dateString);
@@ -159,6 +155,8 @@ function permitirDatasNascimento(data) {
 
     return dataSelecionada < hoje;
 }
+
+
 
 export {formatCurrency, formatMoney,formatDateToServe,
     getMonicipioLabel, formatDate, formatarTempoViagem,

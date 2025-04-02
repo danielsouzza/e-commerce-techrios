@@ -3,17 +3,18 @@
 import {formatCurrency} from "../../../Helper/Ultis.js";
 import {computed, ref} from "vue";
 import {Icon} from "@iconify/vue";
-import {routes} from "../../../services/fetch.js";
-import {getApiBaseUrl} from "../../../services/api.js";
 import {useCartStore} from "../../../store/CartStore.js";
 import TravelImages from "../../shared/TravelImages.vue";
+import {VIcon} from "vuetify/components";
 
 const props = defineProps({
   data:Object
 })
 
 const openRooms = ref(false);
-const baseurl = getApiBaseUrl().replaceAll('api','')
+const showDialogDelete = ref(false)
+const loadingDelete = ref(false)
+const comodoToDelete = ref(null)
 const valorTotal = computed(()=>{
   const valor = props.data.passagem_pedidos.reduce((acc, item)=> {
     if(item.deleted_at){
@@ -30,21 +31,58 @@ const valorTotal = computed(()=>{
   return valor + taxa;
 })
 
+function setToDelete(item){
+  comodoToDelete.value = item
+  showDialogDelete.value = true
+}
+
+
+function confirmDelete(){
+  loadingDelete.value = true
+  useCartStore().removerItem({pedido:comodoToDelete.value.pedido_id,comodos_ids:[comodoToDelete.value.comodo.id],viagem_id:props.data.viagem.id})
+  loadingDelete.value = false
+  showDialogDelete.value = false
+  comodoToDelete.value = null
+}
+
 
 function onOpenRooms(){
   openRooms.value = !openRooms.value
 }
 
 
-// function removerRoom(params){
-//   routes["order.delete"](params.pedido,params).then(response => {
-//     useCartStore().loadCart()
-//   })
-// }
-
 </script>
 
 <template>
+  <v-dialog max-width="600" v-model="showDialogDelete">
+    <template v-slot:default="{ isActive }">
+      <v-card title="Excluir comodo">
+        <v-card-text>
+
+          <div class="tw-w-full tw-flex tw-flex-col tw-items-center tw-pb-3 tw-text-center">
+            <Icon icon="gg:info" width="30" class="icon"  />
+            <span class="message mt-2">Você realmente deseja  excluir essa passagem? Essa ação não pode ser desfeita</span>
+          </div>
+        </v-card-text>
+
+        <v-card-actions>
+
+          <v-btn
+              text="cancelar"
+              @click="showDialogDelete = false"
+          ></v-btn>
+          <v-btn
+              :disabled="loadingDelete"
+              :loading="loadingDelete"
+              variant="flat"
+              color="primary"
+              text="confirmar"
+              @click="confirmDelete"
+          ></v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
+  </v-dialog>
   <v-card variant="outlined" rounded="lg" class="!tw-p-4 !tw-border-secondary">
     <div class="tw-flex  mt-3 tw-w-full ">
 
@@ -87,7 +125,7 @@ function onOpenRooms(){
              </div>
               <Icon
                   v-if="!item.deleted_at"
-                  @click="useCartStore().removerItem({pedido:item.pedido_id,comodos_ids:[item.comodo.id],viagem_id:data.viagem.id})"
+                  @click="setToDelete(item)"
                   icon="mdi:close-box" width="25"  class="mr-1 tw-cursor-pointer !tw-text-red-500"/>
               <span v-else >Removido</span>
             </div>

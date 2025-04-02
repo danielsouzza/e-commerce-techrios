@@ -318,7 +318,7 @@ onMounted(()=>{
               </v-row>
               <v-row v-if="item.status == 'Solicitado'">
                 <v-col class="d-flex justify-end mr-4 mb-3">
-                    <v-btn  @click="submitPaymentPix(item.codigo)" color="primary" rounded="lg" class="tw-w-full" >Gerar podigo pix novamente</v-btn>
+                    <v-btn  @click="submitPaymentPix(item.codigo)" color="primary" rounded="lg" class="tw-w-full" >Gerar código pix novamente</v-btn>
                 </v-col>
               </v-row>
 

@@ -62,7 +62,7 @@ onMounted(()=>{
 
 <template>
 
-  <v-card color="secondary" >
+  <v-card color="secondary" id="mais-buscados">
     <div class="maxWidth">
       <v-card-title class="tw-text-center !tw-px-0  lg:tw-text-start !tw-font-black tw-text-primary !tw-text-2xl !tw-py-5">Destinos mais procurados</v-card-title>
       <Carousel v-bind="config" class="tw-w-[100vw] lg:tw-w-full tw-mb-10 my-carrousel">

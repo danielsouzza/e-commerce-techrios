@@ -23,6 +23,8 @@ import {
 import TravelImages from "./TravelImages.vue";
 import LoadingWrapper from "./LoadingWrapper.vue";
 import {useLoadingStore} from "../../store/states.js";
+import DetailsTopCard from "../ui-components/DetailsTopCard.vue";
+import {getApiBaseUrl} from "../../services/api.js";
 
 const Boat = defineAsyncComponent({
   loader:()=>import('./Boat.vue'),
@@ -33,8 +35,8 @@ const props = defineProps({
   modelValue: Object,
   dataIda: Object,
   dataVolta: Object,
-
 })
+const baseurl = getApiBaseUrl().replaceAll('api','')
 const emit = defineEmits(['continue','chooseBack'])
 const loadingStore = useLoadingStore();
 
@@ -472,13 +474,16 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <BaseCard :active="openRooms" :id="'cardTicket-' + dataIda.id_viagem + (dataVolta?.id_viagem ?? 0)">
-
+  <BaseCard  :active="openRooms" :id="'cardTicket-' + dataIda.id_viagem + (dataVolta?.id_viagem ?? 0)" >
     <div class="tw-flex tw-flex-col " >
-      <div v-if="dataVolta" class="tw-flex  tw-text-primary tw-px-2 tw-justify-between tw-rounded-lg tw-font-bold lg:tw-mr-5">
-        <span>Ida</span>
-        {{formatDate(dataIda.saida)}}
+      <div class="tw-flex tw-items-center tw-justify-between">
+        <div  class="tw-flex  tw-text-primary tw-px-2  tw-rounded-lg tw-font-bold lg:tw-mr-5 tw-w-full tw-items-center">
+          <span class=" tw-text-xs">IDA - {{ dataIda.municipio_destino.nome }} ({{formatDate(dataIda.saida)}})</span>
+        </div>
+        <div class="tw-text-xs mt-2 tw-justify-end tw-w-full tw-flex tw-items-center">{{dataIda.empresa.nome_fantasia}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataIda.empresa.logo" :image="baseurl+dataIda.empresa.logo"></v-avatar>  </div>
       </div>
+      <v-divider  :thickness="1" class="border-opacity-100 tw-mt-1 " ></v-divider>
+
       <div class="lg:tw-flex tw-justify-between tw-items-center">
         <div class="tw-flex tw-justify-between tw-items-center mt-3 tw-w-full mr-10">
           <div>
@@ -492,7 +497,7 @@ onBeforeUnmount(() => {
               Duração <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{formatarTempoViagem(dataIda.tempo_viagem)}}</span>
             </div>
             <div>
-              Tipo <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{dataIda.tipo_embarcacao}}</span>
+              Embarcação <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{dataIda.embarcacao}}</span>
             </div>
           </div>
         </div>
@@ -510,10 +515,13 @@ onBeforeUnmount(() => {
     <v-divider v-if="dataVolta" :thickness="1" class="border-opacity-100 tw-my-2 " ></v-divider>
 
     <div class="tw-flex tw-flex-col" v-if="dataVolta">
-      <div class="tw-flex  tw-text-primary tw-justify-between tw-px-2 tw-rounded-lg tw-font-bold lg:tw-mr-5">
-        <span>Volta</span>
-        {{formatDate(dataVolta.saida)}}
+      <div class="tw-flex tw-items-center tw-justify-between">
+        <div  class="tw-flex  tw-text-primary tw-px-2  tw-rounded-lg tw-font-bold lg:tw-mr-5 tw-w-full tw-items-center">
+          <span class=" tw-text-xs">VOLTA - {{ dataVolta.municipio_destino.nome }} ({{formatDate(dataVolta.saida)}})</span>
+        </div>
+        <div class="tw-text-sm mt-2 tw-justify-end tw-w-full tw-flex tw-items-center">{{dataVolta.empresa.nome_fantasia}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataVolta.empresa.logo" :image="baseurl+dataVolta.empresa.logo"></v-avatar>  </div>
       </div>
+      <v-divider  :thickness="1" class="border-opacity-100 tw-mt-1 " ></v-divider>
       <div class="lg:tw-flex tw-justify-between tw-items-center " >
         <div class="tw-flex tw-justify-between tw-items-center  mt-3 tw-w-full mr-10">
           <div>
@@ -527,7 +535,7 @@ onBeforeUnmount(() => {
               Duração <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{formatarTempoViagem(dataVolta.tempo_viagem)}}</span>
             </div>
             <div>
-              Tipo <br> <span class="tw-font-bold tw-text-[12px]  lg:tw-text-sm">{{gerarStringTiposComodos(dataVolta.tipos_comodos)}}</span>
+              Embarcação <br> <span class="tw-font-bold tw-text-[12px]  lg:tw-text-sm">{{dataIda.embarcacao}}</span>
             </div>
           </div>
         </div>
@@ -843,8 +851,8 @@ onBeforeUnmount(() => {
         <v-divider  :thickness="1" class="border-opacity-100 tw-my-2  " ></v-divider>
       </v-tabs-window-item>
 
-      <div class="tw-flex tw-flex-col tw-justify-center lg:tw-justify-between lg:tw-items-center lg:tw-flex-row-reverse">
-        <div v-if="openRooms" class="tw-flex tw-gap-3 mt-3">
+      <div class="tw-flex tw-flex-col tw-justify-center lg:tw-justify-between lg:tw-items-center lg:tw-flex-row-reverse mb-2">
+        <div v-if="openRooms" class="tw-flex tw-gap-3 mt-3 tw-w-full tw-justify-end">
           <v-btn
               v-if="step === 2"
               variant="outlined"
@@ -878,7 +886,7 @@ onBeforeUnmount(() => {
               color="success"
               rounded
               size="xs"
-              class="d-lg-flex !tw-font-extrabold px-2 py-1"
+              class="d-lg-flex !tw-font-extrabold px-2 py-1 "
               :disabled="(step === 1 && (roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0)) ||
                 (step === 2 && (roomsSelected.dataVolta.selectedsByType?.length === 0 && roomsSelected.dataVolta.selectedsById?.length === 0))"
               @click="initSale"

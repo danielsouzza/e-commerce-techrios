@@ -112,8 +112,6 @@ export const useCartStore = defineStore('cart', {
                 }
                 this.loadCart();
             });
-
-
         },
 
         clearCartLocal() {

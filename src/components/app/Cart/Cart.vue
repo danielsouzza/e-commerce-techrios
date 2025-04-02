@@ -18,11 +18,6 @@ const orders = computed(()=>{
   return useCartStore().order
 })
 
-function removerRoom(params){
-  routes["order.delete"](params.pedido,params).then(response => {
-    useCartStore().loadCart()
-  })
-}
 
 watch(()=>props.auth,()=>{
   useCartStore().loadCart(props.auth)
@@ -39,7 +34,7 @@ watch(()=>props.auth,()=>{
       </div>
     </v-card>
   </div>
-  <div v-if="!useCartStore().isEmptyCart()" class="tw-flex tw-flex-col tw-gap-3 px-3 mx-2">
+  <div v-if="!useCartStore().isEmptyCart()" class="tw-flex tw-flex-col tw-gap-3 px-3 mx-2 tw-overflow-y-auto">
     <CartItem v-for="item in orders?.passagens_agrupadas" :data="item"/>
   </div>
   <div v-else class="tw-flex tw-flex-col tw-items-center tw-gap-3 tw-text-indigo-500 tw-font-semibold px-3 mx-2">
@@ -47,7 +42,7 @@ watch(()=>props.auth,()=>{
     Nenhuma viagem adiciona ao seu carrinho
   </div>
 
-  <div v-if="!useCartStore().isEmptyCart()" class=" userbottom bg-containerBg pb-5">
+  <div v-if="!useCartStore().isEmptyCart()" class="  bg-containerBg pb-5">
     <v-divider  :thickness="1"  class="border-opacity-100 tw-my-2 " ></v-divider>
     <v-row class="px-5">
       <v-col cols="6" class="tw-text-p tw-text-lg tw-font-bold">

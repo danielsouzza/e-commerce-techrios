@@ -778,6 +778,12 @@ onUnmounted(() => {
   }
 });
 
+watch(()=>useCartStore().isEmptyCart(),()=>{
+  if(useCartStore().isEmptyCart()){
+    router.push({name: "home"})
+  }
+})
+
 watch(()=>props.tab,()=>{
   cartStore.loadCart()
   stepSale.value = tabs.find(it=>it.value == props.tab).step
@@ -1254,19 +1260,20 @@ watch(()=>props.tab,()=>{
                 </v-row>
               </BaseCard>
               <v-col cols="12">
-                <v-btn variant="tonal" color="success" rounded  class="!tw-flex lg:!tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
+                <v-btn variant="tonal" color="secondary" rounded  class="!tw-flex lg:!tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
                   <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 "  /><span class=" !tw-text-xs  ml-1">Adicionar ao carrinho</span>
                 </v-btn>
                 <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
               </v-col>
               <v-col cols="12"  class="tw-flex tw-justify-between mt-3">
-                <v-btn variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="prevStep">
-                  <Icon icon="mdi:navigate-before" width="20"  class="mr-1 tw-text-white"  /> <span class=" !tw-text-xs tw-text-white mr-1"  >Voltar</span>
+                <v-btn variant="outlined" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="prevStep">
+                  <Icon icon="mdi:navigate-before" width="20"  class="mr-1 "  /> <span class=" !tw-text-xs  mr-1"  >Voltar</span>
                 </v-btn>
-                <v-btn variant="tonal" color="success" rounded  class="lg:!tw-flex !tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
-                  <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 "  /><span class=" !tw-text-xs  ml-1">Adicionar ao carrinho</span>
-                </v-btn>
-                <div class="tw-flex tw-justify-end tw-gap-3">
+
+                <div class="tw-flex tw-justify-end tw-gap-3 tw-items-center">
+                  <v-btn variant="tonal" color="secondary" rounded  class="lg:!tw-flex !tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
+                    <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 "  /><span class=" !tw-text-xs  ml-1">Adicionar ao carrinho</span>
+                  </v-btn>
                   <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="submitOrder">
                     <span class=" !tw-text-xs tw-text-white ml-1"  >Ir para o pagamento</span><Icon icon="mdi:navigate-next" width="20"  class="ml-1 tw-text-white"  />
                   </v-btn>

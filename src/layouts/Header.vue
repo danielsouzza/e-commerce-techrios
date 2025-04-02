@@ -94,6 +94,7 @@ onMounted(()=>{
                   <Navigation />
                 </div>
                 <v-badge
+                    class="hidden-md-and-down"
                     v-if="useCartStore().getCountTickets() > 0"
                     color="info"
                     :content="useCartStore().getCountTickets()"

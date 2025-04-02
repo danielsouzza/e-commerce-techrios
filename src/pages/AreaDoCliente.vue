@@ -244,7 +244,6 @@ const validatePassword = () => {
   return isValid && formPassword.new_password === formPassword.password_confirmation;
 };
 
-
 function submitFormPassword(){
   if(validatePassword()){
     handleSubmit()
@@ -259,20 +258,14 @@ function permitirDatas(data) {
   return dataSelecionada < hoje;
 }
 
-
-
-
 onMounted(()=>{
   getMunicipios();
   getUser();
   window.addEventListener('resize', updateWidth);
 })
-
-
 </script>
 
 <template>
-
   <v-card  color="primary" rounded="0"  class="!tw-py-6">
     <div class="maxWidth tw-flex  !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
       <div class="text-center lg:tw-text-start tw-py-2 px-5 tw-text-2xl  tw-text-secondary"><strong class="tw-font-bold"> {{titlePage}}</strong> </div>
