@@ -312,15 +312,15 @@ onMounted(()=>{
               <div v-if="item.passagens?.length == 0" class=" my-5 tw-text-center ">Pedido vazio</div>
 
               <v-row v-if="item.status == 'Em aberto' && item.passagens?.length > 0">
-                <v-col class="d-flex justify-end mr-4 mb-3">
+                <v-col class="d-flex justify-end mx-4 mb-3">
                   <RouterLink :to="{name:'sale',params:{tab:'pagamento'}}">
                     <v-btn color="primary" rounded="lg" class="tw-w-full" >Ir para o pagamento</v-btn>
                   </RouterLink>
                 </v-col>
               </v-row>
               <v-row v-if="item.status == 'Solicitado'">
-                <v-col class="d-flex justify-end mr-4 mb-3">
-                    <v-btn  @click="submitPaymentPix(item.codigo)" color="primary" rounded="lg" class="tw-w-full" >Gerar código pix novamente</v-btn>
+                <v-col class="d-flex justify-end mx-4 mb-3">
+                    <v-btn  @click="submitPaymentPix(item.codigo)" color="primary" rounded="lg" class="tw-w-full" >Gerar código pix para pagamento</v-btn>
                 </v-col>
               </v-row>
 
