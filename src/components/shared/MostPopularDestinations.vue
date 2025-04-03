@@ -35,7 +35,7 @@ const config = {
 
 function getImagaeRandom(imagens){
   const count = imagens.length
-  if (count > 1) {
+  if (count > 0) {
     const randomIndex = Math.floor(Math.random() * count);
     return imagens[randomIndex].path
   }
@@ -50,7 +50,7 @@ function getDestinations(){
 
 function goToMostPopularPage(item){
   router.push({name: "destinos-mais-procurados",query: {
-      destino: item.municipio.codigo,
+      destino: item.municipio.slug,
     }})
 }
 
@@ -62,7 +62,7 @@ onMounted(()=>{
 
 <template>
 
-  <v-card color="secondary" id="mais-buscados">
+  <v-card color="secondary" >
     <div class="maxWidth">
       <v-card-title class="tw-text-center !tw-px-0  lg:tw-text-start !tw-font-black tw-text-primary !tw-text-2xl !tw-py-5">Destinos mais procurados</v-card-title>
       <Carousel v-bind="config" class="tw-w-[100vw] lg:tw-w-full tw-mb-10 my-carrousel">

@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import {routes} from "../services/fetch.js";
 import {userAuthStore} from "./AuthStore.js";
+import router from "../routes/index.js";
 
 
 export const useCartStore = defineStore('cart', {
@@ -11,7 +12,12 @@ export const useCartStore = defineStore('cart', {
     actions: {
 
         async addItem(item) {
-            localStorage.setItem('cart', JSON.stringify(item));
+            const dataExpiracao = new Date().getTime() + 24 * 60 * 60 * 1000; // 24 horas em milissegundos
+            const dados = {
+                carrinho: item,
+                expiraEm: dataExpiracao
+            };
+            localStorage.setItem('cart', JSON.stringify(dados));
         },
 
         async loadCart() {
@@ -25,7 +31,14 @@ export const useCartStore = defineStore('cart', {
             } else {
                 const localCart = localStorage.getItem('cart');
                 if(localCart){
-                    this.order = JSON.parse(localCart)
+                    const { carrinho, expiraEm } = JSON.parse(localCart);
+                    const agora = new Date().getTime();
+
+                    if (agora > expiraEm) {
+                        localStorage.removeItem("carrinho");
+                        this.order =  null;
+                    }
+                    this.order = carrinho
                     this.order.passagens_agrupadas = this.order.passagens_agrupadas.filter(
                         passagem => passagem.passagem_pedidos.length > 0
                     );
@@ -109,6 +122,7 @@ export const useCartStore = defineStore('cart', {
                 this.addItem(this.order)
                 if(this.getTotalTickets() === 0){
                     this.clearCartLocal()
+                    window.location = '/'
                 }
                 this.loadCart();
             });

@@ -478,7 +478,7 @@ onBeforeUnmount(() => {
     <div class="tw-flex tw-flex-col " >
       <div class="tw-flex tw-items-center tw-justify-between">
         <div  class="tw-flex  tw-text-primary tw-px-2  tw-rounded-lg tw-font-bold lg:tw-mr-5 tw-w-full tw-items-center">
-          <span class=" tw-text-xs">IDA - {{ dataIda.municipio_destino.nome }} ({{formatDate(dataIda.saida)}})</span>
+          <span class=" tw-text-xs">IDA - {{ dataIda.municipio_destino.nome }} ({{formatDate(dataIda.data_embarque)}})</span>
         </div>
         <div class="tw-text-xs mt-2 tw-justify-end tw-w-full tw-flex tw-items-center">{{dataIda.empresa.nome_fantasia}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataIda.empresa.logo" :image="baseurl+dataIda.empresa.logo"></v-avatar>  </div>
       </div>
@@ -517,7 +517,7 @@ onBeforeUnmount(() => {
     <div class="tw-flex tw-flex-col" v-if="dataVolta">
       <div class="tw-flex tw-items-center tw-justify-between">
         <div  class="tw-flex  tw-text-primary tw-px-2  tw-rounded-lg tw-font-bold lg:tw-mr-5 tw-w-full tw-items-center">
-          <span class=" tw-text-xs">VOLTA - {{ dataVolta.municipio_destino.nome }} ({{formatDate(dataVolta.saida)}})</span>
+          <span class=" tw-text-xs">VOLTA - {{ dataVolta.municipio_destino.nome }} ({{formatDate(dataVolta.data_embarque)}})</span>
         </div>
         <div class="tw-text-sm mt-2 tw-justify-end tw-w-full tw-flex tw-items-center">{{dataVolta.empresa.nome_fantasia}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataVolta.empresa.logo" :image="baseurl+dataVolta.empresa.logo"></v-avatar>  </div>
       </div>
@@ -539,7 +539,9 @@ onBeforeUnmount(() => {
             </div>
           </div>
         </div>
+
         <v-divider  :thickness="1" class="border-opacity-100 tw-mt-2 lg:!tw-hidden" ></v-divider>
+
         <div class="tw-flex tw-justify-end tw-items-center tw-w-full  md:tw-w-1/2 lg:tw-ml-10 lg:tw-mr-5">
           <div class="tw-mt-4 tw-text-right">
             <p v-if="dataVolta?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(dataVolta.valor))}}</span> por</p>
@@ -604,7 +606,7 @@ onBeforeUnmount(() => {
                     <template v-for="item in dataIda.tipos_comodos">
                       <v-col v-if="item.id !== 4 && item.id !== 1 " :key="item.id" cols="12"  md="6" lg="4">
                         <v-card
-                            class="!tw-border-4 !tw-border-blue-400"
+                            class="!tw-border-4 !tw-text-blue-400"
                             flat
                             @click="roomsFree.ida.find(it=>it.tipo_comodidade_id === item.id).quantidade > 0 ? onClickRoom(null,item.id) : ''"
                             :class="roomsSelected.dataIda.selectedsByType?.find(it=>item.id == it.type_comodo_id)?.quantidade > 0 ? '!tw-bg-yellow-400' :
@@ -622,7 +624,8 @@ onBeforeUnmount(() => {
                               Valor
                             </v-col>
                             <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                              {{formatCurrency(calcularValor(formatMoney(dataIda.valor), dataIda.desconto?.desconto,0.04))}}
+                              {{formatCurrency(calcularValor(formatMoney(dataIda.valor), dataIda.desconto?.desconto,0.04))}}<br>
+                              <span class=" tw-text-[10px]"> no PIX</span>
                             </v-col>
                           </v-row>
                         </v-card>
@@ -645,7 +648,8 @@ onBeforeUnmount(() => {
                             Valor
                           </v-col>
                           <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                            {{formatCurrency(item.comodo_trechos.valor)}}
+                            {{formatCurrency(calcularValor(item.comodo_trechos.valor, null,0.04))}}<br>
+                            <span class=" tw-text-[10px]"> no PIX</span>
                           </v-col>
                         </v-row>
                       </v-card>

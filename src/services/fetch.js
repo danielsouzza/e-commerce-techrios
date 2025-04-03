@@ -31,9 +31,9 @@ export const routes = {
     'user.me':() => api.get('/me'),
     'user.login':(params= {}) => api.post('/login',params),
     'user.login.2fa':(params= {}) => api.post('/login/2fa',params),
-    'user.logout':(params= {}) => api.delete('/logout',params),
+    'user.logout':(params= {}) => api.delete('/logout',{data:params}),
     'user.register':(params= {}) => api.post('/register',params),
-    'user.delete':() => api.delete('/usuario'),
+    'user.delete':(params) => api.delete('/usuario',{data:params}),
     'user.reset-password':(params= {}) => api.post('/login/recuperar-senha',params),
     'user.validate-email':(params= {}) => api.post('/register/token',params),
 

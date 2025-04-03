@@ -25,30 +25,30 @@ import router from "../routes/index.js";
 import CartItem from "../components/app/Cart/CartItem.vue";
 import {userAuthStore} from "../store/AuthStore.js";
 import {getApiBaseUrl, getAppBaseUrl} from "../services/api.js";
-import {closeAllCards, showErrorNotification, showInfoNotification, showSuccessNotification, scrollBehavior} from "../event-bus.js";
+import {closeAllCards, showErrorNotification, showInfoNotification, showSuccessNotification} from "../event-bus.js";
 import {useLoadingStore} from "../store/states.js";
 const props = defineProps({
   tab:String,
 })
 
-const showFormNotification = ref(false)
-const percentToPay = ref(0)
-const timeToPay = ref(30 * 60)
+const formRef = ref()
+const route = useRoute();
+const menu = ref(false)
+const empresas = ref([])
+const filtersData = ref([])
 const cartStore = useCartStore()
 const authStore = userAuthStore()
-const loadingStore = useLoadingStore();
-const route = useRoute();
+const percentToPay = ref(0)
+const nextTravel = ref(null)
+const timeToPay = ref(30 * 60)
 const whatPayment = ref(false)
-const windowWidth = ref(window.innerWidth);
-const menu = ref(false)
-const filtersData = ref([])
 const orderResponse = ref(null)
 const paymentPending = ref(null)
-const empresas = ref([])
+const loadingStore = useLoadingStore();
 const orderConfirmation = ref(null)
 const trechosWithTravels = ref([])
-const formRef = ref()
-let checkTimeout = null;
+const windowWidth = ref(window.innerWidth);
+const showFormNotification = ref(false)
 const formPayment = reactive({
   order_id:null,
   payment_method_id:6,
@@ -136,6 +136,7 @@ const pacerls = [
   {value:6,pencet:0.10},
 ]
 let intervalo = null;
+let checkTimeout = null;
 
 const iniciarTemporizador = () => {
   intervalo = setInterval(() => {
@@ -218,7 +219,7 @@ function generateNextDays(data_hora) {
   nextDays.value = futureDates;
 }
 
-function getTrechos(){
+function getTrechos(nextTrip=false){
   const params = new URLSearchParams()
   params.append('origem', filtersSelected.value.origem || '')
   params.append('destino', filtersSelected.value.destino || '')
@@ -226,42 +227,69 @@ function getTrechos(){
   params.append('data_hora_volta', formatDate(filtersSelected.value.dataVolta) || '')
   params.append('intervalo', filtersSelected.value.intervalo || '')
   params.append('tipo_comodidade_id', filtersSelected.value.tipo_comodidade_id || '')
-  params.append('quantia', filtersSelected.value.quantia || '')
+  params.append('quantia', nextTrip ? 1 : filtersSelected.value.quantia || '')
   params.append('empresa', filtersSelected.value.empresa || '')
   params.append('subdomain', window.subdomain || '')
+  if(nextTrip) params.append('data_irrestrita', 1)
  loadingStore.startLoading();
   routes["trechos-viagem"](params).then(response => {
+    if(nextTrip){
+      if(response.data.data.trechos.data.length > 0){
+        nextTravel.value = response.data.data.trechos.data[0]
+      }
+    }else {
+      if(filtersSelected.value.type == "ida-e-volta"  && response.data.data.tipo == "ida" && response.data.data.trechos.data.length > 0){
+        showInfoNotification('Infelizmente não temos viajem de volta para o trecho escolhidos, mas temos viagem somente de ida');
+        filtersSelected.value.type = 'somente-ida'
+        filtersSelected.value.dataVolta = null
+      }
 
-    if(filtersSelected.value.type == "ida-e-volta"  && response.data.data.tipo == "ida" && response.data.data.trechos.data.length > 0){
-      showInfoNotification('Infelizmente não temos viajem de volta para o trecho escolhidos, mas temos viagem somente de ida');
-      filtersSelected.value.type = 'somente-ida'
+      if(response.data.data.trechos.data.length == 0){
+        getTrechos(nextTrip=true)
+      }
 
-    }
-    trechosWithTravels.value = response.data
-    const date = filtersSelected.value.dataIda.getDate()
-    const first = nextDays.value[0].getDate()
-    const last = nextDays.value[nextDays.value.length - 1].getDate()
-    if(date === first || date === last){
-      generateNextDays();
-    }
-    loadingStore.stopLoading();
-    router.push(
-        {
-          name: "sale",
-          params:{tab:'escolher-passagem'},
-          query: {
-            ...filtersSelected.value,
-            dataIda:formatDateToServe(filtersSelected.value.dataIda),
-            dataVolta:formatDateToServe(filtersSelected.value.dataVolta)
+      trechosWithTravels.value = response.data
+      const date = filtersSelected.value.dataIda.getDate()
+      const first = nextDays.value[0].getDate()
+      const last = nextDays.value[nextDays.value.length - 1].getDate()
+      if(date === first || date === last){
+        generateNextDays();
+      }
+      loadingStore.stopLoading();
+      router.push(
+          {
+            name: "sale",
+            params:{tab:'escolher-passagem'},
+            query: {
+              ...filtersSelected.value,
+              dataIda:formatDateToServe(filtersSelected.value.dataIda),
+              dataVolta:formatDateToServe(filtersSelected.value.dataVolta)
+            }
           }
-        }
-    );
+      );
+    }
+
   }).catch(error => {
     loadingStore.stopLoading();
-    if(error.response.data.data?.error){
-      showErrorNotification(error.response.data.data?.error);
+
+    if(!nextTrip){
+      if(error.response.data.data?.error){
+        showErrorNotification(error.response.data.data?.error);
+      }
     }
   })
+}
+
+function goToNextTrip(){
+  filtersSelected.value.dataIda = new Date(nextTravel.value.data_embarque)
+  nextTravel.value = null
+  getTrechos()
+}
+
+function scrollToStartDiv(){
+  const minhaDiv = document.getElementById("form-content");
+  minhaDiv.scrollIntoView({ behavior: "smooth", block: "start" });
+
 }
 
 function getTrechosWithTravels() {
@@ -294,11 +322,12 @@ function formatDates(date) {
 
 function nextStep(){
   stepSale.value = stepSale.value + 1;
-  scrollBehavior()
+  scrollToStartDiv()
 }
 
 function prevStep(){
   stepSale.value = stepSale.value - 1;
+  scrollToStartDiv()
   if(stepSale.value === 1){
     // resetFormSale()
   }
@@ -334,7 +363,6 @@ function addComodoRelated(index,type){
     formSale.dataVolta?.dataComodos.push({...item, comodo_relacionado: item.comodo, comodos_filhos: 1,qtd_comodos_filhos: 1, })
   }
 }
-
 
 function saveTicket(items) {
   const totalIda = calculateTotal(items.dataIda);
@@ -483,12 +511,12 @@ function submitOrder(){
       }
       loadingStore.stopLoading();
       formSale.processing = false
-      scrollBehavior()
+      scrollToStartDiv()
     }).catch(error=>{
       loadingStore.stopLoading();
       formSale.processing = false
       showErrorNotification(error.response.data.data.error);
-      scrollBehavior()
+      scrollToStartDiv()
     })
   }
 }
@@ -529,14 +557,14 @@ function addCart(){
         resetFormSale()
         prevStep()
         closeAllCards()
-        scrollBehavior()
+        scrollToStartDiv()
       }
       loadingStore.stopLoading();
       formSale.processing = false
     }).catch(error=>{
       formSale.processing = false
       loadingStore.stopLoading();
-      scrollBehavior()
+      scrollToStartDiv()
       showErrorNotification(error.response.data.data.error);
     })
   }
@@ -588,7 +616,7 @@ function submitPaymentCredit(){
     loadingStore.stopLoading();
   }).catch(error=>{
     loadingStore.stopLoading();
-    showErrorNotification(error.response.data.data.error);
+    showErrorNotification(error.response.data.data?.error ?? error.response.data.message);
     stepSale.value = 3
   })
 }
@@ -634,6 +662,7 @@ function submitFormNotification(){
   }
 
 }
+
 function identificarCpfOuCnpj(valor) {
   if (typeof valor !== "string") return 0;
 
@@ -739,7 +768,7 @@ function getTicketPdf(){
   const pathToReplace = "/var/www/storage/app/public/";
   const newPathPrefix = `${baseUrl}/storage/`;
 
-  orderConfirmation.value.passagens_agrupadas?.forEach(passage => {
+  orderConfirmation.value.pedido?.passagens_agrupadas?.forEach(passage => {
     passage.passagem_pedidos.forEach(it => {
       routes["ticket.print"](it.passageiro_viagem_id).then(response => {
         if(response.data.success){
@@ -763,8 +792,6 @@ function loadData(){
   }
 }
 
-
-
 onMounted(() => {
   getFilterItems()
   loadData()
@@ -778,11 +805,6 @@ onUnmounted(() => {
   }
 });
 
-watch(()=>useCartStore().isEmptyCart(),()=>{
-  if(useCartStore().isEmptyCart()){
-    router.push({name: "home"})
-  }
-})
 
 watch(()=>props.tab,()=>{
   cartStore.loadCart()
@@ -856,7 +878,7 @@ watch(()=>props.tab,()=>{
       </div>
     </div>
   </v-card>
-  <div class="maxWidth tw-px-3 ">
+  <div class="maxWidth tw-px-3 " id="form-content">
     <CardFilter
         v-model="filtersSelected"
         @update:modelValue="getTrechosWithTravels()"
@@ -1080,6 +1102,13 @@ watch(()=>props.tab,()=>{
                   @continue="saveTicket"
               ></CardTicket>
             </div>
+            <div v-else-if="nextTravel != null" class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
+              <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
+
+              <p class="tw-text-p mt-1"> Nenhuma viagem foi encontrada para esse dia. A próxima viagem de {{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}} para {{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}} será dia {{formatDate(nextTravel.data_embarque)}}.</p>
+
+                <v-btn @click="goToNextTrip" variant="tonal" color="secondary" class="mt-3">Ir para próxima viajem</v-btn>
+            </div>
             <div v-else class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
               <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
               <p class="tw-text-p mt-1"> Opa, parece que o trecho que está procurando ainda não está disponível, mas já estamos informando as Empresas parceiras para liberarem as viagens.
@@ -1113,14 +1142,12 @@ watch(()=>props.tab,()=>{
                     <Icon icon="iconamoon:clock-fill" class="mr-2" width="15"/>{{formatarTempoViagem(formSale.trecho.tempo_viagem)}}
                   </v-col>
                   <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
-                    <Icon icon="solar:map-arrow-up-bold" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}}
+                    <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}} -> {{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}
                   </v-col>
                   <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
                     <Icon icon="solar:armchair-bold" class="mr-2" width="15"/>{{gerarStringTiposComodos(formSale.dataComodos.map(it=>it.tipo_comodidade))}}
                   </v-col>
-                  <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
-                    <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}
-                  </v-col>
+
                   <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
                     <Icon icon="mingcute:ship-fill" width="15" class="mr-2" />{{formSale.trecho.embarcacao}}
                   </v-col>
@@ -1137,13 +1164,10 @@ watch(()=>props.tab,()=>{
                       <Icon icon="iconamoon:clock-fill" class="mr-2" width="15"/>{{formatarTempoViagem(formSale.dataVolta.trecho.tempo_viagem)}}
                     </v-col>
                     <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
-                      <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}
+                      <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}} ->{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}
                     </v-col>
                     <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
                       <Icon icon="solar:armchair-bold" class="mr-2" width="15"/>{{gerarStringTiposComodos(formSale.dataComodos.map(it=>it.tipo_comodidade))}}
-                    </v-col>
-                    <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
-                      <Icon icon="solar:map-arrow-up-bold" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}}
                     </v-col>
                     <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
                       <Icon icon="mingcute:ship-fill" width="15" class="mr-2" />{{formSale.trecho.embarcacao}}
@@ -1448,7 +1472,7 @@ watch(()=>props.tab,()=>{
                 <div v-else class="tw-flex tw-flex-col tw-w-full">
                   <p class="tw-text-p my-3"> Para realizar pagamento com cartão de credito é nescessário realizar o login.</p>
                   <div class="tw-flex tw-gap-3">
-                    <RouterLink :to="{name:'login'}">
+                    <RouterLink :to="{ name: 'login', query: { redirect: '/comprar-passagem/pagamento' } }">
                       <v-btn  flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
                         <span class="tw-text-white tw-flex"><Icon icon="solar:login-linear" class="mr-2 tw-text-xl"/>Login</span>
                       </v-btn>

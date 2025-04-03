@@ -33,7 +33,7 @@ onMounted(()=>{
 
 <template>
 
-  <div class="relative  " >
+  <div class="relative  "  id="mais-buscados">
     <MostPopularDestinations :class="userAuthStore().isAuthenticated() ? '!tw-pb-[10px]' : '!tw-pb-[80px]'"  />
 
     <div class="tw-flex tw-flex-col  tw-w-full tw-bg-primary tw-px-3 ">

@@ -41,10 +41,11 @@ function formatarHora(dataHora) {
 
 function gerarStringTiposComodos(tiposComodos) {
     if (Array.isArray(tiposComodos)) {
-        return tiposComodos.map(comodo => comodo.nome).join(" | ");
+        return [...new Set(tiposComodos.map(comodo => comodo.nome))].join(" | ");
     }
     return "";
 }
+
 
 function formatDate(dateString) {
     if (!dateString) return null

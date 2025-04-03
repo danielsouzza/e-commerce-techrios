@@ -44,12 +44,12 @@ function getDestinations(){
 }
 
 watch(()=>route.query.destino,()=>{
-  filtersSelected.value.destino = parseInt(route.query.destino) || null;
+  filtersSelected.value.destino = route.query.destino || null;
   getTrechosWithTravels()
 })
 
 onMounted(()=>{
-  filtersSelected.value.destino = parseInt(route.query.destino) || null;
+  filtersSelected.value.destino = route.query.destino || null;
   getTrechosWithTravels()
   getDestinations();
 })
@@ -74,7 +74,7 @@ onMounted(()=>{
               hide-details
               variant="solo"
               v-model="filtersSelected.destino"
-              item-value="codigo"
+              item-value="slug"
               item-title="nome"
               placeholder="Alterar cidade de destino"
               class="my-select mt-1"

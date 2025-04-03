@@ -7,12 +7,14 @@ import {userAuthStore} from "../store/AuthStore.js";
 import {useCartStore} from "../store/CartStore.js";
 import {getAppBaseUrl} from "../services/api.js";
 import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
+import {useRoute} from "vue-router";
 
 
 const props  =  defineProps({
   tab:String
 })
 
+const route = useRoute();
 const visible = ref(false);
 const tab = ref( props.tab ?? 'login')
 
@@ -121,13 +123,14 @@ function confirm2fat(){
       form2fa.processing = false
     }).catch(error=>{
       form2fa.processing = false
-      showErrorNotification(error.response.data.data.error);
+      showErrorNotification(error.response?.data.data.error);
     })
   }
 }
 
 function goToHomePage(){
-  router.push({name: "home"})
+  const redirect = route.query.redirect || '/';
+  router.push(redirect)
 }
 
 

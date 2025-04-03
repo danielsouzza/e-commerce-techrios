@@ -19,6 +19,7 @@ const props = defineProps({
 
 const route = useRoute();
 const auth = ref(null)
+const showDialogDelete = ref(null)
 const municipios = ref([]);
 const tab = ref(props.tab)
 const visible1 = ref(false);
@@ -193,6 +194,7 @@ function handleSubmitNewEmail() {
 }
 
 function handleSubmit() {
+  form.processing = true
   const data = {
     ...form,
   }
@@ -202,20 +204,28 @@ function handleSubmit() {
   if(validateForm()){
     routes['user.register'](data).then((response) => {
       showSuccessNotification(response.data.message)
-
+      formPassword.new_password = ""
+      formPassword.password_confirmation = ""
+      form.processing = false
     }).catch((error) => {
       showErrorNotification(error.response.data.data.error)
+      form.processing = false
+
     })
   }
 }
 
 function deleteAccount() {
+  form.processing = false
   routes['user.delete'](form).then((response) => {
     showSuccessNotification(response.data.message)
+    form.processing = false
+
     router.push({name: "login"})
+
   }).catch((error) => {
-    console.log(error)
-    showErrorNotification(error.response.data.data.error)
+    form.processing = false
+    showErrorNotification(error.response.data.data?.error ?? error.response.data.message)
   })
 }
 
@@ -237,15 +247,28 @@ function getMunicipios(){
 }
 
 const validatePassword = () => {
-  if (!formPassword.new_password || !formPassword.password_confirmation) {
+    formPassword.errors = {}
+  if (!formPassword.new_password ) {
+    formPassword.errors.new_password = 'Por favor preencha com sua senha nova'
     return false;
   }
-  const isValid = passwordRules.value.every(rule => rule.rule);
-  return isValid && formPassword.new_password === formPassword.password_confirmation;
+
+  if ( !formPassword.password_confirmation) {
+    formPassword.errors.password_confirmation = 'Por favor preencha com a senha de confirmação '
+    return false;
+  }
+
+  if(formPassword.new_password !== formPassword.password_confirmation){
+    formPassword.errors.password_confirmation = 'A senha de confirmação não é igual a senha nova senha'
+    return false
+  }
+  return  passwordRules.value.every(rule => rule.rule);
+
 };
 
 function submitFormPassword(){
   if(validatePassword()){
+    form.password = formPassword.new_password
     handleSubmit()
   }
 }
@@ -266,6 +289,50 @@ onMounted(()=>{
 </script>
 
 <template>
+  <v-dialog max-width="600" v-model="showDialogDelete">
+    <template v-slot:default="{ isActive }">
+      <v-card title="Deletar Contar Permanentemente">
+        <v-card-text>
+          Tem certeza de que deseja excluir sua conta? Esta ação é permanente e resultará na perda de todos os seus dados, sem possibilidade de recuperação.
+        </v-card-text>
+        <v-card-item>
+          <v-row class="tw-px-4">
+            <v-col cols="12">
+              <v-text-field
+                  v-model="form.password"
+                  :error-messages="form.errors.password"
+                  variant="outlined"
+                  label="Sua senha"
+                  type="password"
+                  hide-details="auto"
+              >
+
+              </v-text-field>
+            </v-col>
+          </v-row>
+        </v-card-item>
+
+        <v-card-actions>
+
+          <v-btn
+              variant="flat"
+              color="secondary"
+              text="cancelar"
+              @click="showDialogDelete = false; form.password = null"
+          ></v-btn>
+          <v-btn
+              :disabled="form.processing"
+              :loading="form.processing"
+              variant="flat"
+              color="error"
+              text="confirmar"
+              @click="deleteAccount"
+          ></v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
+  </v-dialog>
+
   <v-card  color="primary" rounded="0"  class="!tw-py-6">
     <div class="maxWidth tw-flex  !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
       <div class="text-center lg:tw-text-start tw-py-2 px-5 tw-text-2xl  tw-text-secondary"><strong class="tw-font-bold"> {{titlePage}}</strong> </div>
@@ -517,6 +584,7 @@ onMounted(()=>{
                       density="compact"
                       color="secondary"
                       hide-details="auto"
+                      :error-messages="formPassword.errors.new_password"
                       v-model="formPassword.new_password"
                       placeholder="Digite sua nova senha"
                       prepend-inner-icon="mdi-lock-outline"
@@ -543,6 +611,7 @@ onMounted(()=>{
                       color="secondary"
                       hide-details="auto"
                       v-model="formPassword.password_confirmation"
+                      :error-messages="formPassword.errors.password_confirmation"
                       placeholder="Digite novamente sua nova senha"
                       prepend-inner-icon="mdi-lock-outline"
                       variant="outlined"
@@ -552,6 +621,8 @@ onMounted(()=>{
               </v-row>
 
               <v-btn
+                  :disabled="form.processing"
+                  :loading="form.processing"
                   @click="submitFormPassword"
                   class=""
                   color="secondary"
@@ -583,7 +654,7 @@ onMounted(()=>{
                 </v-col >
                 <v-col cols="12" >
                   <v-btn
-                      @click="deleteAccount"
+                      @click="showDialogDelete = true"
                       color="error"
                       size="large"
                       rounded
