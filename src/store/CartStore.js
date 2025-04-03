@@ -39,7 +39,7 @@ export const useCartStore = defineStore('cart', {
                         this.order =  null;
                     }
                     this.order = carrinho
-                    this.order.passagens_agrupadas = this.order.passagens_agrupadas.filter(
+                    this.order.passagens_agrupadas = this.order.passagens_agrupadas?.filter(
                         passagem => passagem.passagem_pedidos.length > 0
                     );
 
@@ -111,7 +111,7 @@ export const useCartStore = defineStore('cart', {
         removerItem(item){
 
             routes["order.delete"](item.pedido, item).then(response => {
-                this.order.passagens_agrupadas.forEach(group => {
+                this.order.passagens_agrupadas?.forEach(group => {
                     if(group.viagem.id == item.viagem_id){
                         const comodoIndex = group.passagem_pedidos.findIndex(it=>item.comodos_ids.includes(it.comodo_id))
                         if(comodoIndex >= 0){

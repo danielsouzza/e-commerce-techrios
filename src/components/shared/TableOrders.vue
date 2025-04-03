@@ -309,7 +309,9 @@ onMounted(()=>{
                 <v-col cols="12"> <v-divider  :thickness="1" class="border-opacity-100 mt-3 " ></v-divider></v-col>
               </v-row>
 
-              <v-row v-if="item.status == 'Em aberto'">
+              <div v-if="item.passagens?.length == 0" class=" my-5 tw-text-center ">Pedido vazio</div>
+
+              <v-row v-if="item.status == 'Em aberto' && item.passagens?.length > 0">
                 <v-col class="d-flex justify-end mr-4 mb-3">
                   <RouterLink :to="{name:'sale',params:{tab:'pagamento'}}">
                     <v-btn color="primary" rounded="lg" class="tw-w-full" >Ir para o pagamento</v-btn>

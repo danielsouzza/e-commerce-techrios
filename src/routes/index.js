@@ -131,13 +131,13 @@ router.afterEach((to) => {
 router.beforeEach(async (to, from, next) => {
     const cartStore = useCartStore();
     const userStore = userAuthStore();
-    await cartStore.loadCart();
 
     if (to.meta.requiresAuth && !userStore.isAuthenticated()) {
         return next({ name: 'login' });
     }
 
     if (to.name === 'sale' && to.params.tab === 'pagamento') {
+        await cartStore.loadCart();
         if (cartStore.isEmptyCart()) {
             return next({ name: 'home' });
         }
@@ -145,7 +145,6 @@ router.beforeEach(async (to, from, next) => {
 
     const loadingStore = useLoadingStore();
     loadingStore.startLoading();
-
     next();
 });
 

@@ -1081,13 +1081,13 @@ watch(()=>props.tab,()=>{
             <v-card  flat  class=" mb-3 !tw-px-3 !tw-py-2  lg:!tw-block">
               <div class="tw-flex tw-gap-10 tw-items-center tw-justify-center tw-p-2 tw-text-[12px]">
                 <v-btn
-                    flat
+                    :variant="filtersSelected.dataIda.getDate() === date.getDate()? 'flat' : 'outlined'"
+                    :color="filtersSelected.dataIda.getDate() === date.getDate()? 'primary' : 'secondary'"
                     v-for="date in nextDays"
                     :key="date.getDate()"
-                    :active="filtersSelected.dataIda.getDate() === date.getDate()"
                     @click="filtersSelected.dataIda = date; getTrechosWithTravels()"
                 >
-                  <span class="tw-text-p tw-font-semibold tw-text-xs">{{ formatDates(date) }}</span>
+                  <span class=" tw-font-semibold tw-text-xs">{{ formatDates(date) }}</span>
                 </v-btn>
               </div>
             </v-card>
