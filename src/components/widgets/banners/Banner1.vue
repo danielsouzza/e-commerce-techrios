@@ -46,7 +46,7 @@ onMounted(() => {
     <!-- Placeholder -->
     <div
         v-if="loading || !imagesReady"
-        class="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-gray-200 tw-z-10"
+        class="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-gray-200 "
     >
       <div class="tw-animate-pulse tw-text-gray-500">Carregando banner...</div>
     </div>
