@@ -39,8 +39,8 @@ function goToSalePage() {
     name: "sale",
     params: { tab: "escolher-passagem" },
     query: {
-      destino: props.data?.municipio_destino.codigo,
-      origem: props.data?.municipio_origem.codigo,
+      destino: props.data?.municipio_destino.slug,
+      origem: props.data?.municipio_origem.slug,
       dataIda: formatDateToServe(new Date(props.data?.data_embarque)),
       type: "somente-ida",
     },

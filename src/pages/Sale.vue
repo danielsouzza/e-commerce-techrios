@@ -521,7 +521,7 @@ function submitOrder(){
     }).catch(error=>{
       loadingStore.stopLoading();
       formSale.processing = false
-      showErrorNotification(error.response.data.data.error);
+      showErrorNotification(error.response.data.data?.error ?? error.response.data?.message);
       scrollToStartDiv()
     })
   }
@@ -571,7 +571,7 @@ function addCart(){
       formSale.processing = false
       loadingStore.stopLoading();
       scrollToStartDiv()
-      showErrorNotification(error.response.data.data.error);
+      showErrorNotification(error.response.data.data?.error ?? error.response.data?.message);
     })
   }
 }

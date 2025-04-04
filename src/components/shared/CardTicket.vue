@@ -377,8 +377,8 @@ async  function initSale(){
       }
     }).catch(error => {
       loadingStore.stopLoading();
-
-      showErrorNotification(error.response.data.data.error);
+      console.log(error)
+      showErrorNotification(error.response.data.data?.error ?? error.response.data?.message);
     })
 
   }
