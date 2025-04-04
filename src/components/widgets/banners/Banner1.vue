@@ -48,7 +48,12 @@ onMounted(() => {
         v-if="loading || !imagesReady"
         class="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-gray-200 "
     >
-      <div class="tw-animate-pulse tw-text-gray-500">Carregando banner...</div>
+      <v-progress-circular
+          width="2"
+          color="white"
+          size="90"
+          indeterminate
+      ></v-progress-circular>
     </div>
 
     <!-- Slides -->
