@@ -55,7 +55,7 @@ function goToSalePage(){
         </p>
       </div>
       <div class="tw-flex tw-items-center tw-gap-3 tw-text-p tw-text-sm">
-        <IconsBoat/><span>{{formatDate(data?.saida)}} • {{formatarHora(data?.horario)}}</span>
+        <IconsBoat :type="data.tipo_embarcacao"/><span>{{formatDate(data?.saida)}} • {{formatarHora(data?.horario)}}</span>
       </div>
       <div class="tw-mt-4 tw-text-left">
         <p v-if="data?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(data.valor))}}</span> por</p>

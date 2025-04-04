@@ -480,14 +480,14 @@ onBeforeUnmount(() => {
         <div  class="tw-flex  tw-text-primary tw-px-2  tw-rounded-lg tw-font-bold lg:tw-mr-5 tw-w-full tw-items-center">
           <span class=" tw-text-xs">IDA - {{ dataIda.municipio_destino.nome }} ({{formatDate(dataIda.data_embarque)}})</span>
         </div>
-        <div class="tw-text-xs mt-2 tw-justify-end tw-w-full tw-flex tw-items-center">{{dataIda.empresa.nome_fantasia}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataIda.empresa.logo" :image="baseurl+dataIda.empresa.logo"></v-avatar>  </div>
+        <div class="tw-text-xs  tw-justify-end tw-w-full tw-flex tw-items-center">{{dataIda.empresa.nome_fantasia}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataIda.empresa.logo" :image="baseurl+dataIda.empresa.logo"></v-avatar>  </div>
       </div>
       <v-divider  :thickness="1" class="border-opacity-100 tw-mt-1 " ></v-divider>
 
       <div class="lg:tw-flex tw-justify-between tw-items-center">
-        <div class="tw-flex tw-justify-between tw-items-center mt-3 tw-w-full mr-10">
+        <div class="tw-flex tw-justify-between tw-items-center mt-3 tw-w-full lg:!tw-mr-10">
           <div>
-            <TravelImages :alt="dataIda.municipio_destino.nome" :images="dataIda.municipio_destino.images" class="bg-grey-lighten-2 !tw-w-[120px] !tw-h-[50px]"/>
+            <TravelImages :alt="dataIda.municipio_destino.nome" :images="dataIda.municipio_destino.images" class="bg-grey-lighten-2 !tw-w-[120px] !tw-h-[50px] mr-2 rounded-lg"/>
           </div>
           <div class="tw-flex lg:tw-ml-5 tw-text-[10px] tw-gap-4 lg:tw-gap-6 lg:tw-text-sm">
             <div>

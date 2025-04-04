@@ -1,85 +1,89 @@
 <script setup>
-import { onMounted, ref } from "vue";
-import { routes } from "../../../services/fetch.js";
+import { ref, onMounted } from 'vue'
+import { routes } from '../../../services/fetch.js'
 
-const loading = ref(true);
-const slides = ref([]);
-const imagesLoaded = ref(false); // Contador de imagens carregadas
+const loading = ref(true)
+const slides = ref([])
+const currentSlide = ref(0)
+const imagesLoadedCount = ref(0)
+const imagesReady = ref(false)
 
 function getSlides() {
-  const subdomain = window?.subdomain || "defaultSubdomain";
+  const subdomain = window?.subdomain || 'defaultSubdomain'
 
-  routes["banners"]({ subdomain, principal: 1 })
+  routes['banners']({ subdomain, principal: 1 })
       .then((res) => {
-        slides.value = res.data.data;
+        slides.value = res.data.data
       })
       .catch(() => {
-        slides.value = [];
+        slides.value = []
       })
       .finally(() => {
-        loading.value = false;
-      });
+        loading.value = false
+      })
 }
 
-function imageLoaded(item) {
-  imagesLoaded.value = true;
+function imageLoaded() {
+  imagesLoadedCount.value++
+  if (imagesLoadedCount.value >= slides.value.length) {
+    imagesReady.value = true
+  }
 }
+
+setInterval(() => {
+  if (slides.value.length > 0) {
+    currentSlide.value = (currentSlide.value + 1) % slides.value.length
+  }
+}, 10000)
 
 onMounted(() => {
-  getSlides();
-});
+  getSlides()
+})
 </script>
 
 <template>
+  <div class="tw-relative tw-w-full tw-overflow-hidden tw-h-[170px] lg:tw-h-[500px]">
+    <!-- Placeholder -->
+    <div
+        v-if="loading || !imagesReady"
+        class="tw-absolute tw-inset-0 tw-flex tw-items-center tw-justify-center tw-bg-gray-200 tw-z-10"
+    >
+      <div class="tw-animate-pulse tw-text-gray-500">Carregando banner...</div>
+    </div>
 
-  <v-skeleton-loader
-      :loading="loading"
-      class="!tw-h-full my-load"
-      type="image"
-  >
-    <v-responsive >
-
-      <v-carousel
-          cycle
-          continuous
-          class="!tw-w-full !tw-h-full my-carousel"
-          show-arrows="hover"
-          hide-delimiter-background
+    <!-- Slides -->
+    <div
+        v-if="slides.length > 0"
+        class="tw-relative tw-h-full tw-transition-opacity tw-duration-500"
+        :class="{ 'tw-opacity-0': !imagesReady, 'tw-opacity-100': imagesReady }"
+    >
+      <div
+          v-for="(item, index) in slides"
+          :key="index"
+          class="tw-absolute tw-inset-0 tw-transition-opacity tw-duration-1000 tw-ease-in-out"
+          :class="{ 'tw-opacity-0': currentSlide !== index, 'tw-opacity-100': currentSlide === index }"
       >
-        <div v-if="slides.length == 0 || !imagesLoaded " class="carousel-placeholder !tw-h-[170px] lg:!tw-h-[500px]" ></div>
-
-        <a v-for="(item, i) in slides" :key="i" :href="item.redirect_url" :target="item.target">
-          <v-carousel-item
-              class="my-carousel !tw-h-[170px] lg:!tw-h-full"
-              cover
-              :class="item.redirect_url ? 'tw-cursor-pointer' : ''"
+        <a
+            v-if="item.redirect_url"
+            :href="item.redirect_url"
+            :target="item.target"
+            class="tw-block tw-w-full tw-h-full"
+        >
+          <img
               :src="item.image_url"
-              alt="banner principal"
+              alt="Banner"
+              class="tw-object-cover tw-w-full tw-h-full"
               @load="imageLoaded"
-          >
-            <template v-slot:placeholder>
-              <v-row align="center" class="fill-height ma-0" justify="center">
-                <v-progress-circular color="grey-lighten-5" indeterminate></v-progress-circular>
-              </v-row>
-            </template>
-          </v-carousel-item>
+          />
         </a>
-      </v-carousel>
-    </v-responsive>
-  </v-skeleton-loader>
+        <img
+            v-else
+            :src="item.image_url"
+            alt="Banner"
+            class="tw-object-cover tw-w-full tw-h-full"
+            @load="imageLoaded"
+        />
+      </div>
+    </div>
+  </div>
 </template>
-
-
-<style scoped>
-.carousel-placeholder {
-  background-color: #f0f0f0;
-}
-
-.my-load::v-deep(.v-skeleton-loader__image) {
-  height: 500px;
-}
-
-.my-carousel::v-deep(.v-carousel__controls){
-  z-index: 0 !important;
-}
-</style>

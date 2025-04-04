@@ -12,6 +12,7 @@ const props = defineProps({
 })
 
 
+const loadingFilters = ref(false)
 const filterOptions = ref([])
 const emit = defineEmits(['update:modelValue'])
 const form = ref(null);
@@ -82,12 +83,14 @@ function getFilterItems(){
     origem: props.modelValue.origem || '',
     subdomain:  window.subdomain || ''
   }
+  loadingFilters.value = false
   routes["filtros"](params).then(response => {
     if(!response.data.data.success){
       filterOptions.value = response.data.data;
       if(filterOptions.value.municipiosDestino.findIndex(it=>it.slug == props.modelValue.destino) < 0){
         props.modelValue.destino = null
       }
+      loadingFilters.value = false
     }
   })
 }
@@ -102,8 +105,7 @@ function changeTypeTravel(){
   props.modelValue.dataVolta = null
   // updateFilters()
 }
-
-onMounted(getFilterItems)
+getFilterItems()
 
 </script>
 
@@ -130,6 +132,7 @@ onMounted(getFilterItems)
                 hide-details="auto"
                 item-value="slug"
                 item-title="nome"
+                :loading="loadingFilters"
                 variant="solo"
                 :rules="[v => !!v || 'Esse campo é obrigatório']"
                 placeholder="Origem"
@@ -141,6 +144,7 @@ onMounted(getFilterItems)
             >
               <template v-slot:selection="{ props, item }">
                 <v-list-item
+                    v-if="item.raw.slug"
                     v-bind="props"
                     :title="item.raw.nome+'/'+item.raw.uf"
                 ></v-list-item>
@@ -169,6 +173,7 @@ onMounted(getFilterItems)
                 :rules="[v => !!v || 'Esse campo é obrigatório']"
                 hide-details="auto"
                 variant="solo"
+                :loading="loadingFilters"
                 placeholder="Destino"
                 class="my-select mt-1 !tw-z-[1]"
                 :items="filterOptions.municipiosDestino"
@@ -176,6 +181,7 @@ onMounted(getFilterItems)
             >
               <template v-slot:selection="{ props, item }">
                 <v-list-item
+                    v-if="item.raw.slug"
                     v-bind="props"
                     :title="item.raw.nome+'/'+item.raw.uf"
                 ></v-list-item>

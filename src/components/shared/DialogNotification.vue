@@ -58,11 +58,11 @@ const closeNotification = () => {
 </script>
 
 <template>
-  <v-overlay  v-model="show"  @click="closeNotification" class="!tw-top-[10%] !tw-left-[42.5%]">
+  <v-overlay  v-model="show"  @click="closeNotification" class="!tw-justify-center !tw-top-[10%]" >
     <transition name="slide-fade">
       <div
           v-if="show"
-          class="notification-container"
+          class="notification-container  "
           :class="`bg-${colors.bg}`"
       >
         <div class="tw-w-full tw-flex tw-flex-col tw-items-center tw-pb-3 tw-text-center">
@@ -81,7 +81,7 @@ const closeNotification = () => {
 
 <style scoped>
 .notification-container {
-  position: fixed;
+  position: relative;
   min-height: 80px;
   min-width: 350px;
   max-width: 500px;

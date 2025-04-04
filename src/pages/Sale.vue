@@ -108,19 +108,23 @@ const months = ["01","02","03","04","05","06","07","08","09","10","11","12"]
 const tabs = [
   {
     step:1,
-    value:'escolher-passagem'
+    value:'escolher-passagem',
+    title: 'Escolher passagem'
   },
   {
     step:2,
-    value:'infor-data'
+    value:'infor-data',
+    title: 'Informa dados'
   },
   {
     step:3,
-    value:'pagamento'
+    value:'pagamento',
+    title:'Pagamento'
   },
   {
     step:4,
-    value:'confirmacao'
+    value:'confirmacao',
+    title:'Pagamento concluído'
   }
 ]
 const stepSale = ref(tabs.find(it=>it.value == props.tab).step)
@@ -322,7 +326,9 @@ function formatDates(date) {
 
 function nextStep(){
   stepSale.value = stepSale.value + 1;
-  scrollToStartDiv()
+  nextTick(() => {
+    scrollToStartDiv();
+  });
 }
 
 function prevStep(){
@@ -792,9 +798,10 @@ function loadData(){
   }
 }
 
+getFilterItems()
+loadData()
+
 onMounted(() => {
-  getFilterItems()
-  loadData()
   getEmpresas()
   window.addEventListener('resize', updateWidth);
 });
@@ -872,14 +879,16 @@ watch(()=>props.tab,()=>{
     </template>
   </v-dialog>
   <v-card  color="primary" rounded="0"  class="!tw-py-6">
-    <div class="maxWidth tw-flex lg:!tw-mb-[70px] !tw-mb-[70px] !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
-      <div class="text-center lg:tw-text-start tw-py-4 px-5 lg:tw-text-lg">
+    <div :class="stepSale == 1 ? 'lg:!tw-mb-[70px] !tw-mb-[70px]' : ''" class="maxWidth tw-flex  !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
+      <div v-if="stepSale === 1" class="text-center lg:tw-text-start tw-py-4 px-5 lg:tw-text-lg">
         Passagem de <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem',filtersData)}} </strong> para <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}</strong>
       </div>
+      <div  v-else class="text-center lg:tw-text-start tw-py-2 px-5 tw-text-2xl  tw-text-secondary"><strong class="tw-font-bold">{{tabs[stepSale-1].title}}</strong> </div>
     </div>
   </v-card>
-  <div class="maxWidth tw-px-3 " id="form-content">
+  <div class="maxWidth tw-px-3 " id="form-content" :class="stepSale == 1 ? '' : 'mt-5'">
     <CardFilter
+        v-if="stepSale === 1"
         v-model="filtersSelected"
         @update:modelValue="getTrechosWithTravels()"
         :options="filtersData"
@@ -1148,7 +1157,7 @@ watch(()=>props.tab,()=>{
                     <Icon icon="solar:armchair-bold" class="mr-2" width="15"/>{{gerarStringTiposComodos(formSale.dataComodos.map(it=>it.tipo_comodidade))}}
                   </v-col>
 
-                  <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
+                  <v-col  cols="12" class="tw-flex tw-items-center  ">
                     <Icon icon="mingcute:ship-fill" width="15" class="mr-2" />{{formSale.trecho.embarcacao}}
                   </v-col>
                 </v-row>
