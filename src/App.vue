@@ -29,7 +29,9 @@ onMounted(() => {
           indeterminate
       ></v-progress-circular>
     </v-overlay>
-    <router-view ></router-view>
+    <main class="tw-flex-1 tw-min-h-[70vh]">
+      <router-view ></router-view>
+    </main>
   </Setup>
 </template>
 

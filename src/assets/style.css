@@ -11,7 +11,10 @@
 }
 
 .lp-wraper {
+  min-height: 100vh;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   margin-top: 70px;
 }
 
