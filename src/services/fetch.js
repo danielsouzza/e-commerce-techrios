@@ -27,6 +27,7 @@ export const routes = {
     'payment.pix': (params= {}) => api.post('/pagamentos/pix',params),
     'payment.credito': (params= {}) => api.post('/pagamentos/credito',params),
     'payment.status': (order_id) => api.get(`/pedidos/${order_id}/status`),
+    'order.send-passenger': (order_id) => api.get(`/pedidos/exportar-de-pedido/${order_id}/enviar-contato`),
 
     'user.me':() => api.get('/me'),
     'user.login':(params= {}) => api.post('/login',params),

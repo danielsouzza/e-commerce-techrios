@@ -26,11 +26,14 @@ const config = {
     },
     // 400px and up
     400: {
+      itemsToShow: 1.75,
+      snapAlign: 'center',
+    },
+    500: {
       itemsToShow: 2,
       snapAlign: 'center',
     },
-    // 500px and up
-    500: {
+    600: {
       itemsToShow: 3,
       gap:10,
       mouseDrag:false,

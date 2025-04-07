@@ -224,6 +224,8 @@ function generateNextDays(data_hora) {
 }
 
 function getTrechos(nextTrip=false){
+  nextTravel.value = null
+  trechosWithTravels.value = []
   const params = new URLSearchParams()
   params.append('origem', filtersSelected.value.origem || '')
   params.append('destino', filtersSelected.value.destino || '')
@@ -250,6 +252,7 @@ function getTrechos(nextTrip=false){
 
       if(response.data.data.trechos.data.length == 0){
         getTrechos(nextTrip=true)
+        return
       }
 
       trechosWithTravels.value = response.data
@@ -259,7 +262,7 @@ function getTrechos(nextTrip=false){
       if(date === first || date === last){
         generateNextDays();
       }
-      loadingStore.stopLoading();
+
       router.push(
           {
             name: "sale",
@@ -272,6 +275,7 @@ function getTrechos(nextTrip=false){
           }
       );
     }
+    loadingStore.stopLoading();
 
   }).catch(error => {
     loadingStore.stopLoading();
@@ -325,17 +329,21 @@ function formatDates(date) {
 }
 
 function nextStep(){
-  stepSale.value = stepSale.value + 1;
-  nextTick(() => {
-    scrollToStartDiv();
-  });
+  if(stepSale.value < 4){
+    stepSale.value++;
+    nextTick(() => {
+      scrollToStartDiv();
+    });
+  }
+
 }
 
 function prevStep(){
-  stepSale.value = stepSale.value - 1;
-  scrollToStartDiv()
-  if(stepSale.value === 1){
-    // resetFormSale()
+  if(stepSale.value > 1){
+    stepSale.value--;
+    nextTick(() => {
+      scrollToStartDiv();
+    });
   }
 }
 
@@ -600,6 +608,16 @@ function checkStatusPayment() {
   });
 }
 
+function reSendTickets(){
+    useLoadingStore().startLoading()
+  routes["order.send-passenger"](orderConfirmation.value.id).then(response => {
+    useLoadingStore().stopLoading()
+    showSuccessNotification(response.data.data)
+
+  }).catch(error=>{
+    showErrorNotification('Algo deu errado!')
+  })
+}
 function submitPaymentCredit(){
   const data = {
     ...formPayment,
@@ -879,6 +897,7 @@ watch(()=>props.tab,()=>{
     </template>
   </v-dialog>
   <v-card  color="primary" rounded="0"  class="!tw-py-6">
+
     <div :class="stepSale == 1 ? 'lg:!tw-mb-[70px] !tw-mb-[70px]' : ''" class="maxWidth tw-flex  !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
       <div v-if="stepSale === 1" class="text-center lg:tw-text-start tw-py-4 px-5 lg:tw-text-lg">
         Passagem de <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem',filtersData)}} </strong> para <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}</strong>
@@ -894,7 +913,7 @@ watch(()=>props.tab,()=>{
         :options="filtersData"
         class=" tw-top-[-100px]  !tw-mb-[-60px] lg:tw-top-[-100px] lg:!tw-mb-[-90px] !tw-mx-5 lg:!tw-mx-0  lg:!tw-block" />
     <div class="lg:tw-flex tw-items-center !tw-my-10  tw-hidden">
-      <v-btn variant="outlined" :color="stepSale > 1 ? 'success': 'secondary'" rounded @click="prevStep">
+      <v-btn variant="outlined" :color="stepSale > 1 ? 'success': 'secondary'" rounded >
         <Icon icon="mingcute:ship-line" class="ml-2 tw-text-xl" />
         SELECIONE A SUA VIAGEM
       </v-btn>
@@ -1086,7 +1105,7 @@ watch(()=>props.tab,()=>{
               </div>
             </v-container>
           </v-card>
-          <div class="tw-flex tw-flex-col tw-gap-3 !tw-w-full">
+          <div class="tw-flex tw-flex-col tw-gap-3 !tw-w-full ">
             <v-card  flat  class=" mb-3 !tw-px-3 !tw-py-2  lg:!tw-block">
               <div class="tw-flex tw-gap-10 tw-items-center tw-justify-center tw-p-2 tw-text-[12px]">
                 <v-btn
@@ -1117,6 +1136,15 @@ watch(()=>props.tab,()=>{
               <p class="tw-text-p mt-1"> Nenhuma viagem foi encontrada para esse dia. A próxima viagem de {{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}} para {{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}} será dia {{formatDate(nextTravel.data_embarque)}}.</p>
 
                 <v-btn @click="goToNextTrip" variant="tonal" color="secondary" class="mt-3">Ir para próxima viajem</v-btn>
+            </div>
+            <div class="tw-flex tw-justify-center"  v-else-if="trechosWithTravels?.length === 0">
+              <v-progress-circular
+
+                  width="2"
+                  color="white"
+                  size="90"
+                  indeterminate
+              ></v-progress-circular>
             </div>
             <div v-else class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
               <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
@@ -1554,14 +1582,19 @@ watch(()=>props.tab,()=>{
             </BaseCard>
           </v-col>
 
-          <v-col v-if="authStore.isAuthenticated" cols="12" class="tw-flex tw-justify-center tw-items-center tw-gap-1 py-2 pb-5" >
+          <v-col v-if="userAuthStore().isAuthenticated()" cols="12" class="tw-flex tw-justify-center tw-items-center tw-gap-1 py-2 pb-5" >
             <RouterLink :to="{name:'area-do-cliente',params:{tab:'pedidos'}}">
               <v-btn  flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
-                <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/>  Ver pedidos</span>
+                <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/>  Ver pedidoss</span>
               </v-btn>
             </RouterLink>
             <v-btn @click="getTicketPdf()" flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
               <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/> Baixar bilhete</span>
+            </v-btn>
+          </v-col>
+          <v-col v-if="!userAuthStore().isAuthenticated()"  cols="12" class="tw-flex tw-justify-center tw-items-center tw-gap-1 py-2 pb-5" >
+            <v-btn @click="reSendTickets()" flat color="info" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+              <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/> Enviar bilhete para meu contato</span>
             </v-btn>
           </v-col>
         </v-row>

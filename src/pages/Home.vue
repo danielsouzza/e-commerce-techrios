@@ -51,7 +51,7 @@ onMounted(() => {
 
 <template>
   <Banner1 />
-  <div class="maxWidth tw-flex tw-flex-col ">
+  <div class="maxWidth tw-flex tw-flex-col  ">
     <CardFilter
         v-model="filtersSelected"
         @update:modelValue="goToSalePage"
@@ -60,7 +60,7 @@ onMounted(() => {
 
     <RiversOfOffers class="!tw-my-5"/>
 
-    <div class="tw-grid md:tw-grid-cols-2 tw-gap-2  tw-py-2 tw-px-5 lg:tw-px-0">
+    <div class="tw-flex tw-items-center tw-flex-col md:tw-grid md:tw-grid-cols-2 tw-gap-2  tw-py-2 tw-px-5 lg:tw-px-0">
       <Banner2 v-for="i in slides.slice(0,2)" :key="i" :src="i.image_url"  :link="i.redirect_url"/>
     </div>
 
