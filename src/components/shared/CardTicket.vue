@@ -111,9 +111,14 @@ function allRooms (data, rooms) {
 
 const updateWidth = () => {
   windowWidth.value = window.innerWidth;
-  const data = step.value === 1 ? props.dataIda : props.dataVolta
-  const roomsStep = step.value === 1 ? rooms.value.ida : rooms.value.volta
-  matrizRooms.value = allRooms(data, roomsStep);
+  // const data = step.value === 1 ? props.dataIda : props.dataVolta
+  // const roomsStep = step.value === 1 ? rooms.value.ida : rooms.value.volta
+  matrizRooms.value.ida = allRooms(props.dataIda, rooms.value.ida);
+  if(step.value > 1){
+    matrizRooms.value.volta = allRooms(props.dataVolta, rooms.value.volta);
+
+  }
+
 };
 
 function getQuantityRoomsFree() {
@@ -393,6 +398,7 @@ function onClickBtnSelect(){
   if(openRooms.value){
     getRoomsByTrecho()
   }else{
+    scrollToStartDiv()
     roomsSelected.value.dataIda = {
       selectedsById:[],
       selectedsByType:[],
@@ -584,7 +590,7 @@ onBeforeUnmount(() => {
                 </v-col>
               </v-row>
               <v-container class=" lg:!tw-max-w-[800px] tw-max-w-[350px]  tw-flex ">
-                <Boat v-if="matrizRooms.ida.length > 0">
+                <Boat v-if="matrizRooms.ida?.length > 0">
                   <div :style="generateLayout()" class="tw-h-full">
                     <div
                         v-for="(comodo, index) in matrizRooms.ida"
@@ -736,7 +742,7 @@ onBeforeUnmount(() => {
                 </v-col>
               </v-row>
               <v-container class=" lg:!tw-max-w-[800px] tw-max-w-[350px]  tw-flex ">
-                <Boat v-if="matrizRooms.volta.length > 0">
+                <Boat v-if="matrizRooms.volta?.length > 0">
                   <div :style="generateLayout()" class="tw-h-full">
                     <div
                         v-for="(comodo, index) in matrizRooms.volta"
