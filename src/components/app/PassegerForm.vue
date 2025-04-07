@@ -2,6 +2,7 @@
 import {Icon} from "@iconify/vue";
 import {VDateInput} from 'vuetify/labs/VDateInput'
 import {converterData, isValidDate, permitirDatasNascimento} from "../../Helper/Ultis.js";
+import {userAuthStore} from "../../store/AuthStore.js";
 
 const props = defineProps({
   form:Object,
@@ -105,6 +106,7 @@ const tiposDoc = [
     </v-col>
   </v-row>
   <v-checkbox
+      v-if="!userAuthStore().isAuthenticated()"
       v-model="form.isContact"
       @update:modelValue="(arg)=>{if(arg) emits('addToContact',index); else emits('removeToContact',index)}"
       hide-details="auto"

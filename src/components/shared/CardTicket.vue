@@ -486,7 +486,7 @@ onBeforeUnmount(() => {
         <div  class="tw-flex  tw-text-primary tw-px-2  tw-rounded-lg tw-font-bold lg:tw-mr-5 tw-w-full tw-items-center">
           <span class=" tw-text-xs">IDA - {{ dataIda.municipio_destino.nome }} ({{formatDate(dataIda.data_embarque)}})</span>
         </div>
-        <div class="tw-text-xs  tw-justify-end tw-w-full tw-flex tw-items-center">{{dataIda.empresa.nome_fantasia}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataIda.empresa.logo" :image="baseurl+dataIda.empresa.logo"></v-avatar>  </div>
+        <div class="tw-text-xs  tw-justify-end tw-w-full tw-flex tw-items-center">{{dataIda.embarcacao}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataIda.empresa.logo" :image="baseurl+dataIda.empresa.logo"></v-avatar>  </div>
       </div>
       <v-divider  :thickness="1" class="border-opacity-100 tw-mt-1 " ></v-divider>
 
@@ -525,7 +525,7 @@ onBeforeUnmount(() => {
         <div  class="tw-flex  tw-text-primary tw-px-2  tw-rounded-lg tw-font-bold lg:tw-mr-5 tw-w-full tw-items-center">
           <span class=" tw-text-xs">VOLTA - {{ dataVolta.municipio_destino.nome }} ({{formatDate(dataVolta.data_embarque)}})</span>
         </div>
-        <div class="tw-text-sm mt-2 tw-justify-end tw-w-full tw-flex tw-items-center">{{dataVolta.empresa.nome_fantasia}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataVolta.empresa.logo" :image="baseurl+dataVolta.empresa.logo"></v-avatar>  </div>
+        <div class="tw-text-sm mt-2 tw-justify-end tw-w-full tw-flex tw-items-center">{{dataVolta.embarcacao}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataVolta.empresa.logo" :image="baseurl+dataVolta.empresa.logo"></v-avatar>  </div>
       </div>
       <v-divider  :thickness="1" class="border-opacity-100 tw-mt-1 " ></v-divider>
       <div class="lg:tw-flex tw-justify-between tw-items-center " >
@@ -612,7 +612,7 @@ onBeforeUnmount(() => {
                     <template v-for="item in dataIda.tipos_comodos">
                       <v-col v-if="item.id !== 4 && item.id !== 1 " :key="item.id" cols="12"  md="6" lg="4">
                         <v-card
-                            class="!tw-border-4 !tw-text-blue-400"
+                            class="!tw-border-4 !tw-border-blue-400"
                             flat
                             @click="roomsFree.ida.find(it=>it.tipo_comodidade_id === item.id).quantidade > 0 ? onClickRoom(null,item.id) : ''"
                             :class="roomsSelected.dataIda.selectedsByType?.find(it=>item.id == it.type_comodo_id)?.quantidade > 0 ? '!tw-bg-yellow-400' :
