@@ -509,7 +509,7 @@ onBeforeUnmount(() => {
               Duração <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{formatarTempoViagem(dataIda.tempo_viagem)}}</span>
             </div>
             <div>
-              Embarcação <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{dataIda.embarcacao}}</span>
+              Tipo <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{dataIda.tipo_embarcacao}}</span>
             </div>
           </div>
         </div>
@@ -547,7 +547,7 @@ onBeforeUnmount(() => {
               Duração <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{formatarTempoViagem(dataVolta.tempo_viagem)}}</span>
             </div>
             <div>
-              Embarcação <br> <span class="tw-font-bold tw-text-[12px]  lg:tw-text-sm">{{dataIda.embarcacao}}</span>
+              Tipo <br> <span class="tw-font-bold tw-text-[12px]  lg:tw-text-sm">{{dataIda.tipo_embarcacao}}</span>
             </div>
           </div>
         </div>
