@@ -36,33 +36,37 @@ const  headers = [
   { title: 'Valor', value: 'total' },
   { title: 'Status', value: 'status' },
 ]
-const orders = computed(()=>{
+const orders = computed(() => {
   const items = []
-  myOrders.value.data?.forEach((item,index)=>{
+  myOrders.value.data?.forEach((item, index) => {
     items.push({
       codigo: item.id,
       total: formatCurrency(item.total),
       data: formatDate(item.data),
       status: item.status,
-      passagens:  item.passagens_agrupadas.map( passage=>{
+      passagens: item.passagens_agrupadas.map(passage => {
+        const dataEmbarque = new Date(passage.viagem.saida)
+        const agora = new Date()
+
         return {
-          codigo: item.id+"-"+passage.viagem.id,
-          viagem: passage.trecho.municipio_origem.nome +" - "+ passage.trecho.municipio_destino.nome,
-          data:passage.viagem.saida,
+          codigo: item.id + "-" + passage.viagem.id,
+          viagem: passage.trecho.municipio_origem.nome + " - " + passage.trecho.municipio_destino.nome,
+          data: passage.viagem.saida,
           status: item.status,
-          detalhes:{
+          embarque_passado: dataEmbarque < agora,
+          detalhes: {
             boat: passage.viagem.embarcacao,
-            passageiros:passage.passagem_pedidos,
-            valor:passage.passagem_pedidos.reduce((acc, item)=>acc+item.valor,0),
-            taxa:passage.passagem_pedidos.reduce((acc, item)=>acc+item.taxa_embarque,0),
+            passageiros: passage.passagem_pedidos,
+            valor: passage.passagem_pedidos.reduce((acc, item) => acc + item.valor, 0),
+            taxa: passage.passagem_pedidos.reduce((acc, item) => acc + item.taxa_embarque, 0),
           }
         }
       })
     })
-
   })
   return items;
 })
+
 
 function getOrder(){
   routes['order.my']({subdomain: window.subdomain || ''}).then((res) => {
@@ -318,7 +322,7 @@ onMounted(()=>{
                   </RouterLink>
                 </v-col>
               </v-row>
-              <v-row v-if="item.status == 'Solicitado'">
+              <v-row v-if="item.status == 'Solicitado' && !item.passagens.some(it=>it.embarque_passado)">
                 <v-col class="d-flex justify-end mx-4 mb-3">
                     <v-btn  @click="submitPaymentPix(item.codigo)" color="primary" rounded="lg" class="tw-w-full" >Gerar código pix para pagamento</v-btn>
                 </v-col>

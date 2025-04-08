@@ -1,6 +1,7 @@
 <script setup>
 import SuperOfferStamp from "../ui-components/SuperOfferStamp.vue";
 import {
+  calcularValor,
   calcularValorParcelado,
   formatCurrency,
   formatDateToServe,
@@ -87,12 +88,12 @@ function goToSalePage() {
         <div>
           <div class="tw-flex tw-items-baseline tw-mt-2">
             <span class="tw-text-3xl tw-font-black text-secondary">
-              {{ data.desconto ? formatCurrency(formatMoney(data.valor) - data.desconto.desconto) : data.valor }}
+              {{formatCurrency(calcularValor(formatMoney( data.valor), data.desconto?.desconto))}}
             </span>
             <span class="tw-text-gray-300 tw-text-sm tw-ml-2">no PIX</span>
           </div>
           <p class="tw-text-gray-300 tw-text-xs">
-            ou a até 6x de <span class="tw-font-bold">{{ calcularValorParcelado(data) }}</span> no cartão
+            ou a até 6x de <span class="tw-font-bold">{{formatCurrency(calcularValor(formatMoney( data.valor), data.desconto?.desconto,-0.04))}}</span> no cartão
           </p>
         </div>
       </div>

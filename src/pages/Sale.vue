@@ -48,6 +48,7 @@ const loadingStore = useLoadingStore();
 const orderConfirmation = ref(null)
 const trechosWithTravels = ref([])
 const windowWidth = ref(window.innerWidth);
+const loadingTrecho = ref(false)
 const showFormNotification = ref(false)
 const formPayment = reactive({
   order_id:null,
@@ -57,7 +58,7 @@ const formPayment = reactive({
     card_number:null,
     expiration_date:'',
     security_code:null,
-    installment_quantity:{value:1,pencet:0.0},
+    installment_quantity:{value:1,pencet:0.04},
   }
 })
 const filtersSelected = ref({
@@ -132,7 +133,7 @@ const cart = computed(()=>{
   return cartStore
 })
 const pacerls = [
-  {value:1,pencet:0.0},
+  {value:1,pencet:0.4},
   {value:2,pencet:0.06},
   {value:3,pencet:0.07},
   {value:4,pencet:0.08},
@@ -225,7 +226,8 @@ function generateNextDays(data_hora) {
 
 function getTrechos(nextTrip=false){
   nextTravel.value = null
-  trechosWithTravels.value = []
+  loadingTrecho.value = true
+  // trechosWithTravels.value = []
   const params = new URLSearchParams()
   params.append('origem', filtersSelected.value.origem || '')
   params.append('destino', filtersSelected.value.destino || '')
@@ -252,7 +254,7 @@ function getTrechos(nextTrip=false){
 
       if(response.data.data.trechos.data.length == 0){
         getTrechos(nextTrip=true)
-        return
+        // return
       }
 
       trechosWithTravels.value = response.data
@@ -275,14 +277,16 @@ function getTrechos(nextTrip=false){
           }
       );
     }
+    loadingTrecho.value = false
     loadingStore.stopLoading();
 
   }).catch(error => {
     loadingStore.stopLoading();
+    loadingTrecho.value = false
 
     if(!nextTrip){
-      if(error.response.data.data?.error){
-        showErrorNotification(error.response.data.data?.error);
+      if(error.response.data.data?.error || error.response.data?.message ){
+        showErrorNotification(error.response.data.data?.error ?? error.response.data?.message);
       }
     }
   })
@@ -1137,7 +1141,7 @@ watch(()=>props.tab,()=>{
 
                 <v-btn @click="goToNextTrip" variant="tonal" color="secondary" class="mt-3">Ir para próxima viajem</v-btn>
             </div>
-            <div class="tw-flex tw-justify-center"  v-else-if="trechosWithTravels?.length === 0">
+            <div class="tw-flex tw-justify-center"  v-else-if="loadingTrecho">
               <v-progress-circular
 
                   width="2"
@@ -1234,8 +1238,8 @@ watch(()=>props.tab,()=>{
                   </v-col>
                   <v-col cols="6" class="tw-flex tw-items-center  !tw-font-black tw-text-[17px] !tw-text-primary tw-justify-end">
                     <div class="tw-text-end">
-                      {{formatCurrency(calcularValor(formSale.total_passagems + formSale.total_taxas, null, 0.04 ))}} <span class="tw-whitespace-nowrap w-text-p tw-text-[10px]"> no PIX</span><br>
-                      <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(formSale.total_passagems + formSale.total_taxas)}} no cartão</p>
+                      {{formatCurrency(calcularValor(formSale.total_passagems + formSale.total_taxas, null ))}} <span class="tw-whitespace-nowrap w-text-p tw-text-[10px]"> no PIX</span><br>
+                      <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(calcularValor(formSale.total_passagems + formSale.total_taxas, null, -0.04))}} no cartão</p>
                     </div>
                   </v-col>
                 </v-row>
@@ -1382,7 +1386,7 @@ watch(()=>props.tab,()=>{
                       {{formatCurrency(useCartStore().getTotal() + (useCartStore().getTotal() * (formPayment.credit_card.installment_quantity.pencet ?? 0) ) )}}<br>
                     </div>
                     <div class="tw-text-end" v-else-if="formPayment.payment_method_id == 6">
-                      {{formatCurrency(useCartStore().getTotal() - (useCartStore().getTotal() * 0.04 ) )}} <span class="tw-text-p tw-text-[10px]"> no PIX</span><br>
+                      {{formatCurrency(useCartStore().getTotal() )}} <span class="tw-text-p tw-text-[10px]"> no PIX</span><br>
                     </div>
                     <div class="tw-text-end" v-else>
                       {{formatCurrency(useCartStore().getTotal())}}<br>

@@ -182,6 +182,7 @@ function getRoomsByTrecho() {
       loadingSets.value = false
     })
   }
+  loadingSets.value = false
 }
 
 function qunatidadeTotalPassagens(typeTravel='dataIda'){
@@ -517,8 +518,8 @@ onBeforeUnmount(() => {
         <div class="tw-flex tw-justify-end tw-items-center tw-w-full  md:tw-w-1/2  lg:tw-ml-10 lg:tw-mr-5">
           <div class="tw-mt-4 tw-text-right ">
             <p v-if="dataIda?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(dataIda.valor))}}</span> por</p>
-            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{calcularValorPix(dataIda)}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
-            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{calcularValorParcelado(dataIda)}} no cartão</p>
+            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{formatCurrency(calcularValor(formatMoney( dataIda.valor), dataIda.desconto?.desconto))}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
+            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(calcularValor(formatMoney( dataIda.valor), dataIda.desconto?.desconto,-0.04))}} no cartão</p>
           </div>
         </div>
       </div>
@@ -557,8 +558,8 @@ onBeforeUnmount(() => {
         <div class="tw-flex tw-justify-end tw-items-center tw-w-full  md:tw-w-1/2 lg:tw-ml-10 lg:tw-mr-5">
           <div class="tw-mt-4 tw-text-right">
             <p v-if="dataVolta?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(dataVolta.valor))}}</span> por</p>
-            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{calcularValorPix(dataVolta)}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
-            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{calcularValorParcelado(dataVolta)}} no cartão</p>
+            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{formatCurrency(calcularValor(formatMoney( dataVolta.valor), dataVolta.desconto?.desconto))}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
+            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(calcularValor(formatMoney( dataVolta.valor), dataVolta.desconto?.desconto, -0.04))}} no cartão</p>
           </div>
         </div>
       </div>
@@ -567,8 +568,8 @@ onBeforeUnmount(() => {
 
 
     <v-tabs-window v-model="step" >
-          <v-divider  :thickness="1" class="border-opacity-100 tw-my-2  " v-show="openRooms" ></v-divider>
-      <div class="tw-flex tw-justify-center"  v-if=" loadingSets">
+      <v-divider  :thickness="1" class="border-opacity-100 tw-my-2  " v-show="openRooms" ></v-divider>
+      <div class="tw-flex tw-justify-center"  v-if="loadingSets">
         <v-progress-circular
             width="2"
             color="white"
@@ -647,7 +648,7 @@ onBeforeUnmount(() => {
                                 Valor
                               </v-col>
                               <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                                {{formatCurrency(calcularValor(formatMoney(dataIda.valor), dataIda.desconto?.desconto,0.04))}}<br>
+                                {{formatCurrency(calcularValor(formatMoney(dataIda.valor), dataIda.desconto?.desconto))}}<br>
                                 <span class=" tw-text-[10px]"> no PIX</span>
                               </v-col>
                             </v-row>
@@ -671,7 +672,7 @@ onBeforeUnmount(() => {
                               Valor
                             </v-col>
                             <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                              {{formatCurrency(calcularValor(item.comodo_trechos.valor, null,0.04))}}<br>
+                              {{formatCurrency(calcularValor(item.comodo_trechos.valor, null))}}<br>
                               <span class=" tw-text-[10px]"> no PIX</span>
                             </v-col>
                           </v-row>
@@ -700,7 +701,7 @@ onBeforeUnmount(() => {
                           </div>
                         </div>
                       </v-col>
-                      <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? formatCurrency(calcularValor(room.comodo_trechos?.valor,0.04)) : formatCurrency(calcularValor(formatMoney(dataIda.valor),dataIda.desconto?.desconto,0.04))}} <Icon @click="onClickRoom(room, null)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /></v-col>
+                      <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? formatCurrency(calcularValor(room.comodo_trechos?.valor)) : formatCurrency(calcularValor(formatMoney(dataIda.valor),dataIda.desconto?.desconto))}} <Icon @click="onClickRoom(room, null)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /></v-col>
                     </v-row>
                   </div>
                   <div class=" mt-3" v-if="roomsSelected.dataIda.selectedsByType?.length > 0">
@@ -796,7 +797,7 @@ onBeforeUnmount(() => {
                                 Valor
                               </v-col>
                               <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                                {{calcularValorPix(dataVolta)}}
+                                {{formatCurrency(calcularValor(formatMoney(dataVolta.valor), dataVolta.desconto?.desconto))}}<br>
                               </v-col>
                             </v-row>
                           </v-card>

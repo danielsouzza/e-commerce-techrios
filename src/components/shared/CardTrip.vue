@@ -4,6 +4,7 @@ import {Icon} from "@iconify/vue";
 import IconsBoat from "../ui-components/IconsBoat.vue";
 import SuperOfferStamp from "../ui-components/SuperOfferStamp.vue";
 import {
+  calcularValor,
   calcularValorParcelado, calcularValorPix,
   formatarHora,
   formatCurrency,
@@ -59,8 +60,8 @@ function goToSalePage(){
       </div>
       <div class="tw-mt-4 tw-text-left">
         <p v-if="data?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(data.valor))}}</span> por</p>
-        <div><span class="tw-text-2xl tw-text-primary tw-font-[900]">{{calcularValorPix(data)}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
-        <p class="tw-text-[12px] tw-text-gray-500 tw-text-wrap">ou a partir de {{calcularValorParcelado(data)}}  no cartão</p>
+        <div><span class="tw-text-2xl tw-text-primary tw-font-[900]">{{formatCurrency(calcularValor(formatMoney( data.valor), data.desconto?.desconto))}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
+        <p class="tw-text-[12px] tw-text-gray-500 tw-text-wrap">ou a partir de {{formatCurrency(calcularValor(formatMoney( data.valor), data.desconto?.desconto,-0.04))}}  no cartão</p>
       </div>
     </v-card-title>
   </v-card>
