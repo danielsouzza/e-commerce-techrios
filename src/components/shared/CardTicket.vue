@@ -590,7 +590,7 @@ onBeforeUnmount(() => {
                 <v-row >
                   <v-col >
                     <div class="tw-flex  tw-items-center tw-gap-1  tw-text-sm">
-                      <div class="my-badge bg-success"></div>
+                      <div class="my-badge !tw-bg-[#02bc6b]"></div>
                       Livre
                     </div>
                   </v-col>
@@ -613,7 +613,7 @@ onBeforeUnmount(() => {
                       <div
                           v-for="(comodo, index) in matrizRooms.ida"
                           :key="index"
-                          :class="comodo?.id ? (comodo.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataIda.selectedsById?.includes(comodo) ? '!tw-bg-yellow-400' : 'tw-bg-green-400') : 'tw-bg-gray-200'"
+                          :class="comodo?.id ? (comodo.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataIda.selectedsById?.includes(comodo) ? '!tw-bg-yellow-400' : '!tw-bg-[#02bc6b]') : 'tw-bg-gray-200'"
                           class="text-center tw-rounded-[5px] !tw-text-white tw-font-black tw-px-1 tw-py-[2px] tw-text-xs tw-h-[24px] tw-min-w-[30px] tw-cursor-pointer "
                           @click="comodo?.id && !comodo.is_ocupado ? onClickRoom(comodo,null) : ''"
                       >
@@ -634,7 +634,7 @@ onBeforeUnmount(() => {
                               flat
                               @click="roomsFree.ida.find(it=>it.tipo_comodidade_id === item.id).quantidade > 0 ? onClickRoom(null,item.id) : ''"
                               :class="roomsSelected.dataIda.selectedsByType?.find(it=>item.id == it.type_comodo_id)?.quantidade > 0 ? '!tw-bg-yellow-400' :
-                            roomsFree.ida.find(it=>it.tipo_comodidade_id === item.id).quantidade === 0 ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : '!tw-bg-green-400'
+                            roomsFree.ida.find(it=>it.tipo_comodidade_id === item.id).quantidade === 0 ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : '!tw-bg-[#02bc6b]'
                             "
                           >
                             <v-row class="tw-p-3 !tw-text-white">
@@ -659,7 +659,7 @@ onBeforeUnmount(() => {
                         <v-card
                             flat
                             @click="!item.is_ocupado ? onClickRoom(item, null) : ''"
-                            :class="(item.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataIda.selectedsById?.includes(item) ? '!tw-bg-yellow-400' : '!tw-bg-green-400')"
+                            :class="(item.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataIda.selectedsById?.includes(item) ? '!tw-bg-yellow-400' : '!tw-bg-[#02bc6b]')"
                         >
                           <v-row class="tw-p-3 !tw-text-white">
                             <v-col cols="9" class=" tw-text-xs">
@@ -712,7 +712,7 @@ onBeforeUnmount(() => {
                         </div>
                       </v-col>
                       <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end ">  <Icon @click="incrementComodo(room.type_comodo_id )" icon="ph:plus-fill"  width="20"  class="mr-3 tw-cursor-pointer" /> {{ room.quantidade}} <Icon @click="decrementComodo(room.type_comodo_id )" icon="ph:minus-fill"  width="20"  class="ml-3 tw-cursor-pointer" /></v-col>
-                      <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">     {{formatCurrency(room.quantidade * calcularValor( formatMoney( dataIda.valor), dataIda.desconto?.desconto,0.04))}} <Icon @click="onClickRoom(null,room.type_comodo_id)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /> </v-col>
+                      <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">     {{formatCurrency(room.quantidade * calcularValor( formatMoney( dataIda.valor), dataIda.desconto?.desconto))}} <Icon @click="onClickRoom(null,room.type_comodo_id)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /> </v-col>
                     </v-row>
                   </div>
                   <div v-if="roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0" class="tw-flex  tw-items-center tw-gap-1  tw-text-xs tw-text-p  !tw-m-0">
@@ -783,7 +783,7 @@ onBeforeUnmount(() => {
                               flat
                               @click="roomsFree.volta.find(it=>it.tipo_comodidade_id === item.id)?.quantidade > 0 ? onClickRoom(null,item.id,'dataVolta') : ''"
                               :class="roomsSelected.dataVolta.selectedsByType?.find(it=>item.id == it.type_comodo_id)?.quantidade > 0 ? '!tw-bg-yellow-400' :
-                            roomsFree.volta.find(it=>it.tipo_comodidade_id === item.id)?.quantidade === 0 ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : '!tw-bg-green-400'
+                            roomsFree.volta.find(it=>it.tipo_comodidade_id === item.id)?.quantidade === 0 ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : '!tw-bg-[#02bc6b]'
                             "
                           >
                             <v-row class="tw-p-3 !tw-text-white">
@@ -807,7 +807,7 @@ onBeforeUnmount(() => {
                         <v-card
                             flat
                             @click="!item.is_ocupado ? onClickRoom(item, null,'dataVolta') : ''"
-                            :class="(item.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataVolta.selectedsById?.includes(item) ? '!tw-bg-yellow-400' : '!tw-bg-green-400')"
+                            :class="(item.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataVolta.selectedsById?.includes(item) ? '!tw-bg-yellow-400' : '!tw-bg-[#02bc6b]')"
                         >
                           <v-row class="tw-p-3 !tw-text-white">
                             <v-col cols="9" class=" tw-text-xs">

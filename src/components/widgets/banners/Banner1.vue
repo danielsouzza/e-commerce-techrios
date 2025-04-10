@@ -8,7 +8,7 @@ const currentSlide = ref(0)
 const imagesLoadedCount = ref(0)
 const imagesReady = ref(false)
 
-function getSlides() {
+async function getSlides() {
   const subdomain = window?.subdomain || 'defaultSubdomain'
 
   routes['banners']({ subdomain, principal: 1 })

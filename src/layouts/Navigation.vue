@@ -1,11 +1,4 @@
 <script setup>
-const scrollToBottom = () => {
-  window.scrollTo({
-    top: document.body.scrollHeight,
-    behavior: "smooth",
-  });
-};
-
 function scrollToStartDiv(){
   const minhaDiv = document.getElementById("mais-buscados");
   minhaDiv.scrollIntoView({ behavior: "smooth", block: "start" });

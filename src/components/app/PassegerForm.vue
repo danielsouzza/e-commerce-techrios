@@ -7,9 +7,10 @@ import {userAuthStore} from "../../store/AuthStore.js";
 const props = defineProps({
   form:Object,
   index:Number,
+  type:String
 })
 
-const emits = defineEmits(['addToContact','removeToContact', 'remover','addComodoRelated'])
+const emits = defineEmits(['addToContact','removeToContact', 'remover','addComodoRelated','addMeToPassenger','removeMeToPassenger'])
 
 const tiposDoc = [
   { id:1, nome: 'RG', tamanho: 15, mask: '###############' },
@@ -29,6 +30,15 @@ const tiposDoc = [
     </div>
     <Icon v-if="form.comodo_relacionado != null" @click="emits('remover',index)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" />
   </div>
+
+  <v-checkbox
+      v-if="userAuthStore().isAuthenticated() && index === 0 && type === 'ida'"
+      @update:modelValue="(arg)=>{if(arg) emits('addMeToPassenger',index); else emits('removeMeToPassenger',index)}"
+      hide-details="auto"
+      class="!tw-text-p tw-mt-3 !tw-text-sx"
+      label="Eu sou o passageiro"
+  >
+  </v-checkbox>
 
   <v-row class="tw-px-2 mt-2">
     <v-col cols="12" md="6">
@@ -108,7 +118,7 @@ const tiposDoc = [
   <v-checkbox
       v-if="!userAuthStore().isAuthenticated()"
       v-model="form.isContact"
-      @update:modelValue="(arg)=>{if(arg) emits('addToContact',index); else emits('removeToContact',index)}"
+      @update:modelValue="(arg)=>{if(arg) emits('addToContact',index); else emits('removeMeToPassenger',index)}"
       hide-details="auto"
       class="!tw-text-p tw-mt-3 !tw-text-sx"
       label="Adicionar como contato"

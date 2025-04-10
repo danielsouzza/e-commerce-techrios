@@ -224,7 +224,7 @@ function generateNextDays(data_hora) {
   nextDays.value = futureDates;
 }
 
-function getTrechos(nextTrip=false){
+async function getTrechos(nextTrip=false){
   nextTravel.value = null
   loadingTrecho.value = true
   // trechosWithTravels.value = []
@@ -265,15 +265,16 @@ function getTrechos(nextTrip=false){
         generateNextDays();
       }
 
-      router.push(
+      router.replace(
           {
             name: "sale",
             params:{tab:'escolher-passagem'},
             query: {
               ...filtersSelected.value,
               dataIda:formatDateToServe(filtersSelected.value.dataIda),
-              dataVolta:formatDateToServe(filtersSelected.value.dataVolta)
-            }
+              dataVolta:formatDateToServe(filtersSelected.value.dataVolta),
+              step:stepSale.value
+            },
           }
       );
     }
@@ -304,12 +305,12 @@ function scrollToStartDiv(){
 
 }
 
-function getTrechosWithTravels() {
+async function getTrechosWithTravels() {
   resetFormSale()
   getTrechos()
 }
 
-function getFilterItems(){
+async function getFilterItems(){
   routes["filtros"]().then(res => {
     if(!res.data.data.success){
       filtersData.value = res.data.data;
@@ -317,7 +318,7 @@ function getFilterItems(){
   })
 }
 
-function getEmpresas(){
+async function getEmpresas(){
   routes["empresas"]({flag:2}).then(res => {
     if(!res.data.data.success){
      empresas.value = res.data.data
@@ -338,6 +339,9 @@ function nextStep(){
     nextTick(() => {
       scrollToStartDiv();
     });
+    const url = new URL(window.location.href);
+    url.searchParams.set('step', stepSale.value.toString());
+    history.pushState({ step: stepSale.value }, '', url.toString());
   }
 
 }
@@ -349,6 +353,7 @@ function prevStep(){
       scrollToStartDiv();
     });
   }
+
 }
 
 function removerPasseger(index,type){
@@ -368,6 +373,23 @@ function removerPasseger(index,type){
     formSale.dataVolta?.dataComodos.splice(index,1)
   }
 }
+
+function removerMeToPassenger(index,type){
+  formSale.dataComodos[0].nome = ''
+  formSale.dataComodos[0].document = ''
+  formSale.dataComodos[0].tipo_doc = ''
+  formSale.dataComodos[0].telefone = ''
+  formSale.dataComodos[0].nascimento = null
+}
+
+function addMeToPassenger(index,type){
+  formSale.dataComodos[0].nome = userAuthStore().user.name
+  formSale.dataComodos[0].document = userAuthStore().user.comprador.cpf_cnpj
+  formSale.dataComodos[0].tipo_doc = identificarCpfOuCnpj(userAuthStore().user.comprador.cpf_cnpj)
+  formSale.dataComodos[0].telefone = userAuthStore().user.comprador.telefone
+  formSale.dataComodos[0].nascimento = formatDateToServe(userAuthStore().user.comprador.nascimento)
+}
+
 
 function addComodoRelated(index,type){
   if(type == 'ida'){
@@ -820,12 +842,24 @@ function loadData(){
   }
 }
 
+
+function handleBackStep(e) {
+  if (stepSale.value > 1) {
+    // history.pushState(null, '', location.href); // repõe o estado
+    prevStep()
+  }
+}
+
+
 getFilterItems()
 loadData()
 
 onMounted(() => {
   getEmpresas()
   window.addEventListener('resize', updateWidth);
+  window.addEventListener('popstate', handleBackStep);
+
+
 });
 
 onUnmounted(() => {
@@ -1143,7 +1177,6 @@ watch(()=>props.tab,()=>{
             </div>
             <div class="tw-flex tw-justify-center"  v-else-if="loadingTrecho">
               <v-progress-circular
-
                   width="2"
                   color="white"
                   size="90"
@@ -1255,7 +1288,10 @@ watch(()=>props.tab,()=>{
                     :form="item"
                     :key="index"
                     :index="index"
+                    type="ida"
                     @remover="(args)=>removerPasseger(index,'ida')"
+                    @remove-me-to-passenger="(args)=>removerMeToPassenger(index,'ida')"
+                    @add-me-to-passenger="(args)=>addMeToPassenger(index,'ida')"
                     @addComodoRelated="(args)=>addComodoRelated(index,'ida')"
                     @add-to-contact="(index)=>addPassegerToContact(index,'ida')"
                     @remove-to-contact="removePassegerToContact"/>
@@ -1274,6 +1310,7 @@ watch(()=>props.tab,()=>{
                 <PassegerForm
                     v-for="(item,index) in formSale.dataVolta?.dataComodos"
                     :form="item" :key="index" :index="index"
+                    type="volta"
                     @remover="(args)=>removerPasseger(index,'volta')"
                     @addComodoRelated="(args)=>addComodoRelated(index,'volta')"
                     @add-to-contact="(index)=>addPassegerToContact(index,'volta')"

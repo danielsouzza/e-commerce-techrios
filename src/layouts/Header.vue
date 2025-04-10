@@ -67,6 +67,7 @@ watch(()=>showCart.value, ()=>{
 
 onMounted(()=>{
   authStore.loadUser()
+  useCartStore().loadCart()
 })
 
 
@@ -201,7 +202,7 @@ onMounted(()=>{
         <Cart :auth="authStore.user" @close="showCart = false"/>
       </v-navigation-drawer>
       <v-navigation-drawer class="lp-drawer" v-model="appsdrawer" location="left" temporary>
-        <MobileSidebar />
+        <MobileSidebar @close="appsdrawer=false" />
       </v-navigation-drawer>
     </v-layout>
 

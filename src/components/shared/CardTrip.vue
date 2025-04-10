@@ -41,7 +41,7 @@ function goToSalePage(){
 <template>
   <v-card @click="goToSalePage" hover  flat class="!tw-rounded-xl !tw-w-[250px]  lg:!tw-w-[270px] tw-h-full hover:tw-border-secondary hover:!tw-border-2"  >
 
-    <TravelImages :alt="data.municipio_destino.nome"  :images="data.municipio_destino.images"   class="bg-grey-lighten-2 !tw-h-[200px] "/>
+    <TravelImages :alt="data.municipio_destino.nome"  :images="[data.municipio_destino.random_image]"   class="bg-grey-lighten-2 !tw-h-[200px] "/>
 
     <SuperOfferStamp v-if="superSale" class="tw-absolute tw-top-[39.5%] tw-right-[50%] " rounded="!tw-rounded-t-lg"/>
     <v-card-title class="tw-bg-white lg:!tw-h-full">

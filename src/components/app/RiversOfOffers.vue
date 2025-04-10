@@ -23,13 +23,17 @@ const config = {
     },
     // 400px and up
     400: {
+      itemsToShow: 1.75,
+      snapAlign: 'center',
+    },
+    500: {
       itemsToShow: 2,
       snapAlign: 'center',
     },
-    // 500px and up
-    500: {
+    600: {
       itemsToShow: 3,
       gap:10,
+      mouseDrag:false,
       snapAlign: 'start',
     },
   },
@@ -43,7 +47,28 @@ function getTrechosWithTravels() {
   params.append('subdomain', window.subdomain || '')
 
   routes["trechos-viagem"](params).then(response => {
-    trechosWithTravels.value = response.data
+    const trechos = response.data.data?.trechos?.data || []
+
+
+    trechos.forEach(trecho => {
+      const images = trecho.municipio_destino?.images || []
+      if (images.length > 0) {
+        const randomIndex = Math.floor(Math.random() * images.length)
+        trecho.municipio_destino.random_image = images[randomIndex]
+      }
+    })
+
+    trechosWithTravels.value = {
+      ...response.data,
+      data: {
+        ...response.data.data,
+        trechos: {
+          ...response.data.data.trechos,
+          data: trechos
+        }
+      }
+    }
+
     setTimeout(() => {
       loading.value = false
     },500)

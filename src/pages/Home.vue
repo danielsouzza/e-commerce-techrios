@@ -21,13 +21,13 @@ const filtersSelected = ref({
 })
 
 const slides = ref([])
-function getSlides() {
+async function getSlides() {
   routes["banners"]({subdomain:window.subdomain,principal:0}).then(res => {
     slides.value = res.data.data;
   })
 }
 
-function getFilterItems(){
+async function getFilterItems(){
   routes["filtros"]().then(res => {
     if(!res.data.data.success){
       filtersData.value = res.data.data;

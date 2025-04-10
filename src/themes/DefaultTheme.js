@@ -5,7 +5,7 @@ const DEFAULT_THEME = {
         primary: '#00579d',
         secondary: '#3dccfd',
         info: '#46caeb',
-        success: '#00cc75',
+        success: '#02bc6b',
         warning: '#f8c076',
         error: '#fb977d',
         indigo:'#8763da',

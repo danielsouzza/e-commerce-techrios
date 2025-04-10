@@ -30,7 +30,7 @@ onMounted(() => {
       ></v-progress-circular>
     </v-overlay>
     <main class="tw-flex-1 tw-min-h-[70vh]">
-      <router-view ></router-view>
+      <router-view :key="$route.fullPath" ></router-view>
     </main>
   </Setup>
 </template>

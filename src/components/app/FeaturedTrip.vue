@@ -76,7 +76,27 @@ function getTrechosWithTravels() {
   params.append('subdomain', window.subdomain || '')
 
   routes["trechos-viagem"](params).then(response => {
-    trechosWithTravels.value = response.data
+    const trechos = response.data.data?.trechos?.data || []
+
+
+    trechos.forEach(trecho => {
+      const images = trecho.municipio_destino?.images || []
+      if (images.length > 0) {
+        const randomIndex = Math.floor(Math.random() * images.length)
+        trecho.municipio_destino.random_image = images[randomIndex]
+      }
+    })
+
+    trechosWithTravels.value = {
+      ...response.data,
+      data: {
+        ...response.data.data,
+        trechos: {
+          ...response.data.data.trechos,
+          data: trechos
+        }
+      }
+    }
   }).catch(error => {
     // showErrorNotification(error.response.data.data.error);
   })
@@ -107,9 +127,9 @@ onMounted(()=>{
     <div class="tw-flex tw-flex-col tw-gap-5 lg:tw-flex-row tw-h-full  tw-justify-between !tw-mt-5 tw-w-full">
 
       <div class="lg:!tw-w-[50%] !tw-w-full lg:!tw-rounded-xl ">
-        <Carousel v-bind="config_1" class="tw-w-[100vw] lg:!tw-rounded-xl lg:tw-w-full tw-mb-4 my-carrousel my-carrousel">
+        <Carousel @drag="isDragging=true" @slideEnd="isDragging=false" v-bind="config_1" class="tw-w-[100vw] lg:!tw-rounded-xl lg:tw-w-full tw-mb-4 my-carrousel my-carrousel">
           <Slide v-for="(item,n) in travels_more_important" :key="item.id"  class="tw-px-5 lg:tw-px-0 tw-h-full">
-            <CardTripFull :data="item" class="tw-h-full"/>
+            <CardTripFull :dragging="isDragging" :data="item" class="tw-h-full"/>
           </Slide>
           <template #addons>
             <Pagination class=" "/>

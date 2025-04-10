@@ -4,6 +4,9 @@ import {userAuthStore} from "../store/AuthStore.js";
 import router from "../routes/index.js";
 import {routes} from "../services/fetch.js";
 
+
+const emit = defineEmits(['close'])
+
 function goToLoginPage(){
   router.push({name: "login"})
 }
@@ -20,6 +23,12 @@ function logout() {
     userAuthStore().logout()
     goToSalePage()
   })
+}
+
+function scrollToStartDiv(){
+  emit('close')
+  const minhaDiv = document.getElementById("mais-buscados");
+  minhaDiv.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 </script>
@@ -39,7 +48,7 @@ function logout() {
               </RouterLink>
             </v-list-item>
             <v-list-item rounded="md">
-              <v-btn  :ripple="false" rounded="sm" variant="text" color="primary">
+              <v-btn @click="scrollToStartDiv"  :ripple="false" rounded="sm" variant="text" color="primary">
                 <span class="tw-text-p">MAIS PROCURADOS</span>
 
               </v-btn>

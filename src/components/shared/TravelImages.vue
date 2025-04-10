@@ -1,30 +1,27 @@
 <script setup>
-
-
-import {getApiBaseUrl} from "../../services/api.js";
-import {computed} from "vue";
+import { getApiBaseUrl } from "../../services/api.js";
+import { ref, onMounted } from "vue";
 
 const props = defineProps({
-  images:Array,
-  alt:{
-    type:String,
-    default:'Image do município de destino'
-  }
-})
+  images: Array,
+  alt: {
+    type: String,
+    default: "Imagem do município de destino",
+  },
+});
 
-const baseurl = getApiBaseUrl().replaceAll('api','')
+const baseurl = getApiBaseUrl().replaceAll("api", "");
 
+// Aqui guardamos a imagem escolhida aleatoriamente
+const imagesRandom = ref([])
 
-const imagesRandom = computed(()=>{
-  const count = props.images.length
+onMounted(() => {
+  const count = props.images.length;
   if (count > 0) {
     const randomIndex = Math.floor(Math.random() * count);
-    return [props.images[randomIndex]];
+    imagesRandom.value = [props.images[randomIndex]];
   }
-  return null;
-})
-
-
+});
 </script>
 
 <template>
@@ -37,17 +34,13 @@ const imagesRandom = computed(()=>{
   >
     <v-carousel-item
         class="tw-cursor-pointer"
-        v-for="(item,i) in imagesRandom"
+        v-for="(item, i) in imagesRandom"
         cover
         :key="i"
         :src="baseurl + item.path"
         :alt="alt"
-    >
-    </v-carousel-item>
-
+    />
   </v-carousel>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
