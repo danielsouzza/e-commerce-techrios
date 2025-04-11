@@ -1,15 +1,17 @@
 <script setup>
 import Banner1 from "../components/widgets/banners/Banner1.vue";
 import CardFilter from "../components/shared/CardFilter.vue";
-import RiversOfOffers from "../components/app/RiversOfOffers.vue";
-import Banner2 from "../components/widgets/banners/Banner2.vue";
-import FeaturedTrip from "../components/app/FeaturedTrip.vue";
-import TravelAtUnbeatablePrices from "../components/app/TravelAtUnbeatablePrices.vue";
+import {defineAsyncComponent} from 'vue';
 import {routes} from "../services/fetch.js";
 import {onMounted, ref} from "vue";
 import router from "../routes/index.js";
 import {formatDateToServe} from "../Helper/Ultis.js";
 
+// Componentes não críticos com lazy loading
+const RiversOfOffers = defineAsyncComponent(() => import("../components/app/RiversOfOffers.vue"));
+const Banner2 = defineAsyncComponent(() => import("../components/widgets/banners/Banner2.vue"));
+const FeaturedTrip = defineAsyncComponent(() => import("../components/app/FeaturedTrip.vue"));
+const TravelAtUnbeatablePrices = defineAsyncComponent(() => import("../components/app/TravelAtUnbeatablePrices.vue"));
 
 const filtersData = ref([])
 const filtersSelected = ref({

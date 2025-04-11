@@ -5,9 +5,19 @@ import {onMounted, ref} from "vue";
 const isLoading = ref(true);
 
 onMounted(() => {
-  setTimeout(() => {
+  // Verifica se todos os recursos críticos foram carregados
+  Promise.all([
+    document.fonts.ready,
+    new Promise(resolve => {
+      if (document.readyState === 'complete') {
+        resolve();
+      } else {
+        window.addEventListener('load', resolve);
+      }
+    })
+  ]).then(() => {
     isLoading.value = false;
-  }, 2000);
+  });
 });
 
 </script>

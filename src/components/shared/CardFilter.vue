@@ -83,7 +83,7 @@ function getFilterItems(){
     origem: props.modelValue.origem || '',
     subdomain:  window.subdomain || ''
   }
-  loadingFilters.value = false
+  loadingFilters.value = true
   routes["filtros"](params).then(response => {
     if(!response.data.data.success){
       filterOptions.value = response.data.data;
@@ -134,6 +134,7 @@ getFilterItems()
                 item-title="nome"
                 :loading="loadingFilters"
                 variant="solo"
+                :disabled="loadingFilters"
                 :rules="[v => !!v || 'Esse campo é obrigatório']"
                 placeholder="Origem"
                 class="my-select mt-1"
@@ -175,6 +176,7 @@ getFilterItems()
                 variant="solo"
                 :loading="loadingFilters"
                 placeholder="Destino"
+                :disabled="loadingFilters"
                 class="my-select mt-1 !tw-z-[1]"
                 :items="filterOptions.municipiosDestino"
                 :custom-filter="customFilter"

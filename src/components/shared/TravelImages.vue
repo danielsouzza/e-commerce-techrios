@@ -1,6 +1,5 @@
 <script setup>
 import { getApiBaseUrl } from "../../services/api.js";
-import { ref, onMounted } from "vue";
 
 const props = defineProps({
   images: Array,
@@ -13,15 +12,7 @@ const props = defineProps({
 const baseurl = getApiBaseUrl().replaceAll("api", "");
 
 // Aqui guardamos a imagem escolhida aleatoriamente
-const imagesRandom = ref([])
 
-onMounted(() => {
-  const count = props.images.length;
-  if (count > 0) {
-    const randomIndex = Math.floor(Math.random() * count);
-    imagesRandom.value = [props.images[randomIndex]];
-  }
-});
 </script>
 
 <template>
@@ -34,7 +25,7 @@ onMounted(() => {
   >
     <v-carousel-item
         class="tw-cursor-pointer"
-        v-for="(item, i) in imagesRandom"
+        v-for="(item, i) in images"
         cover
         :key="i"
         :src="baseurl + item.path"

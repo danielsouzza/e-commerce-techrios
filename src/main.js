@@ -4,16 +4,7 @@ import 'vuetify/styles'
 import './assets/style.css';
 import App from './App.vue'
 import { createVuetify } from 'vuetify'
-import {
-    VApp, VAppBar, VAutocomplete, VBtn, VBtnToggle, VCard, VCardActions,
-    VCardText, VCardTitle, VCarousel, VCarouselItem, VCheckbox, VChip, VCol,
-    VContainer, VDataTable, VDialog, VDivider, VExpandTransition, VForm, VIcon, VImg,
-    VLayout, VList, VListGroup, VListItem, VMenu, VNavigationDrawer, VOtpInput, VAvatar,
-    VOverlay, VProgressCircular, VProgressLinear, VResponsive, VRow, VSelect, VSheet,
-    VSkeletonLoader, VSpacer, VTab, VTabs, VTabsWindow, VTabsWindowItem, VTextField, VToolbar, VTooltip,
-    VWindow, VWindowItem, VBadge
-} from 'vuetify/components';
-
+import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import VueTheMask from 'vue-the-mask'
 import { createPinia } from 'pinia'
@@ -24,6 +15,24 @@ import router from './routes'
 import {DEFAULT_THEME} from "./themes/DefaultTheme.js";
 import {routes} from "./services/fetch.js";
 import {getApiBaseUrl} from "./services/api.js";
+
+// Otimização de carregamento de fontes
+const style = document.createElement('style')
+style.textContent = `
+  @font-face {
+    font-family: 'Material Design Icons';
+    font-display: swap;
+  }
+`
+document.head.appendChild(style)
+
+// Carregamento assíncrono de fontes MDI
+const mdiStyles = document.createElement('link')
+mdiStyles.rel = 'stylesheet'
+mdiStyles.href = '@mdi/font/css/materialdesignicons.css'
+mdiStyles.media = 'print'
+mdiStyles.onload = function() { this.media = 'all' }
+document.head.appendChild(mdiStyles)
 
 const hostname = window.location.hostname;
 const parts = hostname.split(".");
@@ -53,8 +62,11 @@ async function fetchTheme() {
             console.error("Erro ao buscar tema da loja:", error);
         }
     }
-    document.documentElement.style.setProperty('--color-primary', themeConfig.primaryColor);
-    document.documentElement.style.setProperty('--color-secondary', themeConfig.secondaryColor);
+    // Aplicar cores do tema de forma otimizada
+    requestAnimationFrame(() => {
+        document.documentElement.style.setProperty('--color-primary', themeConfig.primaryColor);
+        document.documentElement.style.setProperty('--color-secondary', themeConfig.secondaryColor);
+    });
 }
 
 (async () => {
@@ -76,12 +88,7 @@ async function fetchTheme() {
             locale: 'pt',
             messages:{pt}
         },
-        components:{
-            VBtn, VCard, VWindow, VWindowItem, VCheckbox, VContainer, VAutocomplete, VCardActions, VSpacer, VListItem, VList,VListGroup,
-            VBtnToggle,VMenu,VLayout, VApp, VAppBar, VNavigationDrawer, VToolbar, VTabsWindow, VTabsWindowItem, VResponsive, VRow, VCol,
-            VDivider, VDialog, VForm, VTextField, VSelect, VProgressLinear, VProgressCircular, VIcon, VSheet, VOtpInput, VCardText, VSkeletonLoader,
-            VCardTitle, VChip, VOverlay, VCarousel, VCarouselItem, VImg,VTooltip,VExpandTransition,VDataTable,VTabs,VTab,VAvatar,VBadge
-        },
+        components,
         directives,
         theme: {
             defaultTheme: 'customTheme',
@@ -93,10 +100,22 @@ async function fetchTheme() {
 
     const app = createApp(App);
 
-    app.use(createPinia());
+    // Configuração do Pinia com estado persistente
+    const pinia = createPinia();
+    app.use(pinia);
+    
     app.use(VueTheMask);
     app.use(router);
     app.use(vuetify);
     app.provide('themeConfig', themeConfig);
+
+    // Pré-carregamento de rotas críticas
+    router.beforeResolve((to, from, next) => {
+        if (to.matched.some(record => record.meta.critical)) {
+            import(`./pages/${to.name}.vue`)
+        }
+        next()
+    });
+
     app.mount('#app');
 })();

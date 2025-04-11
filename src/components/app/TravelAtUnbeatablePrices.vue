@@ -69,6 +69,7 @@ function getTrechosWithTravels() {
 
     trechos.forEach(trecho => {
       const images = trecho.municipio_destino?.images || []
+      trecho.municipio_destino.random_image = []
       if (images.length > 0) {
         const randomIndex = Math.floor(Math.random() * images.length)
         trecho.municipio_destino.random_image = images[randomIndex]

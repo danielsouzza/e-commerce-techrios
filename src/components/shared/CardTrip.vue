@@ -43,6 +43,7 @@ function goToSalePage(){
 
     <TravelImages :alt="data.municipio_destino.nome"  :images="[data.municipio_destino.random_image]"   class="bg-grey-lighten-2 !tw-h-[200px] "/>
 
+
     <SuperOfferStamp v-if="superSale" class="tw-absolute tw-top-[39.5%] tw-right-[50%] " rounded="!tw-rounded-t-lg"/>
     <v-card-title class="tw-bg-white lg:!tw-h-full">
       <div class="tw-mb-2">
