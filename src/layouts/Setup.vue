@@ -6,7 +6,7 @@ import {useLoadingStore} from "../store/states.js"
 // Componentes carregados assincronamente
 const Footer = defineAsyncComponent(() => import("./Footer.vue"))
 const Header = defineAsyncComponent(() => import("./Header.vue"))
-const DialogNotification = defineAsyncComponent(() => 
+const DialogNotification = defineAsyncComponent(() =>
   import("../components/shared/DialogNotification.vue")
 )
 
@@ -21,11 +21,11 @@ function scrollBehavior() {
   if (scrollTimeout) {
     window.cancelAnimationFrame(scrollTimeout)
   }
-  
+
   scrollTimeout = window.requestAnimationFrame(() => {
-    window.scrollTo({ 
-      top: 0, 
-      behavior: 'smooth' 
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
     })
   })
 }
@@ -44,7 +44,7 @@ function handleScroll() {
 onMounted(() => {
   emitter.on(SHOW_NOTIFICATION, handleNotification)
   emitter.on(SCROLL_BEHAVIOR, handleScroll)
-  
+
   // Otimização de performance
   if ('connection' in navigator) {
     if (navigator.connection.saveData) {
@@ -68,13 +68,12 @@ onUnmounted(() => {
     <Header class="mb-auto border-t-lg !tw-border-secondary" />
     <slot/>
     <Footer class="mt-auto"/>
-    
+
     <!-- Loading overlay com transição suave -->
     <Transition name="fade">
       <v-overlay
-        v-if="useLoadingStore().isLoading"
+        :model-value="useLoadingStore().isLoading"
         persistent
-        :opacity="0.5"
         class="align-center justify-center"
       >
         <v-progress-circular
@@ -89,7 +88,7 @@ onUnmounted(() => {
     <!-- Notification com transição -->
     <Transition name="slide">
       <DialogNotification
-        v-if="show"
+
         v-model="show"
         :message="message"
         :type="type"

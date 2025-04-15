@@ -99,11 +99,8 @@ async function fetchTheme() {
     });
 
     const app = createApp(App);
+    app.use(createPinia());
 
-    // Configuração do Pinia com estado persistente
-    const pinia = createPinia();
-    app.use(pinia);
-    
     app.use(VueTheMask);
     app.use(router);
     app.use(vuetify);

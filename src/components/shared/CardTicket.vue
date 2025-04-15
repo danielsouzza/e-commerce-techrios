@@ -36,6 +36,7 @@ const props = defineProps({
   modelValue: Object,
   dataIda: Object,
   dataVolta: Object,
+  type:String
 })
 
 const loadingSets = ref(false)
@@ -203,13 +204,6 @@ function onClickRoom(room, type,typeTravel='dataIda') {
       const selectedsByType = roomsSelected.value[typeTravel].selectedsByType
       const type_comodo = selectedsByType.find(it=>it.type_comodo_id === type)
       if(type_comodo){
-        // if(typeTravel == 'dataVolta'){
-        //   const totalIda = qunatidadeTotalPassagens()
-        //   const totalVolta = qunatidadeTotalPassagens('dataVolta') + type_comodo.quantidade
-        //   if (totalVolta > totalIda) {
-        //     throw new Error('Número de passagens de volta não pode ser maior que as de ida.');
-        //   }
-        // }
         if( type_comodo.quantidade > 0){
           roomsSelected.value[typeTravel].selectedsByType.splice(roomsSelected.value[typeTravel].selectedsByType.indexOf(type_comodo), 1)
         }else{
@@ -221,14 +215,14 @@ function onClickRoom(room, type,typeTravel='dataIda') {
     }else{
       const comodo = roomsSelected.value[typeTravel].selectedsById.find(it=>it.id == room.id)
 
-      if(typeTravel == 'dataVolta'){
-        const totalIda = qunatidadeTotalPassagens()
-        const totalVolta = qunatidadeTotalPassagens('dataVolta') + room.quantidade
-        if (totalVolta > totalIda) {
-          throw new Error('Número de passagens de volta não pode ser maior que as de ida.');
-        }
-
-      }
+      // if(typeTravel == 'dataVolta'){
+      //   const totalIda = qunatidadeTotalPassagens()
+      //   const totalVolta = qunatidadeTotalPassagens('dataVolta') + room.quantidade
+      //   if (totalVolta > totalIda) {
+      //     throw new Error('Número de passagens de volta não pode ser maior que as de ida.');
+      //   }
+      //
+      // }
       if(comodo){
         deleteReserva(room)
       }else{
@@ -491,7 +485,7 @@ onBeforeUnmount(() => {
     <div class="tw-flex tw-flex-col " >
       <div class="tw-flex tw-items-center tw-justify-between">
         <div  class="tw-flex  tw-text-primary tw-px-2  tw-rounded-lg tw-font-bold lg:tw-mr-5 tw-w-full tw-items-center">
-          <span class=" tw-text-xs">IDA - {{ dataIda.municipio_destino.nome }} ({{formatDate(dataIda.data_embarque)}})</span>
+          <span class=" tw-text-xs"><span class="tw-uppercase">{{type}}</span> - {{ dataIda.municipio_destino.nome }} ({{formatDate(dataIda.data_embarque)}})</span>
         </div>
         <div class="tw-text-xs  tw-justify-end tw-w-full tw-flex tw-items-center">{{dataIda.embarcacao}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataIda.empresa.logo" :image="baseurl+dataIda.empresa.logo"></v-avatar>  </div>
       </div>
@@ -524,47 +518,6 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
-
-    <v-divider v-if="dataVolta" :thickness="1" class="border-opacity-100 tw-my-2 " ></v-divider>
-
-    <div class="tw-flex tw-flex-col" v-if="dataVolta">
-      <div class="tw-flex tw-items-center tw-justify-between">
-        <div  class="tw-flex  tw-text-primary tw-px-2  tw-rounded-lg tw-font-bold lg:tw-mr-5 tw-w-full tw-items-center">
-          <span class=" tw-text-xs">VOLTA - {{ dataVolta.municipio_destino.nome }} ({{formatDate(dataVolta.data_embarque)}})</span>
-        </div>
-        <div class="tw-text-sm mt-2 tw-justify-end tw-w-full tw-flex tw-items-center">{{dataVolta.embarcacao}}<v-avatar class="ml-2 rounded-lg" size="30" v-if="dataVolta.empresa.logo" :image="baseurl+dataVolta.empresa.logo"></v-avatar>  </div>
-      </div>
-      <v-divider  :thickness="1" class="border-opacity-100 tw-mt-1 " ></v-divider>
-      <div class="lg:tw-flex tw-justify-between tw-items-center " >
-        <div class="tw-flex tw-justify-between tw-items-center  mt-3 tw-w-full mr-10">
-          <div>
-            <TravelImages :alt="dataVolta.municipio_destino.nome"  :images="dataVolta.municipio_destino.images" class="bg-grey-lighten-2 !tw-w-[120px] !tw-h-[50px]"/>
-          </div>
-          <div class="tw-flex lg:tw-ml-5 tw-text-[10px] tw-gap-4 lg:tw-gap-6 lg:tw-text-sm">
-            <div>
-              Saída <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{formatarHora(dataVolta.horario)}}</span>
-            </div>
-            <div>
-              Duração <br> <span class="tw-font-bold tw-text-[12px] lg:tw-text-sm">{{formatarTempoViagem(dataVolta.tempo_viagem)}}</span>
-            </div>
-            <div>
-              Tipo <br> <span class="tw-font-bold tw-text-[12px]  lg:tw-text-sm">{{dataIda.tipo_embarcacao}}</span>
-            </div>
-          </div>
-        </div>
-
-        <v-divider  :thickness="1" class="border-opacity-100 tw-mt-2 lg:!tw-hidden" ></v-divider>
-
-        <div class="tw-flex tw-justify-end tw-items-center tw-w-full  md:tw-w-1/2 lg:tw-ml-10 lg:tw-mr-5">
-          <div class="tw-mt-4 tw-text-right">
-            <p v-if="dataVolta?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(dataVolta.valor))}}</span> por</p>
-            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{formatCurrency(calcularValor(formatMoney( dataVolta.valor), dataVolta.desconto?.desconto))}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
-            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(calcularValor(formatMoney( dataVolta.valor), dataVolta.desconto?.desconto, -0.04))}} no cartão</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
 
 
     <v-tabs-window v-model="step" >

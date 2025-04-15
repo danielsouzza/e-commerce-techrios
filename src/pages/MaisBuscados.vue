@@ -25,10 +25,29 @@ function getTrechosWithTravels() {
   params.append('subdomain', window.subdomain || '')
 
   routes["trechos-viagem"](params).then(response => {
-    trechosWithTravels.value = response.data
-    setTimeout(() => {
-      loading.value = false
-    },500)
+    const trechos = response.data.data?.trechos?.data || []
+
+
+    trechos.forEach(trecho => {
+      const images = trecho.municipio_destino?.images || []
+      if (images.length > 0) {
+        const randomIndex = Math.floor(Math.random() * images.length)
+        trecho.municipio_destino.random_image = images[randomIndex]
+      }
+    })
+
+    trechosWithTravels.value = {
+      ...response.data,
+      data: {
+        ...response.data.data,
+        trechos: {
+          ...response.data.data.trechos,
+          data: trechos
+        }
+      }
+    }
+    
+    loading.value = false
   })
 }
 

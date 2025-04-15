@@ -50,7 +50,7 @@ function getMunicipios(search=''){
   }
   routes["filtros"](params).then(response => {
     if(!response.data.data.success){
-      municipios.value = response.data.data.municipiosDestino;
+      municipios.value = response.data.data.municipiosOrigem;
     }
   })
 }
@@ -99,7 +99,7 @@ onMounted(()=>{
 
 <template>
   <div class=" tw-flex tw-flex-col  tw-gap-10 lg:tw-flex-row-reverse  lg:tw-items-start tw-justify-center !tw-mt-5" >
-   <div class="tw-flex tw-flex-col tw-items-center lg:tw-flex-col-reverse">
+   <div class="tw-flex tw-flex-col tw-items-center lg:tw-items-start lg:tw-flex-col-reverse">
      <div class="tw-flex tw-flex-col tw-w-full tw-items-center lg:tw-items-start">
        <div class=" tw-text-[25px] tw-font-extrabold tw-text-center lg:tw-text-start lg:tw-text-[35px] tw-text-primary " style="line-height: 35px">
          Viagens com preços <br>
@@ -114,7 +114,7 @@ onMounted(()=>{
        </RouterLink>
 
      </div>
-     <div class="tw-mb-3 ">
+     <div class="tw-mb-3 tw-w-full">
        <div class="tw-flex tw-text-p   "><IconsBoat/> <span  class="tw-ml-3 tw-flex tw-flex-wrap">Viagens saindo de &nbsp;<span class="tw-text-primary tw-font-black" > {{municipioLabel(origem)}}</span></span></div>
        <v-autocomplete
            flat
@@ -126,7 +126,7 @@ onMounted(()=>{
            item-title="nome"
            return-object
            placeholder="Alterar ponto de partida"
-           class="my-select mt-1"
+           class="my-select mt-1 "
            @update:search="getMunicipios"
            @update:modelValue="getTrechosWithTravels"
            :items="municipios">
@@ -163,11 +163,11 @@ onMounted(()=>{
   padding-bottom: 0!important;
 }
 .my-select::v-deep(.v-field__input.v-autocomplete__selection) {
-  @apply !tw-text-center !tw-w-full
+  @apply  !tw-w-full
 }
 
 .my-select::v-deep(input) {
-  @apply tw-placeholder-black tw-text-center
+  @apply tw-placeholder-black
 }
 
 .my-select::v-deep(.v-field--variant-solo) {

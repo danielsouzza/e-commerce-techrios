@@ -5,6 +5,7 @@ import {onMounted, ref} from "vue";
 import {routes} from "../services/fetch.js";
 import CardTicket from "../components/shared/CardTrip.vue";
 import {Icon} from "@iconify/vue";
+import NotFoundTrips from "../components/shared/NotFoundTrips.vue";
 
 const loading = ref(true);
 const filtersSelected = ref({
@@ -19,10 +20,28 @@ function getTrechosWithTravels() {
   params.append('subdomain', window.subdomain || '')
 
   routes["trechos-viagem"](params).then(response => {
-    trechosWithTravels.value = response.data
-    setTimeout(() => {
-      loading.value = false
-    },500)
+    const trechos = response.data.data?.trechos?.data || []
+
+
+    trechos.forEach(trecho => {
+      const images = trecho.municipio_destino?.images || []
+      if (images.length > 0) {
+        const randomIndex = Math.floor(Math.random() * images.length)
+        trecho.municipio_destino.random_image = images[randomIndex]
+      }
+    })
+
+    trechosWithTravels.value = {
+      ...response.data,
+      data: {
+        ...response.data.data,
+        trechos: {
+          ...response.data.data.trechos,
+          data: trechos
+        }
+      }
+    }
+    loading.value = false
   })
 }
 
@@ -51,10 +70,7 @@ onMounted(()=>{
         <CardTicket :data="item"/>
       </v-col>
     </v-row>
-    <div v-else class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
-      <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
-      <p class="tw-text-p mt-1">Nenhuma passagem encontrada</p>
-    </div>
+    <NotFoundTrips v-else class="tw-min-h-[30vh] " ></NotFoundTrips>
     <div class="tw-flex tw-justify-center mb-5">
       <v-btn @click="showMoreticket" v-if="filtersSelected.quantia <= trechosWithTravels.data?.trechos.total" flat variant="plain" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
         <Icon icon="line-md:arrow-down" class="mr-2 tw-text-xl"/>

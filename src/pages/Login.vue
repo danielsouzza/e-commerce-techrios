@@ -10,13 +10,8 @@ import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
 import {useRoute} from "vue-router";
 
 
-const props  =  defineProps({
-  tab:String
-})
-
-const route = useRoute();
 const visible = ref(false);
-const tab = ref( props.tab ?? 'login')
+const tab = ref('login');
 
 const formReset = reactive({
   email: '',
@@ -42,6 +37,7 @@ const form = reactive({
   processing:false
 })
 
+const route = useRoute();
 
 const validateStepForm = () => {
   form.errors = {};
@@ -69,7 +65,7 @@ const validateStepForm2fa = () => {
     }
   };
 
-  validateField('verification_code', 'Por favor, insira seu email.');
+  validateField('verification_code', 'Por favor, insira o código de verificação.');
 
   return Object.keys(form2fa.errors).length === 0;
 };
@@ -176,13 +172,13 @@ function goToHomePage(){
 
             <div class="text-subtitle-1 text-medium-emphasis d-flex align-center justify-space-between">
               Sua senha
-              <a
-                  @click="router.replace({ path: '/esqueci_minha_senha' ,force:true})"
+              <RouterLink
+              
                   class="text-caption text-decoration-none text-blue"
-                  href="/esqueci_minha_senha"
+                  to="/esqueci-minha-senha"
                   rel="noopener noreferrer"
               >
-                Esqueci minha senha?</a>
+                Esqueci minha senha?</RouterLink>
             </div>
 
             <v-text-field
@@ -315,11 +311,8 @@ function goToHomePage(){
               block
           ></v-btn>
 
-<!--          <div class="text-caption">-->
-<!--            Não recebeu o link? <a class="text-decoration-underline" @click="handleSubmitResetPassword" href="#" @click.prevent="">Reenviar</a>-->
-<!--          </div>-->
           <div class="text-caption mt-2 tw-cursor-pointer">
-            <a class="text-decoration-underline" @click="tab = 'login'" href="#" @click.prevent=""> Voltar ao login?</a>
+            <a class="text-decoration-underline"  href="/login" @click.prevent=""> Voltar ao login?</a>
           </div>
         </v-card>
       </v-tabs-window-item>

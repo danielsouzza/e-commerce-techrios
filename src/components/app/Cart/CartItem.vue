@@ -87,7 +87,7 @@ function onOpenRooms(){
     <div class="tw-flex  mt-3 tw-w-full ">
 
       <div class="tw-mr-5">
-        <TravelImages :alt="data.trecho.municipio_destino?.nome" :images="data.trecho.municipio_destino?.images?? []" class="bg-grey-lighten-2 !tw-w-[120px] !tw-h-[50px]"/>
+        <TravelImages :alt="data.trecho.municipio_destino?.nome" :images="[data.trecho.municipio_destino.random_image]" class="bg-grey-lighten-2 !tw-w-[120px] !tw-h-[50px]"/>
       </div>
       <v-row>
         <v-col cols="6" class="pb-0 !tw-font-bold">

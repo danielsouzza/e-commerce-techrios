@@ -74,10 +74,9 @@ const routes = [
         meta: { title: 'Validação de email' }
     },
     {
-        path: '/esqueci_minha_senha',
-        component: () => import('../pages/Login.vue'),
-        props: {tab:'reset-password'},
-        name: 'esqueci_minha_senha',
+        path: '/esqueci-minha-senha',
+        component: () => import('../pages/ForgotPassword.vue'),
+        name: 'esqueci-minha-senha',
         meta: { title: 'Esqueci minha senha' }
     },
     {
@@ -119,12 +118,15 @@ const router = createRouter({
     routes
 })
 
-router.afterEach((to) => {
+router.afterEach((to, from) => {
     document.title = to.meta.title + " - " + appName;
     const loadingStore = useLoadingStore();
+    
     setTimeout(() => {
         loadingStore.stopLoading();
-        scrollBehavior()
+        if (!to.hash) {
+            scrollBehavior();
+        }
     }, 300);
 });
 

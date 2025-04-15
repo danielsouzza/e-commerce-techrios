@@ -39,16 +39,27 @@ const filtersData = ref([])
 const cartStore = useCartStore()
 const authStore = userAuthStore()
 const percentToPay = ref(0)
-const nextTravel = ref(null)
+const nextTravel = ref({
+  ida:null,
+  volta:null
+})
+const stepChooseTrip = ref(1)
 const timeToPay = ref(30 * 60)
 const whatPayment = ref(false)
 const orderResponse = ref(null)
 const paymentPending = ref(null)
 const loadingStore = useLoadingStore();
 const orderConfirmation = ref(null)
-const trechosWithTravels = ref([])
+const trechosWithTravels = ref({
+  trechosIda:null,
+  trechosVolta:null
+})
 const windowWidth = ref(window.innerWidth);
 const loadingTrecho = ref(false)
+const tripsSelecteds = ref({
+  dataIda:null,
+  dataVolta:null
+})
 const showFormNotification = ref(false)
 const formPayment = reactive({
   order_id:null,
@@ -99,7 +110,8 @@ const formNotification = reactive({
   errors:{},
   processing:false
 })
-const nextDays = ref([])
+const nextDaysIda = ref([])
+const nextDaysVolta = ref([])
 const years = computed(() => {
       const currentYear = new Date().getFullYear();
       return  Array.from({ length: 21 }, (_, i) => `${currentYear + i}`);
@@ -173,6 +185,9 @@ const downloadFile = async (url, filename) => {
 const updateWidth = () => {
   windowWidth.value = window.innerWidth;
   generateNextDays()
+  if(filtersSelected.value.type == 'ida-e-volta'){
+    generateNextDays('volta')
+  }
 };
 
 const updateFilters = () => {
@@ -182,10 +197,17 @@ const updateFilters = () => {
   filtersSelected.value.dataIda = new Date(route.query.dataIda + 'T00:00:00') || new Date().toISOString().split('T')[0];
   filtersSelected.value.dataVolta = route.query.dataVolta ? new Date(route.query.dataVolta + 'T00:00:00') : null;
   generateNextDays()
+  if(filtersSelected.value.type == 'ida-e-volta'){
+    generateNextDays('volta')
+  }
 };
 
-function generateNextDays(data_hora) {
-  const dateCurrent = data_hora ?? filtersSelected.value.dataIda;
+function generateNextDays( type='ida') {
+  let dateCurrent = filtersSelected.value.dataIda
+  if(type == 'volta'){
+    dateCurrent = filtersSelected.value.dataVolta
+  }
+
   if (!dateCurrent) return;
 
   let date = new Date(dateCurrent);
@@ -203,87 +225,162 @@ function generateNextDays(data_hora) {
   while (start < 0) {
     let pastDate = new Date(date);
     pastDate.setDate(date.getDate() + start);
-    if (pastDate < hoje) {
-      start++;
-    } else {
-      break;
+    if(type == 'ida'){
+      if (pastDate < hoje) {
+        start++;
+      } else {
+        break;
+      }
+    }else{
+      if (pastDate < filtersSelected.value.dataIda) {
+        start++;
+      } else {
+        break;
+      }
     }
+
   }
 
   for (let i = start; i < end; i++) {
     let futureDate = new Date(date);
     futureDate.setDate(date.getDate() + i);
 
-    if (filtersSelected.value.dataVolta && futureDate > filtersSelected.value.dataVolta) {
-      break;
+    if(type == 'ida'){
+      if (filtersSelected.value.dataVolta && futureDate > filtersSelected.value.dataVolta) {
+        break;
+      }
     }
 
     futureDates.push(futureDate);
   }
 
-  nextDays.value = futureDates;
+  if(type == 'ida'){
+    nextDaysIda.value = futureDates;
+  }else{
+    nextDaysVolta.value = futureDates
+  }
 }
 
-async function getTrechos(nextTrip=false){
-  nextTravel.value = null
+function prevToBack(){
+  stepChooseTrip.value = 1
+  resetFormSale('volta')
+}
+
+async function getTrechos(nextTrip=false, type='ida'){
+  nextTravel.value = {
+    ida:null,
+    volta:null
+  }
   loadingTrecho.value = true
-  // trechosWithTravels.value = []
   const params = new URLSearchParams()
-  params.append('origem', filtersSelected.value.origem || '')
-  params.append('destino', filtersSelected.value.destino || '')
-  params.append('data_hora', formatDate(filtersSelected.value.dataIda) || '')
-  params.append('data_hora_volta', formatDate(filtersSelected.value.dataVolta) || '')
+
+  if(type == 'ida'){
+    loadingStore.startLoading();
+    params.append('origem', filtersSelected.value.origem || '')
+    params.append('destino', filtersSelected.value.destino || '')
+    params.append('data_hora', formatDate(filtersSelected.value.dataIda) || '')
+  }else{
+    params.append('origem', filtersSelected.value.destino || '')
+    params.append('destino', filtersSelected.value.origem || '')
+    params.append('data_hora', formatDate(filtersSelected.value.dataVolta) || '')
+  }
   params.append('intervalo', filtersSelected.value.intervalo || '')
   params.append('tipo_comodidade_id', filtersSelected.value.tipo_comodidade_id || '')
   params.append('quantia', nextTrip ? 1 : filtersSelected.value.quantia || '')
   params.append('empresa', filtersSelected.value.empresa || '')
   params.append('subdomain', window.subdomain || '')
   if(nextTrip) params.append('data_irrestrita', 1)
- loadingStore.startLoading();
+
   routes["trechos-viagem"](params).then(response => {
     if(nextTrip){
       if(response.data.data.trechos.data.length > 0){
-        nextTravel.value = response.data.data.trechos.data[0]
+        if(type == 'ida'){
+          nextTravel.value.ida = response.data.data.trechos.data[0]
+          if(filtersSelected.value.type == 'ida-e-volta'){
+            const dateNext = new Date(nextTravel.value.ida.data_embarque)
+            const dateBack = new Date(filtersSelected.value.dataVolta)
+            if(dateNext > dateBack){
+              showInfoNotification(`Não foi encontrado viagem dentro das datas escolhidas, mas foi encontrado uma viagem na data ${formatDate(dateNext)}, no entanto é superior a data da volta`);
+              nextTravel.value.ida = null
+            }
+
+          }
+
+          if(nextTravel.value.ida.data_embarque)
+          console.log(nextTravel.value.ida)
+        }else{
+          nextTravel.value.volta = response.data.data.trechos.data[0]
+        }
+      }else{
+        if(filtersSelected.value.type == "ida-e-volta"  && type == 'volta'){
+          showInfoNotification('Infelizmente não temos viajem de volta para o trecho escolhidos, mas temos viagem somente de ida');
+          filtersSelected.value.type = 'somente-ida'
+          filtersSelected.value.dataVolta = null
+        }
       }
     }else {
-      if(filtersSelected.value.type == "ida-e-volta"  && response.data.data.tipo == "ida" && response.data.data.trechos.data.length > 0){
-        showInfoNotification('Infelizmente não temos viajem de volta para o trecho escolhidos, mas temos viagem somente de ida');
-        filtersSelected.value.type = 'somente-ida'
-        filtersSelected.value.dataVolta = null
+
+
+
+      let date = filtersSelected.value.dataIda.getDate()
+      let first = nextDaysIda.value[0].getDate()
+      let last = nextDaysIda.value[nextDaysIda.value.length - 1].getDate()
+      if(type == 'ida'){
+        trechosWithTravels.value.trechosIda = response.data
+        if(filtersSelected.value.type == 'ida-e-volta'){
+          getTrechos(false,'volta')
+        }
+      }else{
+        trechosWithTravels.value.trechosVolta = response.data
+        date = filtersSelected.value.dataVolta.getDate()
+        first = nextDaysVolta.value[0].getDate()
+        last = nextDaysVolta.value[nextDaysVolta.value.length - 1].getDate()
       }
 
-      if(response.data.data.trechos.data.length == 0){
-        getTrechos(nextTrip=true)
-        // return
-      }
-
-      trechosWithTravels.value = response.data
-      const date = filtersSelected.value.dataIda.getDate()
-      const first = nextDays.value[0].getDate()
-      const last = nextDays.value[nextDays.value.length - 1].getDate()
       if(date === first || date === last){
-        generateNextDays();
+        generateNextDays(type);
       }
 
-      router.replace(
-          {
-            name: "sale",
-            params:{tab:'escolher-passagem'},
-            query: {
-              ...filtersSelected.value,
-              dataIda:formatDateToServe(filtersSelected.value.dataIda),
-              dataVolta:formatDateToServe(filtersSelected.value.dataVolta),
-              step:stepSale.value
-            },
-          }
-      );
+      const queryParams = {
+        ...filtersSelected.value,
+        dataIda: formatDateToServe(filtersSelected.value.dataIda),
+        dataVolta: formatDateToServe(filtersSelected.value.dataVolta),
+        step: stepSale.value
+      };
+      
+      // Constrói a URL com os novos parâmetros
+      const url = new URL(window.location.href);
+      Object.keys(queryParams).forEach(key => {
+        if (queryParams[key] !== null && queryParams[key] !== undefined) {
+          url.searchParams.set(key, queryParams[key]);
+        } else {
+          url.searchParams.delete(key);
+        }
+      });
+      
+      // Atualiza a URL sem recarregar a página
+      history.replaceState({ 
+        ...queryParams, 
+        path: url.pathname,
+        tab: 'escolher-passagem'
+      }, '', url.toString());
     }
-    loadingTrecho.value = false
-    loadingStore.stopLoading();
+    nextTick(()=>{
+      loadingStore.stopLoading();
+      if(response.data.data.trechos.data.length == 0){
+        getTrechos(nextTrip=true,type)
+      }else{
+        loadingTrecho.value = false
+      }
+    })
+
 
   }).catch(error => {
-    loadingStore.stopLoading();
-    loadingTrecho.value = false
+    console.log(error)
+    nextTick(()=>{
+      loadingStore.stopLoading();
+      loadingTrecho.value = false
+    })
 
     if(!nextTrip){
       if(error.response.data.data?.error || error.response.data?.message ){
@@ -293,21 +390,25 @@ async function getTrechos(nextTrip=false){
   })
 }
 
-function goToNextTrip(){
-  filtersSelected.value.dataIda = new Date(nextTravel.value.data_embarque)
-  nextTravel.value = null
-  getTrechos()
+function goToNextTrip(type='ida'){
+  if(type == 'ida'){
+    filtersSelected.value.dataIda = new Date(nextTravel.value.ida.data_embarque)
+    nextTravel.value.ida = null
+  }else{
+    filtersSelected.value.dataVolta = new Date(nextTravel.value.volta.data_embarque)
+    nextTravel.value.volta = null
+  }
+  getTrechos(false,type)
 }
 
 function scrollToStartDiv(){
   const minhaDiv = document.getElementById("form-content");
   minhaDiv.scrollIntoView({ behavior: "smooth", block: "start" });
-
 }
 
-async function getTrechosWithTravels() {
-  resetFormSale()
-  getTrechos()
+function getTrechosWithTravels(type='ida') {
+  resetFormSale(type)
+  getTrechos(false,type)
 }
 
 async function getFilterItems(){
@@ -404,27 +505,42 @@ function addComodoRelated(index,type){
   }
 }
 
-function saveTicket(items) {
-  const totalIda = calculateTotal(items.dataIda);
+function saveTrips(item){
+  if(stepChooseTrip.value === 1){
+    tripsSelecteds.value.dataIda = item.dataIda
+    if(filtersSelected.value.type == 'somente-ida'){
+      saveTicket()
+    }else{
+      stepChooseTrip.value = 2
+    }
+  }else{
+    tripsSelecteds.value.dataVolta = item.dataIda
+    saveTicket()
+  }
+  scrollToStartDiv()
+}
+
+function saveTicket() {
+  const totalIda = calculateTotal(tripsSelecteds.value.dataIda);
 
   Object.assign(formSale, {
     total_passagems: totalIda.passagens,
     total_taxas: totalIda.taxa,
-    trecho: items.dataIda.trecho,
-    viagem: items.dataIda.trecho.id_viagem,
-    data_hora: items.dataIda.trecho.data_embarque,
-    dataComodos: populateComodos(items.dataIda.rooms, items.dataIda.trecho)
+    trecho: tripsSelecteds.value.dataIda.trecho,
+    viagem: tripsSelecteds.value.dataIda.trecho.id_viagem,
+    data_hora: tripsSelecteds.value.dataIda.trecho.data_embarque,
+    dataComodos: populateComodos(tripsSelecteds.value.dataIda.rooms, tripsSelecteds.value.dataIda.trecho)
   });
 
   if (filtersSelected.value.type === "ida-e-volta") {
-    const totalVolta = calculateTotal(items.dataVolta);
+    const totalVolta = calculateTotal(tripsSelecteds.value.dataVolta);
     formSale.total_passagems += totalVolta.passagens;
     formSale.total_taxas += totalVolta.taxa;
 
     formSale.dataVolta = {
-      trecho: items.dataVolta.trecho,
-      viagem: items.dataVolta.trecho.id_viagem,
-      dataComodos: populateComodos(items.dataVolta.rooms, items.dataVolta.trecho)
+      trecho: tripsSelecteds.value.dataVolta.trecho,
+      viagem: tripsSelecteds.value.dataVolta.trecho.id_viagem,
+      dataComodos: populateComodos(tripsSelecteds.value.dataVolta.rooms, tripsSelecteds.value.dataVolta.trecho)
     };
   }
 
@@ -672,6 +788,7 @@ function submitPaymentCredit(){
 }
 
 function submitPaymentPix(){
+
  loadingStore.startLoading();
   routes["payment.pix"]({order_id:useCartStore().order?.id}).then(res => {
     if(res.data.success){
@@ -727,26 +844,36 @@ function identificarCpfOuCnpj(valor) {
   }
 }
 
-function resetFormSale() {
-  formSale.trecho = null
-  formSale.viagem = null
-  formSale.data_hora = null
-  formSale.total_passagems = 0.0
-  formSale.total_taxas = 0.0
-  formSale.contato = {
-    nome: authStore.user?.name ?? null,
-    email: authStore.user?.email ?? null,
-    telefone: authStore.user?.comprador.telefone,
-    tipo_doc: authStore.user?.comprador.cpf_cnpj ? identificarCpfOuCnpj(authStore.user?.comprador.cpf_cnpj) : null,
-    nascimento: authStore.user?.comprador.nascimento ?
-        new Date(authStore.user?.comprador.nascimento+ 'T00:00:00') :
-        null,
-    document:authStore.user?.comprador.cpf_cnpj,
-  };
-  formSale.dataComodos = [];
-  formSale.dataVolta = null;
-  stepSale.value = 1
-  generateNextDays()
+function resetFormSale(type='ida') {
+  if(type == 'ida'){
+    formSale.trecho = null
+    formSale.viagem = null
+    formSale.data_hora = null
+    formSale.total_passagems = 0.0
+    formSale.total_taxas = 0.0
+    formSale.contato = {
+      nome: authStore.user?.name ?? null,
+      email: authStore.user?.email ?? null,
+      telefone: authStore.user?.comprador.telefone,
+      tipo_doc: authStore.user?.comprador.cpf_cnpj ? identificarCpfOuCnpj(authStore.user?.comprador.cpf_cnpj) : null,
+      nascimento: authStore.user?.comprador.nascimento ?
+          new Date(authStore.user?.comprador.nascimento+ 'T00:00:00') :
+          null,
+      document:authStore.user?.comprador.cpf_cnpj,
+    };
+    formSale.dataComodos = [];
+    formSale.dataVolta = null;
+    stepSale.value = 1
+    generateNextDays()
+
+  }else{
+    formSale.dataVolta = null;
+  }
+
+
+  if(filtersSelected.value.type == 'ida-e-volta'){
+    generateNextDays('volta')
+  }
 }
 
 function updateFormattedDate(value,type) {
@@ -838,10 +965,12 @@ function loadData(){
   if(stepSale.value === 1){
     updateFilters()
     generateNextDays()
+    if(filtersSelected.value.type == 'ida-e-volta'){
+      generateNextDays('volta')
+    }
     getTrechosWithTravels()
   }
 }
-
 
 function handleBackStep(e) {
   if (stepSale.value > 1) {
@@ -851,11 +980,13 @@ function handleBackStep(e) {
 }
 
 
-getFilterItems()
-loadData()
-
 onMounted(() => {
-  getEmpresas()
+  if(stepChooseTrip.value == 1){
+    getFilterItems()
+    loadData()
+    getEmpresas()
+  }
+
   window.addEventListener('resize', updateWidth);
   window.addEventListener('popstate', handleBackStep);
 
@@ -1144,57 +1275,128 @@ watch(()=>props.tab,()=>{
             </v-container>
           </v-card>
           <div class="tw-flex tw-flex-col tw-gap-3 !tw-w-full ">
-            <v-card  flat  class=" mb-3 !tw-px-3 !tw-py-2  lg:!tw-block">
-              <div class="tw-flex tw-gap-10 tw-items-center tw-justify-center tw-p-2 tw-text-[12px]">
-                <v-btn
-                    :variant="filtersSelected.dataIda.getDate() === date.getDate()? 'flat' : 'outlined'"
-                    :color="filtersSelected.dataIda.getDate() === date.getDate()? 'primary' : 'secondary'"
-                    v-for="date in nextDays"
-                    :key="date.getDate()"
-                    @click="filtersSelected.dataIda = date; getTrechosWithTravels()"
-                >
-                  <span class=" tw-font-semibold tw-text-xs">{{ formatDates(date) }}</span>
+            <v-card  flat  class="  !tw-px-3 !tw-py-2  lg:!tw-block">
+              <div class="tw-flex tw-gap-10 tw-items-center tw-justify-between tw-p-2 tw-text-[14px] tw-font-semibold">
+                <v-btn v-if="stepChooseTrip == 2" size="small" variant="flat" @click="prevToBack">
+                  Voltar para ida
                 </v-btn>
+                <span>Escolha sua viagem de {{stepChooseTrip == 1 ? 'ida':'volta'}}</span>
               </div>
             </v-card>
 
-            <div class="tw-w-full tw-flex tw-flex-col tw-gap-3 " v-if="trechosWithTravels.data?.trechos?.data.length > 0">
-              <CardTicket
-                  v-for="item in trechosWithTravels.data?.trechos?.data"
-                  :key="item.id_viagem + (item.volta?.id_viagem ?? 0)"
-                  :dataIda="item"
-                  :dataVolta="item.volta"
-                  class=" !tw-w-full !tw-h-fit "
-                  @continue="saveTicket"
-              ></CardTicket>
-            </div>
-            <div v-else-if="nextTravel != null" class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
-              <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
 
-              <p class="tw-text-p mt-1"> Nenhuma viagem foi encontrada para esse dia. A próxima viagem de {{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}} para {{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}} será dia {{formatDate(nextTravel.data_embarque)}}.</p>
+            <div class="tw-w-full tw-flex tw-flex-col tw-gap-3 " >
+              <v-tabs-window v-model="stepChooseTrip">
+                <v-tabs-window-item :value="1">
+                  <v-card  flat  class=" mb-3 !tw-px-3 !tw-py-2  lg:!tw-block">
+                    <div class="tw-flex tw-gap-10 tw-items-center tw-justify-center tw-p-2 tw-text-[12px]">
+                      <v-btn
+                          :variant="filtersSelected.dataIda.getDate() === date.getDate()? 'flat' : 'outlined'"
+                          :color="filtersSelected.dataIda.getDate() === date.getDate()? 'primary' : 'secondary'"
+                          v-for="date in nextDaysIda"
+                          :key="date.getDate()"
+                          @click="filtersSelected.dataIda = date; getTrechosWithTravels()"
+                      >
+                        <span class=" tw-font-semibold tw-text-xs">{{ formatDates(date) }}</span>
+                      </v-btn>
+                    </div>
+                  </v-card>
+                  <template v-if="trechosWithTravels.trechosIda?.data?.trechos?.data.length > 0">
+                    <CardTicket
+                        v-for="item in trechosWithTravels.trechosIda.data?.trechos?.data"
+                        :key="item.id_viagem + (item.volta?.id_viagem ?? 0)"
+                        :dataIda="item"
+                        type="ida"
+                        class=" !tw-w-full !tw-h-fit mb-3"
+                        @continue="saveTrips"
+                    ></CardTicket>
+                  </template>
+                  <div v-else-if="nextTravel.ida != null" class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
+                    <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
 
-                <v-btn @click="goToNextTrip" variant="tonal" color="secondary" class="mt-3">Ir para próxima viajem</v-btn>
-            </div>
-            <div class="tw-flex tw-justify-center"  v-else-if="loadingTrecho">
-              <v-progress-circular
-                  width="2"
-                  color="white"
-                  size="90"
-                  indeterminate
-              ></v-progress-circular>
-            </div>
-            <div v-else class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
-              <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
-              <p class="tw-text-p mt-1"> Opa, parece que o trecho que está procurando ainda não está disponível, mas já estamos informando as Empresas parceiras para liberarem as viagens.
-                Informe o seu Email e seu WhatsApp que iremos lhe avisar assim que estiver disponível.
-              </p>
-              <v-btn @click="showFormNotification = true" variant="tonal" color="secondary" class="mt-3">Avise-me</v-btn>
+                    <p class="tw-text-p mt-1"> Nenhuma viagem foi encontrada para esse dia. A próxima viagem de {{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}} para {{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}} será dia {{formatDate(nextTravel.ida.data_embarque)}}.</p>
+
+                    <v-btn @click="goToNextTrip()" variant="tonal" color="secondary" class="mt-3">Ir para próxima viajem</v-btn>
+                  </div>
+                  <div class="tw-flex tw-justify-center"  v-else-if="loadingTrecho">
+                    <v-progress-circular
+                        width="2"
+                        color="white"
+                        size="90"
+                        indeterminate
+                    ></v-progress-circular>
+                  </div>
+                  <div v-else class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
+                    <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
+                    <p class="tw-text-p mt-1"> Opa, parece que o trecho que está procurando ainda não está disponível, mas já estamos informando as Empresas parceiras para liberarem as viagens.
+                      Informe o seu Email e seu WhatsApp que iremos lhe avisar assim que estiver disponível.
+                    </p>
+                    <v-btn @click="showFormNotification = true" variant="tonal" color="secondary" class="mt-3">Avise-me</v-btn>
+                  </div>
+
+                  <v-btn @click="showMoreticket" v-if="filtersSelected.quantia <= trechosWithTravels.data?.trechos.total" flat variant="plain" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+                    <Icon icon="line-md:arrow-down" class="mr-2 tw-text-xl"/>
+                    Mostrar mais
+                  </v-btn>
+                </v-tabs-window-item>
+                <v-tabs-window-item :value="2" >
+                  <v-card  flat  class=" mb-3 !tw-px-3 !tw-py-2  lg:!tw-block">
+                    <div class="tw-flex tw-gap-10 tw-items-center tw-justify-center tw-p-2 tw-text-[12px]">
+                      <v-btn
+                          :variant="filtersSelected.dataVolta.getDate() === date.getDate()? 'flat' : 'outlined'"
+                          :color="filtersSelected.dataVolta.getDate() === date.getDate()? 'primary' : 'secondary'"
+                          v-for="date in nextDaysVolta"
+                          :key="date.getDate()"
+                          @click="filtersSelected.dataVolta = date; getTrechosWithTravels('volta')"
+                      >
+                        <span class=" tw-font-semibold tw-text-xs">{{ formatDates(date) }}</span>
+                      </v-btn>
+                    </div>
+                  </v-card>
+                  <template v-if="trechosWithTravels.trechosVolta?.data?.trechos?.data.length > 0">
+                    <CardTicket
+                        v-for="item in trechosWithTravels.trechosVolta.data?.trechos?.data"
+                        :key="item.id_viagem + (item.volta?.id_viagem ?? 0)"
+                        :dataIda="item"
+                        type="volta"
+                        class=" !tw-w-full !tw-h-fit "
+                        @continue="saveTrips"
+                    ></CardTicket>
+                  </template>
+
+
+                  <div v-else-if="nextTravel.volta != null" class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
+                    <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
+
+                    <p class="tw-text-p mt-1"> Nenhuma viagem foi encontrada para esse dia. A próxima viagem de {{getMonicipioLabel(filtersSelected.destino,'municipiosDestino', filtersData)}} para {{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem',filtersData)}} será dia {{formatDate(nextTravel.volta.data_embarque)}}.</p>
+
+                    <v-btn @click="goToNextTrip('volta')" variant="tonal" color="secondary" class="mt-3">Ir para próxima viajem</v-btn>
+                  </div>
+                  <div class="tw-flex tw-justify-center"  v-else-if="loadingTrecho">
+                    <v-progress-circular
+                        width="2"
+                        color="white"
+                        size="90"
+                        indeterminate
+                    ></v-progress-circular>
+                  </div>
+                  <div v-else class="tw-w-full tw-text-center tw-flex tw-flex-col tw-items-center">
+                    <Icon icon="ix:anomaly-found" width="60" class=" tw-text-xl tw-text-p"/>
+                    <p class="tw-text-p mt-1"> Opa, parece que o trecho que está procurando ainda não está disponível, mas já estamos informando as Empresas parceiras para liberarem as viagens.
+                      Informe o seu Email e seu WhatsApp que iremos lhe avisar assim que estiver disponível.
+                    </p>
+                    <v-btn @click="showFormNotification = true" variant="tonal" color="secondary" class="mt-3">Avise-me</v-btn>
+                  </div>
+
+                  <v-btn @click="showMoreticket" v-if="filtersSelected.quantia <= trechosWithTravels.data?.trechos.total" flat variant="plain" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+                    <Icon icon="line-md:arrow-down" class="mr-2 tw-text-xl"/>
+                    Mostrar mais
+                  </v-btn>
+                </v-tabs-window-item>
+              </v-tabs-window>
+
             </div>
 
-            <v-btn @click="showMoreticket" v-if="filtersSelected.quantia <= trechosWithTravels.data?.trechos.total" flat variant="plain" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
-              <Icon icon="line-md:arrow-down" class="mr-2 tw-text-xl"/>
-              Mostrar mais
-            </v-btn>
           </div>
         </div>
       </v-tabs-window-item>
