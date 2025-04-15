@@ -98,6 +98,7 @@ function getTrechosWithTravels() {
       }
     }
   }).catch(error => {
+    console.log(error)
     // showErrorNotification(error.response.data.data.error);
   })
 }

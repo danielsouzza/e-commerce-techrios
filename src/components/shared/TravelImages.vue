@@ -28,7 +28,7 @@ const baseurl = getApiBaseUrl().replaceAll("api", "");
         v-for="(item, i) in images"
         cover
         :key="i"
-        :src="baseurl + item.path"
+        :src="baseurl + item?.path"
         :alt="alt"
     />
   </v-carousel>
