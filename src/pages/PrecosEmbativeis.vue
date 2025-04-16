@@ -1,7 +1,7 @@
 <script setup>
 
 
-import {onMounted, ref} from "vue";
+import {nextTick, onMounted, ref} from "vue";
 import {routes} from "../services/fetch.js";
 import CardTicket from "../components/shared/CardTrip.vue";
 import {Icon} from "@iconify/vue";
@@ -47,7 +47,10 @@ function getTrechosWithTravels() {
         }
       }
     }
-    loading.value = false
+    nextTick(()=>{
+      loading.value = false
+
+    })
   })
 }
 

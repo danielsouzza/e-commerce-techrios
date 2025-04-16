@@ -1,11 +1,12 @@
 <script setup>
 
-import {reactive} from "vue";
+import {reactive, ref} from "vue";
 import {getAppBaseUrl} from "../services/api.js";
 import {routes} from "../services/fetch.js";
 import {showErrorNotification, showSuccessNotification} from "../event-bus.js";
 import router from "../routes/index.js";
 
+const emailAlready = ref(false)
 const form = reactive({
   email: '',
   base_url:getAppBaseUrl()+'/registrar',
@@ -33,12 +34,18 @@ function handleSubmit() {
     form.processing = true
     routes['user.validate-email'](form).then((response) => {
       if (response.data.success) {
+
         showSuccessNotification(response.data.message);
       }
       form.processing = false
     }).catch(error => {
+      console.log(error)
+      if(error.response.data.data.already_existe){
+        emailAlready.value = true
+      }else{
+        showErrorNotification(error.response.data.data.error);
+      }
       form.processing = false
-      showErrorNotification(error.response.data.data.error);
     })
   }
 }
@@ -46,6 +53,29 @@ function handleSubmit() {
 </script>
 
 <template>
+  <v-dialog max-width="600" v-model="emailAlready">
+    <template v-slot:default="{ isActive }">
+      <v-card title="Trecho indisponível">
+        <v-card-text>
+          Já existe um usuário com esse email em nossa base de dado. Deseja recuperar sua senha?
+        </v-card-text>
+
+        <v-card-actions>
+          <v-btn
+              text="Não"
+              @click="emailAlready = false"
+          ></v-btn>
+          <RouterLink
+              class="text-caption text-decoration-none text-blue"
+              to="/esqueci-minha-senha"
+          >
+            <v-btn>Recuperar minha senha</v-btn>
+          </RouterLink>
+
+        </v-card-actions>
+      </v-card>
+    </template>
+  </v-dialog>
   <v-container>
     <v-card
         class="mx-auto pa-8 pb-8 my-4 tw-text-center"

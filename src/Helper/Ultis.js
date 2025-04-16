@@ -79,7 +79,7 @@ function municipioLabel(municipio) {
 }
 
 function formatMoney(money) {
-    return parseFloat(money.replace("R$ ","").replace(".","").replace(" ","").replace(",","."))
+    return parseFloat(money.replace("R$","").replace(".","").replace(" ","").replace(",","."))
 }
 
 function calcularValorParcelado(data) {

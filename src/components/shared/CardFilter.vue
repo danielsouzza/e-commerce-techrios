@@ -4,11 +4,13 @@ import {VDateInput} from 'vuetify/labs/VDateInput'
 import {computed, onMounted, ref} from "vue";
 import {converterData} from "../../Helper/Ultis.js";
 import {routes} from "../../services/fetch.js";
+import {useLoadingStore} from "../../store/states.js";
 
 
 const props = defineProps({
   modelValue: Object,
   options:Object,
+  isLoading:Boolean
 })
 
 
@@ -110,7 +112,7 @@ getFilterItems()
 </script>
 
 <template>
-  <v-card elevation="0" class="my-5 !tw-rounded-xl !tw-bg-transparent">
+  <v-card elevation="0" class="my-5 !tw-rounded-xl !tw-bg-transparent !tw-z-[1]">
     <v-btn-toggle v-model="modelValue.type" @update:modelValue="changeTypeTravel" dense rounded="xl" color="secondary" class="mb-1 mx-auto tw-w-full"  >
       <v-btn value="somente-ida" class="!tw-font-bold" >
         Somente ida
@@ -256,7 +258,7 @@ getFilterItems()
           </div>
         </div>
         <div class="tw-flex tw-flex-col tw-col-span-2 lg:tw-col-span-1 tw-w-full tw-h-full ">
-          <v-btn @click="updateFilters" class="tw-w-full !tw-h-full " variant="flat" color="secondary" rounded="0">
+          <v-btn @click="updateFilters" :loading="isLoading" :disabled="isLoading" class="tw-w-full !tw-h-full " variant="flat" color="secondary" rounded="0">
             <div  class="tw-text-[20px] tw-flex tw-items-center tw-text-white tw-font-[900] tw-my-3 tw-normal-case">
               <Icon icon="majesticons:search-line" class="tw-text-[30px] tw-text-white tw-mr-1 " />Buscar
             </div>

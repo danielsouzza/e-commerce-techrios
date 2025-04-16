@@ -41,7 +41,7 @@ onMounted(()=>{
       <div class="tw-flex tw-flex-col  tw-w-full maxWidth" :class="userAuthStore().isAuthenticated() ? 'tw-pt-10' : ''">
         <div class="tw-flex tw-flex-col tw-w-full lg:tw-flex-row lg:tw-justify-start lg:tw-gap-5 ">
           <div class="tw-flex tw-flex-col tw-items-center lg:tw-items-start  tw-w-full ">
-            <div class="py-5">
+            <div class="">
               <AppLogo footer size="190" />
             </div>
           </div>

@@ -56,7 +56,7 @@ function onOpenRooms(){
 <template>
   <v-dialog max-width="600" v-model="showDialogDelete">
     <template v-slot:default="{ isActive }">
-      <v-card title="Excluir comodo">
+      <v-card title="Excluir passagem">
         <v-card-text>
 
           <div class="tw-w-full tw-flex tw-flex-col tw-items-center tw-pb-3 tw-text-center">
@@ -105,7 +105,7 @@ function onOpenRooms(){
           <span class="tw-font-semibold">{{data.passagem_pedidos.length}} {{data.passagem_pedidos.length > 1 ? 'passagens' : 'passagem'}}</span>
         </v-col>
         <v-col  class="tw-flex  tw-items-center justify-end tw-gap-3 ">
-          <v-btn @click="onOpenRooms" variant="tonal" color="info"><Icon icon="weui:eyes-on-outlined" width="25"  class="mr-1 "/>Cômodos</v-btn>
+          <v-btn @click="onOpenRooms" variant="tonal" color="info"><Icon icon="weui:eyes-on-outlined" width="25"  class="mr-1 "/>Passagens</v-btn>
         </v-col>
       </v-row>
     </div>

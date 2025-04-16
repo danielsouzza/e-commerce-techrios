@@ -3,6 +3,7 @@ import {Icon} from "@iconify/vue";
 import 'vue3-carousel/dist/carousel.css'
 import CardTicket from "../shared/CardTrip.vue";
 import { Carousel, Slide, Pagination } from 'vue3-carousel'
+import { Navigation as CarouselNavigation } from 'vue3-carousel'
 import IconsBoat from "../ui-components/IconsBoat.vue";
 import {onMounted, ref} from "vue";
 import {routes} from "../../services/fetch.js";
@@ -46,7 +47,8 @@ const config = {
 function getMunicipios(search=''){
   const params = {
     search:search,
-    com_desconto:1
+    com_desconto:1,
+    subdomain:window.subdomain || ''
   }
   routes["filtros"](params).then(response => {
     if(!response.data.data.success){
@@ -139,6 +141,7 @@ onMounted(()=>{
           <CardTicket :data="item" :active="currentSlide === n -1"/>
         </Slide>
         <template #addons>
+          <CarouselNavigation />
           <Pagination class="!tw-bottom-[-30px] "/>
         </template>
       </Carousel>
@@ -153,6 +156,16 @@ onMounted(()=>{
 
 
 <style scoped>
+
+
+.my-carrousel::v-deep(.carousel__prev){
+  left: -4%;
+}
+
+.my-carrousel::v-deep(.carousel__next){
+  right: -4%;
+}
+
 .my-carrousel::v-deep(.carousel__viewport){
   @apply lg:!tw-rounded-xl
 }

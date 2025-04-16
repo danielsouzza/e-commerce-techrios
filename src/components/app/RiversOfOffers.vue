@@ -3,6 +3,7 @@ import {Icon} from "@iconify/vue";
 import 'vue3-carousel/dist/carousel.css'
 import CardTicket from "../shared/CardTrip.vue";
 import { Carousel, Slide, Pagination } from 'vue3-carousel'
+import { Navigation as CarouselNavigation } from 'vue3-carousel'
 import {onMounted, ref} from "vue";
 import {routes} from "../../services/fetch.js";
 
@@ -119,6 +120,7 @@ onMounted(()=>{
           <CardTicket super-sale :dragging="isDragging" :data="item" :active="currentSlide === n -1"/>
         </Slide>
         <template #addons>
+          <CarouselNavigation />
           <Pagination class="!tw-bottom-[-30px] "/>
         </template>
       </Carousel>
@@ -128,6 +130,14 @@ onMounted(()=>{
 </template>
 
 <style scoped>
+
+.my-carrousel::v-deep(.carousel__prev){
+  left: -4%;
+}
+
+.my-carrousel::v-deep(.carousel__next){
+  right: -4%;
+}
 
 .my-carrousel::v-deep(.carousel__viewport){
   @apply !tw-rounded-xl

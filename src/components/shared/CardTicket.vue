@@ -664,7 +664,7 @@ onBeforeUnmount(() => {
                           {{dataIda.tipos_comodos.find(it=>it.id == room.type_comodo_id).nome}}
                         </div>
                       </v-col>
-                      <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end ">  <Icon @click="incrementComodo(room.type_comodo_id )" icon="ph:plus-fill"  width="20"  class="mr-3 tw-cursor-pointer" /> {{ room.quantidade}} <Icon @click="decrementComodo(room.type_comodo_id )" icon="ph:minus-fill"  width="20"  class="ml-3 tw-cursor-pointer" /></v-col>
+                      <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end ">  <Icon @click="decrementComodo(room.type_comodo_id )" icon="ph:minus-fill"  width="20"  class="mr-3 tw-cursor-pointer" />  {{ room.quantidade}} <Icon @click="incrementComodo(room.type_comodo_id )" icon="ph:plus-fill"  width="20"  class="ml-3 tw-cursor-pointer" /></v-col>
                       <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">     {{formatCurrency(room.quantidade * calcularValor( formatMoney( dataIda.valor), dataIda.desconto?.desconto))}} <Icon @click="onClickRoom(null,room.type_comodo_id)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /> </v-col>
                     </v-row>
                   </div>
@@ -680,193 +680,19 @@ onBeforeUnmount(() => {
             </div>
           </v-expand-transition>
         </v-tabs-window-item>
-        <v-tabs-window-item :value="2">
-          <v-expand-transition>
-            <div class="tw-flex tw-flex-col my-3 tw-w-full" v-if="openRooms">
-              <div class="lg:tw-flex  tw-items-center justify-center">
-                <div class="tw-flex tw-justify-between tw-items-center   lg:tw-gap-3">
-                  <div class="tw-text-[12px] lg:tw-text-sm">Restam <strong class="tw-font-extrabold">{{quantityRoomsFree}} LUGARES</strong> </div>
-                </div>
-              </div>
-              <div class="tw-flex tw-flex-col lg:tw-flex-col-reverse tw-justify-center tw-items-center ">
-                <v-row >
-                  <v-col >
-                    <div class="tw-flex  tw-items-center tw-gap-1  tw-text-sm">
-                      <div class="my-badge bg-success"></div>
-                      Livre
-                    </div>
-                  </v-col>
-                  <v-col >
-                    <div class="tw-flex  tw-items-center tw-gap-1  tw-text-sm">
-                      <div class="my-badge !tw-bg-[#3dccfd]"></div>
-                      vendido
-                    </div>
-                  </v-col>
-                  <v-col>
-                    <div class="tw-flex  tw-items-center tw-gap-1  tw-text-sm">
-                      <div class="my-badge !tw-bg-yellow-400"></div>
-                      selecionado
-                    </div>
-                  </v-col>
-                </v-row>
-                <v-container class=" lg:!tw-max-w-[800px] tw-max-w-[350px]  tw-flex ">
-                  <Boat v-if="matrizRooms.volta?.length > 0">
-                    <div :style="generateLayout()" class="tw-h-full">
-                      <div
-                          v-for="(comodo, index) in matrizRooms.volta"
-                          :key="index"
-                          :class="comodo?.id ? (comodo.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataVolta.selectedsById?.includes(comodo) ? '!tw-bg-yellow-400' : 'tw-bg-green-400') : 'tw-bg-gray-200'"
-                          class="text-center tw-rounded-[5px] !tw-text-white tw-font-black tw-px-1 tw-py-[2px] tw-text-xs tw-h-[24px] tw-min-w-[30px] tw-cursor-pointer "
-                          @click="comodo?.id && !comodo.is_ocupado ? onClickRoom(comodo,null,'dataVolta') : ''"
-                      >
-                        {{ comodo?.id ? (comodo.numeracao < 10 ? '0' + comodo.numeracao : comodo.numeracao) : '' }}
-                      </div>
-                    </div>
-                    <div class="mt-2 lg:tw-hidden " >
-                      <div class="tw-flex  lg:tw-justify-start tw-w-full tw-font-bold">Mais viajante?</div>
-                      <div class="tw-text-p tw-text-sm">selecione outro cômodo.</div>
-                    </div>
-                  </Boat>
-                  <v-container v-if="hasCamarotesAndRede">
-                    <v-row>
-                      <template v-for="item in dataVolta.tipos_comodos">
-                        <v-col v-if="item.id !== 4 && item.id !== 1 " :key="item.id" cols="12"  md="6" lg="4">
-                          <v-card
-                              class="!tw-border-4 !tw-border-blue-400"
-                              flat
-                              @click="roomsFree.volta.find(it=>it.tipo_comodidade_id === item.id)?.quantidade > 0 ? onClickRoom(null,item.id,'dataVolta') : ''"
-                              :class="roomsSelected.dataVolta.selectedsByType?.find(it=>item.id == it.type_comodo_id)?.quantidade > 0 ? '!tw-bg-yellow-400' :
-                            roomsFree.volta.find(it=>it.tipo_comodidade_id === item.id)?.quantidade === 0 ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : '!tw-bg-[#02bc6b]'
-                            "
-                          >
-                            <v-row class="tw-p-3 !tw-text-white">
-                              <v-col cols="8" class=" tw-text-xs">
-                                {{item.nome}}
-                              </v-col>
-                              <v-col cols="4" class=" tw-text-sm tw-flex tw-items-center  tw-justify-end">
-                                <Icon icon="el:person" width="15"  class="mr-1 "/>{{roomsFree.volta.find(it=>it.tipo_comodidade_id === item.id)?.quantidade}}
-                              </v-col>
-                              <v-col cols="6" class=" tw-text-xs !tw-pt-0 ">
-                                Valor
-                              </v-col>
-                              <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                                {{formatCurrency(calcularValor(formatMoney(dataVolta.valor), dataVolta.desconto?.desconto))}}<br>
-                              </v-col>
-                            </v-row>
-                          </v-card>
-                        </v-col>
-                      </template>
-                      <v-col v-for="item in rooms.volta[4]" cols="12" md="6" lg="4">
-                        <v-card
-                            flat
-                            @click="!item.is_ocupado ? onClickRoom(item, null,'dataVolta') : ''"
-                            :class="(item.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataVolta.selectedsById?.includes(item) ? '!tw-bg-yellow-400' : '!tw-bg-[#02bc6b]')"
-                        >
-                          <v-row class="tw-p-3 !tw-text-white">
-                            <v-col cols="9" class=" tw-text-xs">
-                              {{item.nome}}
-                            </v-col>
-                            <v-col cols="3" class=" tw-text-sm tw-flex tw-items-center  tw-justify-end">
-                              <Icon icon="el:person" width="15"  class="mr-1 "/>{{item.quantidade}}
-                            </v-col>
-                            <v-col cols="6" class=" tw-text-xs !tw-pt-0 ">
-                              Valor
-                            </v-col>
-                            <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                              {{formatCurrency(item.comodo_trechos.valor)}}
-                            </v-col>
-                          </v-row>
-                        </v-card>
-                      </v-col>
-                    </v-row>
-                  </v-container>
-                </v-container>
-              </div>
-              <v-divider  :thickness="1" class="border-opacity-100 tw-my-2 tw-hidden lg:tw-block mt-5 " ></v-divider>
-              <v-row >
-                <v-col cols="12" md="12">
-                  <div class="tw-flex tw-justify-center lg:tw-justify-start tw-w-full tw-font-bold">Cômodos selecionados</div>
-                  <div class=" mt-3" v-if="roomsSelected.dataVolta.selectedsById?.length > 0">
-                    <v-row v-for="room in roomsSelected.dataVolta.selectedsById" :key="room.id" class="tw-flex tw-justify-center tw-items-center tw-gap-1 tw-text-xs lg:tw-text-[16px] tw-text-p  !tw-m-0" >
-                      <v-col cols="8" class="tw-flex tw-items-center tw-gap-1 !tw-p-0">
-                        <div v-if="room.tipo_comodidade_id == 1 || room.tipo_comodidade == 1" class="tw-flex tw-items-center tw-gap-1 !tw-p-0">
-                          <div  class="!tw-bg-yellow-400 text-center tw-rounded-[5px] !tw-text-white  tw-px-1 tw-py-[2px]  my-1">
-                            {{room.numeracao < 10 ? '0' + room.numeracao : room.numeracao}}
-                          </div>
-                          <span >{{room.tipo_comodidade.nome}}</span>
-                        </div>
-                        <div v-else class="tw-flex tw-items-center tw-gap-1 !tw-p-0">
-                          <div  class="!tw-bg-yellow-400 text-center tw-rounded-[5px] !tw-text-white  tw-px-1 tw-py-[2px]  my-1">
-                            {{room.nome}}
-                          </div>
-                        </div>
-                      </v-col>
-                      <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? formatCurrency(room.comodo_trechos?.valor) : dataVolta.valor}} <Icon @click="onClickRoom(room, null,'dataVolta')" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /></v-col>
-                    </v-row>
-                  </div>
-                  <div class=" mt-3" v-if="roomsSelected.dataVolta.selectedsByType?.length > 0">
-                    <v-row v-for="(room,i) in roomsSelected.dataVolta.selectedsByType" :key="i" class="tw-flex tw-justify-between tw-items-center tw-gap-1  lg:tw-text-[16px] tw-text-xs tw-text-p  !tw-m-0" >
-                      <v-col cols="3" class="tw-flex tw-items-center tw-gap-1 !tw-p-0">
-                        <div class="!tw-bg-yellow-400 text-center tw-rounded-[5px] !tw-text-white  tw-px-1 tw-py-[2px]  my-1">
-                          {{dataVolta.tipos_comodos.find(it=>it.id == room.type_comodo_id).nome}}
-                        </div>
-                      </v-col>
-                      <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end "><Icon @click="incrementComodo(room.type_comodo_id,'dataVolta')" icon="ph:plus-fill"  width="20"  class="mr-3 tw-cursor-pointer" /> {{ room.quantidade}} <Icon @click="decrementComodo(room.type_comodo_id, 'dataVolta')" icon="ph:minus-fill"  width="20"  class="ml-3 tw-cursor-pointer" /></v-col>
-                      <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{ dataVolta.valor}} <Icon @click="onClickRoom(room,room.type_comodo_id,'dataVolta')" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /> </v-col>
-                    </v-row>
-                  </div>
-                  <div v-if="roomsSelected.dataVolta.selectedsByType?.length === 0 && roomsSelected.dataVolta.selectedsById?.length === 0" class="tw-flex  tw-items-center tw-gap-1 tw-text-xs tw-text-p  !tw-m-0">
-                    Nenhum cômodo selecionado
-                  </div>
-                </v-col>
-                <v-col cols="12"  class="tw-hidden lg:tw-block">
-                  <div class="tw-flex tw-justify-center lg:tw-justify-start tw-w-full tw-font-bold">Mais passageiros?</div>
-                  <div class="tw-text-p tw-text-xs">selecione outro cômodo.</div>
-                </v-col>
-              </v-row>
-            </div>
-          </v-expand-transition>
-        </v-tabs-window-item>
       </div>
       <v-divider  :thickness="1" class="border-opacity-100 tw-my-2  " ></v-divider>
       <div class="tw-flex tw-flex-col tw-justify-center lg:tw-justify-between lg:tw-items-center lg:tw-flex-row-reverse mb-2">
         <div v-if="openRooms" class="tw-flex tw-gap-3 mt-3 tw-w-full tw-justify-end">
-          <v-btn
-              v-if="step === 2"
-              variant="outlined"
-              color="success"
-              rounded
-              size="xs"
-              class="d-lg-flex !tw-font-extrabold px-2 py-1"
-              @click="beforeStep"
-          >
-            <Icon icon="mdi:navigate-before" width="20" />
-            <span class="!tw-text-xs">voltar</span>
-          </v-btn>
 
           <v-btn
-              v-if="!!dataVolta && step === 1"
-              variant="flat"
-              color="success"
-              rounded
-              size="xs"
-              class="d-lg-flex !tw-font-extrabold px-2 py-1"
-              :disabled="roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0"
-              @click="nextStep"
-          >
-            <span class="!tw-text-xs tw-text-white">Escolher volta</span>
-            <Icon icon="mdi:navigate-next" width="20" class="ml-1 tw-text-white" />
-          </v-btn>
 
-          <v-btn
-              v-else
               variant="flat"
               color="success"
               rounded
               size="xs"
               class="d-lg-flex !tw-font-extrabold px-2 py-1 "
-              :disabled="(step === 1 && (roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0)) ||
-                (step === 2 && (roomsSelected.dataVolta.selectedsByType?.length === 0 && roomsSelected.dataVolta.selectedsById?.length === 0))"
+              :disabled="((roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0))"
               @click="initSale"
           >
             <span class="!tw-text-xs tw-text-white">Avançar</span>

@@ -140,6 +140,7 @@ function goToHomePage(){
   </v-card>
 
   <div class="maxWidth tw-px-3 ">
+
     <v-tabs-window v-model="tab" class="mb-3">
       <v-tabs-window-item value="login">
         <v-card
@@ -155,6 +156,13 @@ function goToHomePage(){
             </v-btn>
             <v-divider  :thickness="1" class="border-opacity-100  " ></v-divider>
           </div>
+
+          <v-card variant="outlined" color="secondary" class="mb-3">
+            <v-card-text>
+              Se você já tem um cadastro na <a href="https://loja.yjaraviagens.com/" class="tw-underline tw-font-bold">YjaraViagens</a> use aqui os mesmos dados de acesso.
+              Somos parceiros e estamos trabalhando juntos para a sua comodidade
+            </v-card-text>
+          </v-card>
 
           <v-form @submit.prevent="handleSubmit" validate-on="blur">
             <div class="text-subtitle-1 text-medium-emphasis">Seu email</div>

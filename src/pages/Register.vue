@@ -451,6 +451,7 @@ onMounted(()=>{
             <v-text-field
                 density="compact"
                 color="secondary"
+                disabled
                 v-model="form.email"
                 :rules="[validationEmail]"
                 :error-messages="form.errors.email"

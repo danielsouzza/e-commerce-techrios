@@ -1,7 +1,7 @@
 <script setup>
 
 
-import {onMounted, ref} from "vue";
+import {nextTick, onMounted, ref} from "vue";
 import {routes} from "../services/fetch.js";
 import CardTicket from "../components/shared/CardTrip.vue";
 import {Icon} from "@iconify/vue";
@@ -18,7 +18,7 @@ function getTrechosWithTravels() {
   params.append('is_superoferta', 1)
   params.append('quantia', filtersSelected.value.quantia)
   params.append('subdomain', window.subdomain || '')
-
+  loading.value = true
   routes["trechos-viagem"](params).then(response => {
     const trechos = response.data.data?.trechos?.data || []
 
@@ -41,7 +41,8 @@ function getTrechosWithTravels() {
         }
       }
     }
-    loading.value = false
+    nextTick(()=> loading.value = false)
+
   })
 }
 
@@ -70,7 +71,15 @@ onMounted(()=>{
         <CardTicket :data="item"/>
       </v-col>
     </v-row>
-    <NotFoundTrips v-else class="tw-min-h-[30vh] " ></NotFoundTrips>
+    <div class="tw-flex tw-justify-center tw-min-h-[30vh] tw-items-center"  v-else-if="loading">
+      <v-progress-circular
+          width="2"
+          color="white"
+          size="90"
+          indeterminate
+      ></v-progress-circular>
+    </div>
+    <NotFoundTrips v-else class="tw-min-h-[30vh]" ></NotFoundTrips>
     <div class="tw-flex tw-justify-center mb-5">
       <v-btn @click="showMoreticket" v-if="filtersSelected.quantia <= trechosWithTravels.data?.trechos.total" flat variant="plain" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
         <Icon icon="line-md:arrow-down" class="mr-2 tw-text-xl"/>

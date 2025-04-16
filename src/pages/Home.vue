@@ -13,6 +13,7 @@ const Banner2 = defineAsyncComponent(() => import("../components/widgets/banners
 const FeaturedTrip = defineAsyncComponent(() => import("../components/app/FeaturedTrip.vue"));
 const TravelAtUnbeatablePrices = defineAsyncComponent(() => import("../components/app/TravelAtUnbeatablePrices.vue"));
 
+const is_enterprise = !!window.subdomain
 const filtersData = ref([])
 const filtersSelected = ref({
   origem:null,
@@ -30,7 +31,8 @@ async function getSlides() {
 }
 
 async function getFilterItems(){
-  routes["filtros"]().then(res => {
+
+  routes["filtros"]({subdomain:window.subdomain}).then(res => {
     if(!res.data.data.success){
       filtersData.value = res.data.data;
     }
@@ -60,9 +62,9 @@ onMounted(() => {
         :options="filtersData"
         class=" tw-top-[-80px]  !tw-mb-[-30px] lg:tw-top-[-110px] lg:!tw-mb-[-80px] !tw-mx-5 lg:!tw-mx-0"/>
 
-    <RiversOfOffers class="!tw-my-5"/>
+    <RiversOfOffers v-if="!is_enterprise" class="!tw-my-5"/>
 
-    <div class="tw-flex tw-items-center tw-flex-col md:tw-grid md:tw-grid-cols-2 tw-gap-2  tw-py-2 tw-px-5 lg:tw-px-0">
+    <div v-if="!is_enterprise" class="tw-flex tw-items-center tw-flex-col md:tw-grid md:tw-grid-cols-2 tw-gap-2  tw-py-2 tw-px-5 lg:tw-px-0">
       <Banner2 v-for="i in slides.slice(0,2)" :key="i" :src="i.image_url"  :link="i.redirect_url"/>
     </div>
 

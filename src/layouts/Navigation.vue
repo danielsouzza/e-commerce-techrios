@@ -13,8 +13,11 @@ function scrollToStartDiv(){
     </v-btn>
   </RouterLink>
 
-  <v-btn  class="hidden-sm-and-down " :ripple="false" rounded="sm" variant="text" color="primary">
-    <span class="tw-text-p">MAIS PROCURADOS</span>
-  </v-btn>
+  <a href="#mais-buscados">
+    <v-btn  class="hidden-sm-and-down " :ripple="false" rounded="sm" variant="text" color="primary">
+      <span class="tw-text-p">MAIS PROCURADOS</span>
+    </v-btn>
+  </a>
+
 
 </template>

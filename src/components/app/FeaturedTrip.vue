@@ -3,6 +3,7 @@
 import {Icon} from "@iconify/vue";
 import CardTicket from "../shared/CardTrip.vue";
 import {Carousel, Pagination, Slide} from "vue3-carousel";
+import { Navigation as CarouselNavigation } from 'vue3-carousel'
 import CardTripFull from "../shared/CardTripFull.vue";
 import {computed, onMounted, ref} from "vue";
 import {routes} from "../../services/fetch.js";
@@ -65,13 +66,13 @@ const travels_more_important = computed(()=>{
 })
 
 const travels_les_important = computed(()=>{
-  return trechosWithTravels.value.data?.trechos?.data.slice(3,5)
+  return trechosWithTravels.value.data?.trechos?.data.slice(3,trechosWithTravels.value.data?.trechos?.data.length)
 })
 
 
 function getTrechosWithTravels() {
   const params = new URLSearchParams()
-  params.append('quantia', 5)
+  params.append('quantia', !!window.subdomain ? '' : 5 )
   params.append('is_destaque', 1)
   params.append('subdomain', window.subdomain || '')
 
@@ -133,7 +134,8 @@ onMounted(()=>{
             <CardTripFull :dragging="isDragging" :data="item" class="tw-h-full"/>
           </Slide>
           <template #addons>
-            <Pagination class=" "/>
+            <CarouselNavigation />
+            <Pagination class="!tw-bottom-[-30px] "/>
           </template>
         </Carousel>
       </div>
@@ -149,6 +151,15 @@ onMounted(()=>{
 </template>
 
 <style scoped>
+
+.my-carrousel::v-deep(.carousel__prev){
+  left: -4%;
+}
+
+.my-carrousel::v-deep(.carousel__next){
+  right: -4%;
+}
+
 .my-carrousel::v-deep(.carousel__pagination-button){
   padding: 2px !important;
 }

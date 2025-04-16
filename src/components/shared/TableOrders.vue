@@ -1,14 +1,16 @@
 <script setup>
 
-import {computed, onMounted, onUnmounted, ref} from "vue";
+import {computed, onMounted, onUnmounted, reactive, ref} from "vue";
 import {routes} from "../../services/fetch.js";
 import {Icon} from "@iconify/vue";
-import {formatCurrency, formatDate} from "../../Helper/Ultis.js";
+import {formatCurrency, formatDate, formatDateToServe, formatMoney} from "../../Helper/Ultis.js";
 import BaseCard from "./BaseCard.vue";
 import VueQrcode from "vue-qrcode";
 import CopyToClipboard from "./CopyToClipboard.vue";
-import {showErrorNotification} from "../../event-bus.js";
+import {showErrorNotification, showSuccessNotification} from "../../event-bus.js";
 import {useLoadingStore} from "../../store/states.js";
+import {userAuthStore} from "../../store/AuthStore.js";
+import {useCartStore} from "../../store/CartStore.js";
 
 const props = defineProps({
   auth: Object,
@@ -21,13 +23,14 @@ const props = defineProps({
 
 let intervalo = null;
 let checkTimeout = null;
-const  myOrders = ref( [])
+const myOrders = ref( [])
 const percentToPay = ref(0)
 const orderToPay = ref(null)
 const whatPayment = ref(false)
 const timeToPay = ref(30 * 60)
 const paymentPending = ref(null)
 const showPaymentPix = ref(false)
+const showPaymentCredit = ref(false)
 const loadingStore = useLoadingStore();
 const orderConfirmation = ref(null)
 const  headers = [
@@ -36,6 +39,32 @@ const  headers = [
   { title: 'Valor', value: 'total' },
   { title: 'Status', value: 'status' },
 ]
+const months = ["01","02","03","04","05","06","07","08","09","10","11","12"]
+const pacerls = [
+  {value:1,pencet:0.4},
+  {value:2,pencet:0.06},
+  {value:3,pencet:0.07},
+  {value:4,pencet:0.08},
+  {value:5,pencet:0.09},
+  {value:6,pencet:0.10},
+]
+const formPayment = reactive({
+  order_id:null,
+  payment_method_id:6,
+  credit_card:{
+    holder:null,
+    card_number:null,
+    expiration_date:'',
+    security_code:null,
+    installment_quantity:{value:1,pencet:0.04},
+  }
+})
+
+const years = computed(() => {
+  const currentYear = new Date().getFullYear();
+  return  Array.from({ length: 21 }, (_, i) => `${currentYear + i}`);
+})
+
 const orders = computed(() => {
   const items = []
   myOrders.value.data?.forEach((item, index) => {
@@ -45,8 +74,12 @@ const orders = computed(() => {
       data: formatDate(item.data),
       status: item.status,
       passagens: item.passagens_agrupadas.map(passage => {
-        const dataEmbarque = new Date(passage.viagem.saida)
-        const agora = new Date()
+        const [dataParte, horaParte] = passage.viagem.saida.split(' ');
+        const [dia, mes, ano] = dataParte.split('/');
+        const [hora, minuto] = horaParte ? horaParte.split(':') : ['00', '00'];
+
+        const dataEmbarque = new Date(ano, mes - 1, dia, hora, minuto);
+        const agora = new Date();
 
         return {
           codigo: item.id + "-" + passage.viagem.id,
@@ -67,6 +100,15 @@ const orders = computed(() => {
   return items;
 })
 
+function updateFormattedDate(value,type) {
+  let [month, year] = formPayment.credit_card.expiration_date.split("/");
+  if (type === 'month') {
+    month = value
+  }else{
+    year = value
+  }
+  formPayment.credit_card.expiration_date = `${month}/${year}`;
+}
 
 function getOrder(){
   routes['order.my']({subdomain: window.subdomain || ''}).then((res) => {
@@ -105,6 +147,7 @@ function checkStatusPayment() {
       orderConfirmation.value = res.data.data;
       if (orderConfirmation.value.status === "Pago") {
         whatPayment.value = false;
+        getOrder()
       } else {
         if (timeToPay.value === 0) {
           showErrorNotification('Tempo de venda expirou');
@@ -139,6 +182,12 @@ const iniciarTemporizador = () => {
   }, 1000);
 };
 
+function handlePaymentCredit(item){
+  orderToPay.value = item
+  showPaymentCredit.value = true
+
+}
+
 function submitPaymentPix(order_id){
   loadingStore.startLoading();
   orderToPay.value = order_id
@@ -155,6 +204,31 @@ function submitPaymentPix(order_id){
     loadingStore.stopLoading();
     whatPayment.value = false
     showErrorNotification(error.response.data.data.error);
+  })
+}
+
+function submitPaymentCredit(){
+  const data = {
+    ...formPayment,
+    order_id:orderToPay.value.codigo.toString(),
+    credit_card:{
+      ...formPayment.credit_card,
+      installment_quantity: formPayment.credit_card.installment_quantity.value,
+      card_number:formPayment.credit_card.card_number.replaceAll(' ','')
+    }
+  }
+  loadingStore.startLoading();
+  routes["payment.credito"](data).then(res => {
+    if(res.data.success){
+      orderConfirmation.value = res.data.data;
+      console.log(orderConfirmation)
+      showSuccessNotification(res.data.message);
+      getOrder()
+    }
+    loadingStore.stopLoading();
+  }).catch(error=>{
+    loadingStore.stopLoading();
+    showErrorNotification(error.response.data.data?.error ?? error.response.data.message);
   })
 }
 
@@ -184,7 +258,7 @@ onMounted(()=>{
 <template>
   <v-dialog max-width="800" v-model="showPaymentPix">
     <template v-slot:default="{ isActive }">
-      <BaseCard title="Confirmação da compra"  class="mt-3" v-if="orderConfirmation?.status == 'Pago'">
+      <BaseCard title="Confirmação da compra"  class="mt-3 rounded-lg" v-if="orderConfirmation?.status == 'Pago'">
         <div class="tw-flex tw-justify-center tw-flex-col tw-items-center tw-text-center">
           <Icon icon="icon-park-outline:ticket"  class="mr-2 tw-text-secondary !tw-text-[80px]"  />
           <p class="tw-text-xl tw-text-secondary tw-font-bold my-2">Compra realizada com sucesso!</p>
@@ -243,12 +317,135 @@ onMounted(()=>{
           </v-col>
         </v-row>
       </BaseCard>
-
     </template>
+  </v-dialog>
+  <v-dialog max-width="800" v-model="showPaymentCredit">
+    <template v-slot:default="{ isActive }">
+      <BaseCard title="Confirmação da compra"  class="mt-3 rounded-lg" v-if="orderConfirmation != null">
+        <div class="tw-flex tw-justify-center tw-flex-col tw-items-center tw-text-center">
+          <Icon icon="icon-park-outline:ticket"  class="mr-2 tw-text-secondary !tw-text-[80px]"  />
+          <p class="tw-text-xl tw-text-secondary tw-font-bold my-2">Compra realizada com sucesso!</p>
+          <p> Olá, {{userAuthStore().user.name}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
+          <p><strong> {{orderConfirmation.description}}</strong></p>
+          <p><strong> {{formatCurrency(orderConfirmation.amount)}}</strong></p>
+          <p><strong> {{orderConfirmation.installments}}x  {{orderConfirmation.payment_method}}</strong></p>
+        </div>
+        <v-row>
+          <v-col cols="12" class="mb-0 pb-0" >
+            <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
+          </v-col>
 
+          <v-col class=" d-flex justify-end  my-0 py-0">
+            <v-btn
+                class="my-0 py-0"
+                variant="text"
+                @click="cancelarPaymentPix"
+            >
+              Fechar
+            </v-btn>
+          </v-col>
+        </v-row>
+      </BaseCard>
+      <BaseCard title="Confirmação da compra"  class="mt-3" v-else>
+        <div v-if="userAuthStore().isAuthenticated()" class="tw-w-full tw-flex tw-flex-col">
+          <v-row class="mt-3" >
+            <v-col cols="12" >
+              <v-text-field variant="outlined" v-model="formPayment.credit_card.holder" label="Nome no cartão"/>
+            </v-col>
+            <v-col cols="12" >
+              <v-text-field  variant="outlined" v-model="formPayment.credit_card.card_number" v-mask="'#### #### #### ####'" label="Numero do cartão"/>
+            </v-col>
+            <v-col>
+              <v-row justify="center">
+                <v-col cols="12" md="6" >
+                  <v-select
+                      variant="outlined"
+                      :items="months"
+                      @update:modelValue="(args)=>updateFormattedDate(args, 'month')"
+                      label="Mês"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12"  md="6" >
+                  <v-select
+                      variant="outlined"
+                      @update:modelValue="(args)=>updateFormattedDate(args, 'year')"
+                      :items="years"
+                      label="Ano"
+                  ></v-select>
+                </v-col>
+                <v-col cols="12"  md="6">
+                  <v-select
+                      variant="outlined"
+                      hide-details="auto"
+                      v-model="formPayment.credit_card.installment_quantity"
+                      :items="pacerls"
+
+                      item-value="value"
+                      item-title="value"
+                      return-object
+                      label="Parcelas"
+                  >
+                    <template v-slot:selection="{ item, index }">
+                      <div>{{item.raw.value}}x {{(formatCurrency((formatMoney(orderToPay.total) + (formatMoney(orderToPay.total) * item.raw.pencet) )/ item.raw.value )) }}</div>
+                    </template>
+                    <template v-slot:item="{ props, item }">
+
+                      <v-list-item class="!tw-my-0 !tw-py-0" v-bind="props" title="" >{{item.raw.value}}x {{(formatCurrency((formatMoney(orderToPay.total) + (formatMoney(orderToPay.total) * item.raw.pencet) )/ item.raw.value )) }}</v-list-item>
+                    </template>
+                  </v-select>
+                </v-col>
+                <v-col cols="12"  md="6"  >
+                  <v-text-field
+                      variant="outlined"
+                      hide-details="auto"
+                      v-mask="'###'"
+                      v-model="formPayment.credit_card.security_code"
+                      label="CV"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-col>
+          </v-row>
+          <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2  mt-3 lg:!tw-py-5"  @click="submitPaymentCredit">
+            <Icon icon="heroicons:credit-card-20-solid"  class="mr-2 tw-text-white" width="26"/><span class=" !tw-text-xs lg:!tw-text-sm tw-text-white ml-1"  >REALIZAR PAGAMENTO</span>
+          </v-btn>
+        </div>
+        <div v-else class="tw-flex tw-flex-col tw-w-full">
+          <p class="tw-text-p my-3"> Para realizar pagamento com cartão de credito é nescessário realizar o login.</p>
+          <div class="tw-flex tw-gap-3">
+            <RouterLink :to="{ name: 'login', query: { redirect: '/comprar-passagem/pagamento' } }">
+              <v-btn  flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+                <span class="tw-text-white tw-flex"><Icon icon="solar:login-linear" class="mr-2 tw-text-xl"/>Login</span>
+              </v-btn>
+            </RouterLink>
+            <RouterLink :to="{name:'validar-email'}">
+              <v-btn  variant="tonal" color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+                <span class="tw-flex"><Icon icon="solar:login-linear" class="mr-2 tw-text-xl"/>Criar conta</span>
+              </v-btn>
+            </RouterLink>
+          </div>
+        </div>
+        <v-row>
+          <v-col cols="12" class="mb-0 pb-0" >
+            <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
+          </v-col>
+
+          <v-col class=" d-flex justify-end  my-0 py-0">
+            <v-btn
+                class="my-0 py-0"
+                variant="text"
+                @click="cancelarPaymentPix"
+            >
+              Fechar
+            </v-btn>
+          </v-col>
+        </v-row>
+      </BaseCard>
+    </template>
   </v-dialog>
   <v-container class=" !tw-p-0 !tw-mx-0">
     <v-card variant="flat" elevation="0" rounded="lg" color="secondary"  class="!tw-border-2 !tw-border-secondary" >
+
       <v-data-table
           :headers="headers"
           :items="orders"
@@ -315,16 +512,20 @@ onMounted(()=>{
 
               <div v-if="item.passagens?.length == 0" class=" my-5 tw-text-center ">Pedido vazio</div>
 
-              <v-row v-if="item.status == 'Em aberto' && item.passagens?.length > 0">
+              <v-row v-if="item.status == 'Em aberto' && item.passagens?.length > 0" >
                 <v-col class="d-flex justify-end mx-4 mb-3">
                   <RouterLink :to="{name:'sale',params:{tab:'pagamento'}}">
                     <v-btn color="primary" rounded="lg" class="tw-w-full" >Ir para o pagamento</v-btn>
                   </RouterLink>
                 </v-col>
               </v-row>
-              <v-row v-if="item.status == 'Solicitado' && !item.passagens.some(it=>it.embarque_passado)">
-                <v-col class="d-flex justify-end mx-4 mb-3">
-                    <v-btn  @click="submitPaymentPix(item.codigo)" color="primary" rounded="lg" class="tw-w-full" >Gerar código pix para pagamento</v-btn>
+              <v-row v-if="item.status == 'Solicitado' && !item.passagens.some(it=>it.embarque_passado)" class="px-4">
+                <v-col cols="12" lg="6" class="d-flex justify-end  mb-3">
+                    <v-btn variant="tonal" @click="submitPaymentPix(item.codigo)" color="primary" rounded="lg" class="tw-w-full" >Pagar no Pix</v-btn>
+                </v-col>
+                <v-col cols="12" lg="6" class="d-flex justify-end  mb-3">
+
+                  <v-btn variant="tonal"  @click="handlePaymentCredit(item)" color="secondary" rounded="lg" class="tw-w-full" >Pagar om cartão de credito</v-btn>
                 </v-col>
               </v-row>
 
