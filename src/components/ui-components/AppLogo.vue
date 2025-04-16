@@ -25,14 +25,14 @@ const logo = computed(()=>{
 <template>
 <!--    <img v-if="footer" src="/assets/images/logo-yjara-white.svg" :width="size" alt=""/>-->
     <v-avatar   :size="size" >
-      <img  :src="logo"  alt="" class="tw-invert tw-brightness-200 tw-contrast-150" />
+      <img  :src="logo"  alt="" :class="footer ? 'tw-invert tw-brightness-200 tw-contrast-150 footer':'' " />
     </v-avatar>
 
 </template>
 
 <style scoped>
 /* Alternativa com CSS normal (se preferir essa abordagem) */
-img {
+.footer {
   filter: brightness(0) invert(1);
 }
 </style>
