@@ -12,7 +12,7 @@ import {useRoute} from "vue-router";
 
 const visible = ref(false);
 const tab = ref('login');
-
+const is_enterprise = !!window.subdomain
 const formReset = reactive({
   email: '',
   base_url:getAppBaseUrl(),
@@ -157,7 +157,7 @@ function goToHomePage(){
             <v-divider  :thickness="1" class="border-opacity-100  " ></v-divider>
           </div>
 
-          <v-card variant="outlined" color="secondary" class="mb-3">
+          <v-card v-if="is_enterprise" variant="outlined" color="secondary" class="mb-3">
             <v-card-text>
               Se você já tem um cadastro na <a href="https://loja.yjaraviagens.com/" class="tw-underline tw-font-bold">YjaraViagens</a> use aqui os mesmos dados de acesso.
               Somos parceiros e estamos trabalhando juntos para a sua comodidade

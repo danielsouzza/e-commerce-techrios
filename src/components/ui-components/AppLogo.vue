@@ -1,7 +1,7 @@
 <script setup>
 
-import {computed, inject} from "vue";
-
+import {computed, inject, ref} from "vue";
+const is_enterprise = ref(!!window.subdomain)
 const themeConfig = inject('themeConfig');
 
 
@@ -25,7 +25,7 @@ const logo = computed(()=>{
 <template>
 <!--    <img v-if="footer" src="/assets/images/logo-yjara-white.svg" :width="size" alt=""/>-->
     <v-avatar   :size="size" >
-      <img  :src="logo"  alt="" :class="footer ? 'tw-invert tw-brightness-200 tw-contrast-150 footer':'' " />
+      <img  :src="logo"  alt="" :class="footer && !is_enterprise  ? 'tw-invert tw-brightness-200 tw-contrast-150 footer':'' " />
     </v-avatar>
 
 </template>

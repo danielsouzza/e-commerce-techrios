@@ -658,6 +658,7 @@ function submitOrder(){
   formSale.total = formSale.total_passagems + formSale.total_taxas;
 
   const params = {
+    subdomain:window.subdomain || '',
     pedido_id: useCartStore().order?.id,
     ...formSale,
     trecho:formSale.trecho.id,
@@ -706,6 +707,7 @@ function addCart(){
   formSale.total = formSale.total_passagems + formSale.total_taxas;
 
   const params = {
+    subdomain:window.subdomain || '',
     pedido_id: useCartStore().order?.id,
     ...formSale,
     trecho:formSale.trecho.id,

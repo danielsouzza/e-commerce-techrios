@@ -92,6 +92,12 @@ const routes = [
         meta: { title: 'Registrar' }
     },
     {
+        path: '/onde-estamos',
+        component: () => import('../pages/OndeEstamos.vue'),
+        name: 'onde-estamos',
+        meta: { title: 'Onde estamos' }
+    },
+    {
         path: '/comprar-passagem/:tab',
         component: () => import('../pages/Sale.vue'),
         name: 'sale',

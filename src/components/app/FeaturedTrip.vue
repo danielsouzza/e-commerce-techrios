@@ -139,11 +139,16 @@ onMounted(()=>{
           </template>
         </Carousel>
       </div>
-      <div class="lg:!tw-w-[50%] tw-h-full tw-hidden lg:tw-block">
+      <div class="lg:!tw-w-[50%] tw-h-full tw-hidden lg:tw-block" v-if="travels_les_important.length > 0">
         <Carousel @drag="isDragging=true" @slideEnd="isDragging=false" v-bind="config_2" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-h-full tw-mb-4 my-carrousel">
           <Slide v-for="(item,n) in travels_les_important" :key="item.id" >
             <CardTicket :dragging="isDragging" :data="item" :active="currentSlide === n -1"/>
+
           </Slide>
+          <template #addons>
+            <CarouselNavigation />
+            <Pagination class="!tw-bottom-[-30px] "/>
+          </template>
         </Carousel>
       </div>
     </div>
