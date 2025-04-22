@@ -152,6 +152,7 @@ export const useCartStore = defineStore('cart', {
                     console.log(error);
                 })
             }
+            window.location = '/'
 
         },
     },

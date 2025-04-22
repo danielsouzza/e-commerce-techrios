@@ -151,7 +151,7 @@ const cart = computed(()=>{
   return cartStore
 })
 const pacerls = [
-  {value:1,pencet:0.4},
+  {value:1,pencet:0.04},
   {value:2,pencet:0.06},
   {value:3,pencet:0.07},
   {value:4,pencet:0.08},
