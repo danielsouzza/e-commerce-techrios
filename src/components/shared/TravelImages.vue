@@ -28,6 +28,7 @@ const baseurl = getApiBaseUrl().replaceAll("api", "");
         v-for="(item, i) in images"
         cover
         :key="i"
+        lazy-src=""
         :src="baseurl + item?.path"
         :alt="alt"
     />

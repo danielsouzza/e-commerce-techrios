@@ -41,7 +41,7 @@ const config = {
 };
 
 
-function getTrechosWithTravels() {
+async function getTrechosWithTravels() {
   const params = new URLSearchParams()
   params.append('is_superoferta', 1)
   params.append('quantia', 8)

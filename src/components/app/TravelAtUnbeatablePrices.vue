@@ -57,7 +57,7 @@ function getMunicipios(search=''){
   })
 }
 
-function getTrechosWithTravels() {
+async function getTrechosWithTravels() {
   const params = new URLSearchParams()
   params.append('com_desconto', 1)
   params.append('origem', origem.value?.slug || '')

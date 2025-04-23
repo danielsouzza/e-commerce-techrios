@@ -70,7 +70,7 @@ const travels_les_important = computed(()=>{
 })
 
 
-function getTrechosWithTravels() {
+async function getTrechosWithTravels() {
   const params = new URLSearchParams()
   params.append('quantia', !!window.subdomain ? '' : 5 )
   params.append('is_destaque', 1)

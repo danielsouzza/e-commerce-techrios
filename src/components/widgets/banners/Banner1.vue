@@ -151,6 +151,7 @@ onUnmounted(() => {
           <img
             :src="item.image_url"
             :alt="item.title || 'Banner'"
+            loading="lazy"
             class="tw-object-cover tw-w-full tw-h-full"
             @load="imageLoaded"
             width="1335"
@@ -167,6 +168,7 @@ onUnmounted(() => {
           :src="item.image_url"
           :alt="item.title || 'Banner'"
           class="tw-object-cover tw-w-full tw-h-full"
+          loading="lazy"
           @load="imageLoaded"
           width="1335"
           height="500"
