@@ -1849,6 +1849,9 @@ watch(()=>props.tab,()=>{
                 <CopyToClipboard  :textToCopy="paymentPending.pix_copia_cola" />
               </div>
             </BaseCard>
+            <v-btn v-if="formSale.dataComodos.length > 0" variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 mt-3"  @click="prevStep">
+              <Icon icon="mdi:navigate-before" width="20"  class="mr-1 tw-text-white"  /> <span class=" !tw-text-xs tw-text-white mr-1"  >Voltar</span>
+            </v-btn>
           </v-col>
         </v-row>
       </v-tabs-window-item>

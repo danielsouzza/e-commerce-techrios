@@ -37,6 +37,8 @@ const form = reactive({
   processing:false
 })
 
+const loja_main_url = ref(window.location.href.replace(window.subdomain+'.', ''))
+
 const route = useRoute();
 
 const validateStepForm = () => {
@@ -159,7 +161,7 @@ function goToHomePage(){
 
           <v-card v-if="is_enterprise" variant="outlined" color="secondary" class="mb-3">
             <v-card-text>
-              Se você já tem um cadastro na <a href="https://loja.yjaraviagens.com/" class="tw-underline tw-font-bold">YjaraViagens</a> use aqui os mesmos dados de acesso.
+              Se você já tem um cadastro na <a :href="loja_main_url" class="tw-underline tw-font-bold">YjaraViagens</a> use aqui os mesmos dados de acesso.
               Somos parceiros e estamos trabalhando juntos para a sua comodidade
             </v-card-text>
           </v-card>

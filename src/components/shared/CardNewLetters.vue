@@ -59,7 +59,7 @@ function submit(){
 </script>
 
 <template>
-  <v-card class=" !tw-rounded-xl tw-w-full"  elevation="0"  >
+  <v-card class=" !tw-rounded-xl tw-w-full"  elevation="6"  >
     <div class="tw-flex tw-flex-col tw-h-full lg:tw-flex-row justify-space-between">
       <div class="tw-pl-5 tw-hidden lg:tw-block">
         <img :src="'/assets/images/footer/email.png'" alt=""  class="tw-w-[260px] tw-h-full"/>

@@ -43,7 +43,7 @@ function getImagaeRandom(imagens){
 }
 
 function getDestinations() {
-  routes["destinos-procurados"]()
+  routes["destinos-procurados"]({subdomain: window.subdomain || ''})
       .then(res => {
         data.value = res.data.map(item => {
           const imagens = item.municipio.imagens || []

@@ -39,6 +39,7 @@ const props = defineProps({
   type:String
 })
 
+const loadingReserva = ref(false)
 const loadingSets = ref(false)
 const baseurl = getApiBaseUrl().replaceAll('api','')
 const emit = defineEmits(['continue','chooseBack'])
@@ -223,9 +224,17 @@ function onClickRoom(room, type,typeTravel='dataIda') {
       //   }
       //
       // }
+
+
+
       if(comodo){
         deleteReserva(room)
       }else{
+        if(step.value === 1){
+          roomsSelected.value.dataIda.selectedsById.push(room)
+        }else {
+          roomsSelected.value.dataVolta.selectedsById.push(room)
+        }
         postReserva(room)
       }
     }
@@ -269,6 +278,7 @@ function decrementComodo(type,typeTravel='dataIda') {
 }
 
 function postReserva(room){
+  loadingReserva.value = true
   const params = new URLSearchParams();
   params.append('trecho_id', step.value === 1 ? props.dataIda.id : props.dataVolta.id);
   params.append('viagem_id', step.value === 1 ? props.dataIda.id_viagem : props.dataVolta.id_viagem);
@@ -276,15 +286,16 @@ function postReserva(room){
 
   params.append('comodo_id', room.id);
   routes['rooms.reservas'](params).then((response) => {
-    if(response.data.success){
-      if(step.value === 1){
-        roomsSelected.value.dataIda.selectedsById.push(room)
-      }else {
-        roomsSelected.value.dataVolta.selectedsById.push(room)
-      }
-    }
+    // if(response.data.success){
+    //   if(step.value === 1){
+    //     roomsSelected.value.dataIda.selectedsById.push(room)
+    //   }else {
+    //     roomsSelected.value.dataVolta.selectedsById.push(room)
+    //   }
+    // }
+    loadingReserva.value = false
   }).catch(error => {
-
+    loadingReserva.value = false
     showErrorNotification(error.response.data.data.error);
     if(step.value === 1){
       roomsSelected.value.dataIda.selectedsById.splice(roomsSelected.value.dataIda.selectedsById.indexOf(room), 1)
@@ -561,13 +572,13 @@ onBeforeUnmount(() => {
                   </v-col>
                 </v-row>
                 <v-container class=" lg:!tw-max-w-[800px] tw-max-w-[350px]  tw-flex ">
-                  <Boat v-if="matrizRooms.ida?.length > 0">
-                    <div :style="generateLayout()" class="tw-h-full">
+                  <Boat v-if="matrizRooms.ida?.length > 0" class="">
+                    <div :style="generateLayout()" class="tw-h-full  ">
                       <div
                           v-for="(comodo, index) in matrizRooms.ida"
                           :key="index"
                           :class="comodo?.id ? (comodo.is_ocupado ? '!tw-bg-[#3dccfd] tw-cursor-not-allowed' : roomsSelected.dataIda.selectedsById?.includes(comodo) ? '!tw-bg-yellow-400' : '!tw-bg-[#02bc6b]') : 'tw-bg-gray-200'"
-                          class="text-center tw-rounded-[5px] !tw-text-white tw-font-black tw-px-1 tw-py-[2px] tw-text-xs tw-h-[24px] tw-min-w-[30px] tw-cursor-pointer "
+                          class=" text-center tw-rounded-[5px] !tw-text-white tw-font-black tw-px-1 tw-py-[2px] tw-text-xs tw-h-[24px] tw-min-w-[32px] tw-cursor-pointer "
                           @click="comodo?.id && !comodo.is_ocupado ? onClickRoom(comodo,null) : ''"
                       >
                         {{ comodo?.id ? (comodo.numeracao < 10 ? '0' + comodo.numeracao : comodo.numeracao) : '' }}
@@ -686,13 +697,13 @@ onBeforeUnmount(() => {
         <div v-if="openRooms" class="tw-flex tw-gap-3 mt-3 tw-w-full tw-justify-end">
 
           <v-btn
-
               variant="flat"
               color="success"
               rounded
+              :loading="loadingReserva"
               size="xs"
               class="d-lg-flex !tw-font-extrabold px-2 py-1 "
-              :disabled="((roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0))"
+              :disabled="((roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0) || loadingReserva)"
               @click="initSale"
           >
             <span class="!tw-text-xs tw-text-white">Avançar</span>

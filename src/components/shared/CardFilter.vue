@@ -53,9 +53,9 @@ const validarDataIda = computed(() => {
 
 function permitirDatasIda(data) {
   const dataSelecionada = new Date(data);
-  if (props.modelValue.type === 'ida-e-volta' && props.modelValue.dataVolta) {
-    return dataSelecionada >= hoje && dataSelecionada <= props.modelValue.dataVolta;
-  }
+  // if (props.modelValue.type === 'ida-e-volta' && props.modelValue.dataVolta) {
+  //   return dataSelecionada >= hoje && dataSelecionada <= props.modelValue.dataVolta;
+  // }
   return dataSelecionada >= hoje;
 }
 
@@ -66,6 +66,14 @@ function permitirDatasVolta(data) {
     return dataSelecionada >= props.modelValue.dataIda.setHours(0, 0, 0, 0);
   }
   return dataSelecionada >= hoje;
+}
+
+function checkData(data){
+  const dataSelecionada = new Date(data);
+  dataSelecionada.setHours(0, 0, 0, 0);
+  if (props.modelValue.dataVolta && dataSelecionada >= props.modelValue.dataIda.setHours(0, 0, 0, 0))  {
+    props.modelValue.dataVolta = null;
+  }
 }
 
 const validarDataVolta = computed(() => {
@@ -220,6 +228,7 @@ getFilterItems()
                 hide-details="auto"
                 prepend-icon=""
                 v-model="modelValue.dataIda"
+                @update:modelValue="checkData"
                 :allowed-dates="permitirDatasIda"
                 :rules="[validarDataIda]"
                 variant="solo"

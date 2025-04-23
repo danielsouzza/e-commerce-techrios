@@ -47,7 +47,6 @@ const config = {
 function getMunicipios(search=''){
   const params = {
     search:search,
-    com_desconto:1,
     subdomain:window.subdomain || ''
   }
   routes["filtros"](params).then(response => {
@@ -59,7 +58,7 @@ function getMunicipios(search=''){
 
 async function getTrechosWithTravels() {
   const params = new URLSearchParams()
-  params.append('com_desconto', 1)
+  // params.append('com_desconto', 1)
   params.append('origem', origem.value?.slug || '')
   params.append('quantia', 3)
   params.append('subdomain', window.subdomain || '')
