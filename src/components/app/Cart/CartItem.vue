@@ -6,6 +6,7 @@ import {Icon} from "@iconify/vue";
 import {useCartStore} from "../../../store/CartStore.js";
 import TravelImages from "../../shared/TravelImages.vue";
 import {VIcon} from "vuetify/components";
+import {showErrorNotification} from "../../../event-bus.js";
 
 const props = defineProps({
   data:Object
@@ -28,7 +29,10 @@ const valorTotal = computed(()=>{
     }
     return acc + item.taxa_embarque
   },0)
-  return valor + taxa;
+  return {
+    total:valor,
+    taxa:taxa,
+  };
 })
 
 function setToDelete(item){
@@ -39,10 +43,15 @@ function setToDelete(item){
 
 function confirmDelete(){
   loadingDelete.value = true
-  useCartStore().removerItem({pedido:comodoToDelete.value.pedido_id,comodos_ids:[comodoToDelete.value.comodo.id],viagem_id:props.data.viagem.id})
-  loadingDelete.value = false
-  showDialogDelete.value = false
-  comodoToDelete.value = null
+  useCartStore().removerItem({pedido:comodoToDelete.value.pedido_id,comodos_ids:[comodoToDelete.value.comodo.id],viagem_id:props.data.viagem.id}).then(()=>{
+    loadingDelete.value = false
+    showDialogDelete.value = false
+    comodoToDelete.value = null
+  }).catch(()=>{
+    loadingDelete.value = false
+    showErrorNotification('Erro ao remover passagem, tente novamente mais tarde.')
+  })
+
 }
 
 
@@ -95,7 +104,7 @@ function onOpenRooms(){
           <br><span class="tw-font-normal">{{ data.viagem.saida }}</span>
         </v-col>
         <v-col cols="6" class="pb-0 ! !tw-font-black tw-text-lg !tw-text-primary text-end">
-          {{formatCurrency(valorTotal)}}
+          {{formatCurrency(valorTotal.total)}} <br> <small v-if="valorTotal.taxa > 0" class="tw-text-[12px] tw-font-semibold">Taxa de embarque: {{formatCurrency(valorTotal.taxa)}}</small>
         </v-col>
         <v-col cols="12" class="py-0">
           <v-divider  :thickness="1" class="border-opacity-100 tw-mt-2 " ></v-divider>
