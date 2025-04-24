@@ -571,7 +571,7 @@ onBeforeUnmount(() => {
                     </div>
                   </v-col>
                 </v-row>
-                <v-container class=" lg:!tw-max-w-[800px] tw-max-w-[350px]  tw-flex ">
+                <v-container class=" lg:!tw-max-w-[800px] tw-max-w-[350px] px-0  tw-flex ">
                   <Boat v-if="matrizRooms.ida?.length > 0" class="">
                     <div :style="generateLayout()" class="tw-h-full  ">
                       <div
@@ -694,22 +694,25 @@ onBeforeUnmount(() => {
       </div>
       <v-divider  :thickness="1" class="border-opacity-100 tw-my-2  " ></v-divider>
       <div class="tw-flex tw-flex-col tw-justify-center lg:tw-justify-between lg:tw-items-center lg:tw-flex-row-reverse mb-2">
-        <div v-if="openRooms" class="tw-flex tw-gap-3 mt-3 tw-w-full tw-justify-end">
+<!--        <div  class="tw-flex tw-gap-3 mt-3 tw-w-full tw-justify-end">-->
 
-          <v-btn
-              variant="flat"
-              color="success"
-              rounded
-              :loading="loadingReserva"
-              size="xs"
-              class="d-lg-flex !tw-font-extrabold px-2 py-1 "
-              :disabled="((roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0) || loadingReserva)"
-              @click="initSale"
-          >
-            <span class="!tw-text-xs tw-text-white">Avançar</span>
-            <Icon icon="mdi:navigate-next" width="20" class="ml-1 tw-text-white" />
-          </v-btn>
-        </div>
+<!--          -->
+<!--        </div>-->
+
+        <v-btn
+            v-if="openRooms"
+            variant="flat"
+            color="success"
+            rounded
+            :loading="loadingReserva"
+            size="xs"
+            class="d-lg-flex !tw-font-extrabold px-2 py-1 "
+            :disabled="((roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0) || loadingReserva)"
+            @click="initSale"
+        >
+          <span class="!tw-text-xs tw-text-white">Avançar</span>
+          <Icon icon="mdi:navigate-next" width="20" class="ml-1 tw-text-white" />
+        </v-btn>
 
         <v-btn
             :variant="!openRooms ? 'flat' : ''"

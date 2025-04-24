@@ -12,7 +12,7 @@ export function getAppBaseUrl() {
 
 export const api = axios.create({
     baseURL: getApiBaseUrl(),
-    timeout: 15000,
+    timeout: 20000,
 })
 
 api.interceptors.request.use(
