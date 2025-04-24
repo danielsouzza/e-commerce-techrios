@@ -464,8 +464,9 @@ function prevStep(){
     });
   }
 
-
-
+  if (checkTimeout) {
+    clearTimeout(checkTimeout);
+  }
 }
 
 function removerPasseger(index,type){
