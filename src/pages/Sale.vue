@@ -464,6 +464,8 @@ function prevStep(){
     });
   }
 
+
+
 }
 
 function removerPasseger(index,type){
@@ -691,7 +693,7 @@ function submitOrder(){
     }).catch(error=>{
       loadingStore.stopLoading();
       formSale.processing = false
-      showErrorNotification(error.response.data.data?.error ?? error.response.data?.message);
+      showErrorNotification(error.response.data.data?.error ?? error.response.data.details ?? error.response.data?.message );
       scrollToStartDiv()
     })
   }
@@ -743,7 +745,7 @@ function addCart(){
       formSale.processing = false
       loadingStore.stopLoading();
       scrollToStartDiv()
-      showErrorNotification(error.response.data.data?.error ?? error.response.data?.message);
+      showErrorNotification(error.response.data.data?.error ?? error.response.data.details ?? error.response.data?.message );
     })
   }
 }
@@ -769,6 +771,7 @@ function checkStatusPayment() {
     }
   }).catch(() => {
     whatPayment.value = false;
+    showErrorNotification(error.response.data.data?.error ?? error.response.data.details ?? error.response.data?.message );
   });
 }
 
@@ -804,7 +807,11 @@ function submitPaymentCredit(){
     loadingStore.stopLoading();
   }).catch(error=>{
     loadingStore.stopLoading();
-    showErrorNotification(error.response.data.data?.error ?? error.response.data.message);
+    showErrorNotification(error.response.data.data?.error ?? error.response.data.details ?? error.response.data?.message );
+    if(error.response.data.data?.pedido){
+      cartStore.addItem(error.response.data.data.pedido)
+      cartStore.loadCart()
+    }
     stepSale.value = 3
   })
 }
@@ -825,7 +832,11 @@ function submitPaymentPix(){
   }).catch(error=>{
     loadingStore.stopLoading();
     whatPayment.value = false
-    showErrorNotification(error.response.data.data.error);
+    showErrorNotification(error.response.data.data?.error ?? error.response.data.data?.details ?? error.response.data?.message );
+    if(error.response.data.data?.pedido){
+      cartStore.addItem(error.response.data.data.pedido)
+      cartStore.loadCart()
+    }
   })
 }
 
@@ -1849,7 +1860,7 @@ watch(()=>props.tab,()=>{
                 <CopyToClipboard  :textToCopy="paymentPending.pix_copia_cola" />
               </div>
             </BaseCard>
-            <v-btn v-if="formSale.dataComodos.length > 0" variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 mt-3"  @click="prevStep">
+            <v-btn  variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 mt-3"  @click="prevStep">
               <Icon icon="mdi:navigate-before" width="20"  class="mr-1 tw-text-white"  /> <span class=" !tw-text-xs tw-text-white mr-1"  >Voltar</span>
             </v-btn>
           </v-col>

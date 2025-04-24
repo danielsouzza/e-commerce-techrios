@@ -694,10 +694,6 @@ onBeforeUnmount(() => {
       </div>
       <v-divider  :thickness="1" class="border-opacity-100 tw-my-2  " ></v-divider>
       <div class="tw-flex tw-flex-col tw-justify-center lg:tw-justify-between lg:tw-items-center lg:tw-flex-row-reverse mb-2">
-<!--        <div  class="tw-flex tw-gap-3 mt-3 tw-w-full tw-justify-end">-->
-
-<!--          -->
-<!--        </div>-->
 
         <v-btn
             v-if="openRooms"

@@ -118,7 +118,7 @@ const tiposDoc = [
   <v-checkbox
       v-if="!userAuthStore().isAuthenticated()"
       v-model="form.isContact"
-      @update:modelValue="(arg)=>{if(arg) emits('addToContact',index); else emits('removeMeToPassenger',index)}"
+      @update:modelValue="(arg)=>{if(arg) emits('addToContact',index); else emits('removeToContact',index)}"
       hide-details="auto"
       class="!tw-text-p tw-mt-3 !tw-text-sx"
       label="Adicionar como contato"
