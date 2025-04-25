@@ -8,6 +8,7 @@ export const useCartStore = defineStore('cart', {
     state: () => ({
         order: null,
         isCartVisible: false,
+        loading: false,
     }),
     actions: {
 
@@ -108,7 +109,7 @@ export const useCartStore = defineStore('cart', {
             },0)
         },
 
-        removerItem(item){
+        async removerItem(item){
 
             routes["order.delete"](item.pedido, item).then(response => {
                 this.order.passagens_agrupadas?.forEach(group => {
@@ -122,7 +123,8 @@ export const useCartStore = defineStore('cart', {
                 this.addItem(this.order)
                 if(this.getTotalTickets() === 0){
                     this.clearCartLocal()
-                    window.location = '/'
+                    router.push({name: "home"})
+                    // window.location = '/'
                 }
                 this.loadCart();
             });
@@ -131,14 +133,15 @@ export const useCartStore = defineStore('cart', {
         clearCartLocal() {
             this.order = null;
             localStorage.removeItem('cart');
-
+            router.push({name: "home"})
         },
 
         async clearCart() {
-            this.clearCartLocal()
+            this.loading = true;
             const authStore = userAuthStore()
-            if (authStore.user) {
+            if (authStore.isAuthenticated()) {
                 const passagens  = []
+                console.log(this.order)
                 this.order.passagens_agrupadas.forEach(p =>{
                     p.passagem_pedidos.forEach(p => {
                         passagens.push(p.comodo.id)
@@ -147,12 +150,17 @@ export const useCartStore = defineStore('cart', {
 
                 const params = {pedido_id:this.order.id,comodos_ids:passagens};
                 await routes['order.delete'](this.order.id,params).then((response) => {
-
+                    console.log(response);
+                    this.clearCartLocal()
+                    this.loading = false;
                 }).catch((error) => {
                     console.log(error);
                 })
+            }else {
+                this.clearCartLocal()
+                this.loading = false;
             }
-            window.location = '/'
+
 
         },
     },

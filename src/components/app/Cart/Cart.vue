@@ -1,5 +1,5 @@
 <script setup>
-import {computed, watch} from "vue";
+import {computed, ref, watch} from "vue";
 import CartItem from "./CartItem.vue";
 import {formatCurrency} from "../../../Helper/Ultis.js";
 import {useCartStore} from "../../../store/CartStore.js";
@@ -8,6 +8,8 @@ import {Icon} from "@iconify/vue";
 const props = defineProps({
   auth:Object
 })
+
+const showDialogDelete = ref(false)
 
 defineEmits(['close'])
 
@@ -32,6 +34,37 @@ watch(()=>props.auth,()=>{
 </script>
 
 <template>
+  <v-dialog max-width="600" v-model="showDialogDelete">
+    <template v-slot:default="{ isActive }">
+      <v-card title="Limpar carrinho">
+        <v-card-text>
+
+          <div class="tw-w-full tw-flex tw-flex-col tw-items-center tw-pb-3 tw-text-center">
+            <Icon icon="gg:info" width="30" class="icon"  />
+            <span class="message mt-2">Você realmente deseja  excluir todas as passagens do seu carrinho? Essa ação não pode ser desfeita</span>
+          </div>
+        </v-card-text>
+
+        <v-card-actions>
+
+          <v-btn
+              text="cancelar"
+              @click="showDialogDelete = false"
+          ></v-btn>
+          <v-btn
+              :disabled="useCartStore().loading"
+              :loading="useCartStore().loading"
+              variant="flat"
+              color="primary"
+              text="confirmar"
+              @click="useCartStore().clearCart().finally(()=>{
+                showDialogDelete = false
+              })"
+          ></v-btn>
+        </v-card-actions>
+      </v-card>
+    </template>
+  </v-dialog>
   <div class="cart-container">
     <!-- Header Fixo -->
     <div class="cart-header">
@@ -66,7 +99,7 @@ watch(()=>props.auth,()=>{
           {{formatCurrency(useCartStore().getTotal())}}
         </v-col>
         <v-col md="4">
-          <v-btn @click="useCartStore().clearCart()" variant="text" color="prmary" rounded="lg" class="tw-w-full" size="large">
+          <v-btn  @click="showDialogDelete = true" variant="text" color="prmary" rounded="lg" class="tw-w-full" size="large">
             Limpar carrinho
           </v-btn>
         </v-col>
