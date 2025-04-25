@@ -16,7 +16,7 @@ const hasMultipleSlides = computed(() => slides.value.length > 1)
 
 
 async function getSlides() {
-  const subdomain = window?.subdomain || 'defaultSubdomain'
+  const subdomain = window?.subdomain || ''
 
   try {
     const res = await routes['banners']({ subdomain, principal: 1 })

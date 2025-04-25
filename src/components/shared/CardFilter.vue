@@ -9,7 +9,6 @@ import {useLoadingStore} from "../../store/states.js";
 
 const props = defineProps({
   modelValue: Object,
-  options:Object,
   isLoading:Boolean
 })
 

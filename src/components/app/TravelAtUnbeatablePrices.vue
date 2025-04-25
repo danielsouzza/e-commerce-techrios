@@ -87,7 +87,6 @@ async function getTrechosWithTravels() {
         }
       }
     }
-    getMunicipios()
   })
 }
 

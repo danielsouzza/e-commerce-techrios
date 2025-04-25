@@ -30,14 +30,6 @@ async function getSlides() {
   })
 }
 
-async function getFilterItems(){
-
-  routes["filtros"]({subdomain:window.subdomain}).then(res => {
-    if(!res.data.data.success){
-      filtersData.value = res.data.data;
-    }
-  })
-}
 
 function goToSalePage(query){
   query.dataIda = formatDateToServe(query.dataIda);
@@ -46,7 +38,6 @@ function goToSalePage(query){
 }
 
 onMounted(() => {
-  getFilterItems()
   getSlides()
 });
 
