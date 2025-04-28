@@ -12,6 +12,7 @@ import {municipioLabel} from "../../Helper/Ultis.js";
 const origem = ref(null)
 const municipios = ref([]);
 const currentSlide = ref(0);
+const isDragging = ref(false);
 const trechosWithTravels = ref([])
 
 
@@ -134,9 +135,9 @@ onMounted(()=>{
      </div>
    </div>
     <div class="lg:!tw-w-[75%] ">
-      <Carousel v-if="trechosWithTravels.data?.trechos?.data.length > 0"  v-bind="config" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-mb-4 my-carrousel">
+      <Carousel v-if="trechosWithTravels.data?.trechos?.data.length > 0"  @drag="isDragging=true" @touchend="isDragging = false"   @slideEnd="isDragging=false" v-bind="config" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-mb-4 my-carrousel">
         <Slide v-for="(item, n) in trechosWithTravels.data?.trechos?.data" :key="item.id">
-          <CardTicket :data="item" :active="currentSlide === n -1"/>
+          <CardTicket :data="item" :active="currentSlide === n -1" :dragging="isDragging"/>
         </Slide>
         <template #addons>
           <CarouselNavigation />

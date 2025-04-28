@@ -73,7 +73,7 @@ const formPayment = reactive({
   }
 })
 const filtersSelected = ref({
-  origem:null,
+  origem:route.query.origem || null,
   destino:null,
   dataIda:new Date(),
   dataVolta:null,
@@ -108,6 +108,7 @@ const formNotification = reactive({
   url:getAppBaseUrl()+'/comprar-passagem/escolher-passagem',
   municipio_origem_id:null,
   municipio_destino_id:null,
+  subdomain:window.subdomain || '',
   errors:{},
   processing:false
 })
@@ -420,14 +421,6 @@ function getTrechosWithTravels(type='ida') {
   getTrechos(false,type)
 }
 
-async function getFilterItems(){
-  routes["filtros"]().then(res => {
-    if(!res.data.data.success){
-      filtersData.value = res.data.data;
-    }
-  })
-}
-
 async function getEmpresas(){
   routes["empresas"]({flag:2}).then(res => {
     if(!res.data.data.success){
@@ -503,7 +496,6 @@ function addMeToPassenger(index,type){
   formSale.dataComodos[0].nascimento =  userAuthStore().user.comprador.nascimento ? new Date( userAuthStore().user.comprador.nascimento+'T00:00:00') : null
 }
 
-
 function addComodoRelated(index,type){
   if(type == 'ida'){
     const item =  formSale.dataComodos[index]
@@ -516,7 +508,6 @@ function addComodoRelated(index,type){
     formSale.dataVolta?.dataComodos.push({...item, comodo_relacionado: item.comodo, comodos_filhos: 1,qtd_comodos_filhos: 1, })
   }
 }
-
 
 function clearFilterSide(){
   filtersSelected.value.quantia = 8
@@ -1011,7 +1002,6 @@ function handleBackStep(e) {
   }
 }
 
-
 onMounted(() => {
   authStore.loadUser()
   authStore.getUser().then(()=>{
@@ -1027,7 +1017,6 @@ onMounted(() => {
     };
   })
   if(stepChooseTrip.value == 1){
-getFilterItems()
 loadData()
   getEmpresas()
   }
@@ -1125,7 +1114,7 @@ watch(()=>props.tab,()=>{
         v-model="filtersSelected"
         :is-loading="loadingTrecho"
         @update:modelValue="getTrechosWithTravels()"
-        :options="filtersData"
+        @update:options="(args)=>filtersData = args"
         class=" tw-top-[-100px]  !tw-mb-[-60px] lg:tw-top-[-100px] lg:!tw-mb-[-90px] !tw-mx-5 lg:!tw-mx-0  lg:!tw-block" />
     <div class="lg:tw-flex tw-items-center !tw-my-10  tw-hidden">
       <v-btn variant="outlined" :color="stepSale > 1 ? 'success': 'secondary'" rounded >
@@ -1473,7 +1462,7 @@ watch(()=>props.tab,()=>{
                 <div class=" tw-font-bold tw-text-gray-800 ">Resumo da viagem</div>
                 <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
 
-                <div class=" tw-font-bold tw-text-gray-800 tw-text-xs mb-1">IDA</div>
+                <div class=" tw-font-bold tw-text-gray-800 tw-text-xs mb-2">IDA</div>
 
                 <v-row  class="!tw-text-gray-500 tw-font-semibold tw-text-xs">
                   <v-col cols="6" lg="12" class="tw-flex tw-items-center  ">
@@ -1495,7 +1484,7 @@ watch(()=>props.tab,()=>{
                 </v-row>
                 <div v-if="formSale.dataVolta" class="tw-flex tw-flex-col">
                   <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
-                  <div class=" tw-font-bold tw-text-gray-800 tw-text-xs mb-1">VOLTA</div>
+                  <div class=" tw-font-bold tw-text-gray-800 tw-text-xs mb-2">VOLTA</div>
 
                   <v-row  class="!tw-text-gray-500 tw-font-semibold tw-text-xs">
                     <v-col cols="6" lg="12" class="tw-flex tw-items-center  ">
@@ -1505,13 +1494,13 @@ watch(()=>props.tab,()=>{
                       <Icon icon="iconamoon:clock-fill" class="mr-2" width="15"/>{{formatarTempoViagem(formSale.dataVolta.trecho.tempo_viagem)}}
                     </v-col>
                     <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
-                      <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}} ->{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}
+                      <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}} -> {{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}}
                     </v-col>
                     <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
                       <Icon icon="solar:armchair-bold" class="mr-2" width="15"/>{{gerarStringTiposComodos(formSale.dataComodos.map(it=>it.tipo_comodidade))}}
                     </v-col>
                     <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
-                      <Icon icon="mingcute:ship-fill" width="15" class="mr-2" />{{formSale.trecho.embarcacao}}
+                      <Icon icon="mingcute:ship-fill" width="15" class="mr-2" />{{formSale.dataVolta.trecho.embarcacao}}
                     </v-col>
                   </v-row>
                 </div>

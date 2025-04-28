@@ -15,7 +15,7 @@ const props = defineProps({
 
 const loadingFilters = ref(false)
 const filterOptions = ref([])
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue','update:options'])
 const form = ref(null);
 const hoje = new Date();
 hoje.setHours(0, 0, 0, 0);
@@ -92,6 +92,7 @@ function getFilterItems(){
     origem: props.modelValue.origem || '',
     subdomain:  window.subdomain || ''
   }
+
   loadingFilters.value = true
   routes["filtros"](params).then(response => {
     if(!response.data.data.success){
@@ -99,6 +100,7 @@ function getFilterItems(){
       if(filterOptions.value.municipiosDestino.findIndex(it=>it.slug == props.modelValue.destino) < 0){
         props.modelValue.destino = null
       }
+      emit('update:options',filterOptions.value)
       loadingFilters.value = false
     }
   })
@@ -114,7 +116,8 @@ function changeTypeTravel(){
   props.modelValue.dataVolta = null
   // updateFilters()
 }
-getFilterItems()
+onMounted(()=>getFilterItems())
+
 
 </script>
 

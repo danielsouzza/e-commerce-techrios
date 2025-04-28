@@ -115,8 +115,8 @@ onMounted(()=>{
        >
        </v-skeleton-loader>
      </div>
-      <Carousel v-else @drag="isDragging=true" @slideEnd="isDragging=false" v-bind="config" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-mb-4 my-carrousel">
-        <Slide v-for="(item, n) in trechosWithTravels.data?.trechos?.data" :key="item.id">
+      <Carousel v-else @drag="isDragging=true" @touchend="isDragging = false"   @slideEnd="isDragging=false" v-bind="config" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-mb-4 my-carrousel">
+        <Slide v-for="(item, n) in trechosWithTravels.data?.trechos?.data" :key="item.id" @mouseup="isDragging = false">
           <CardTicket super-sale :dragging="isDragging" :data="item" :active="currentSlide === n -1"/>
         </Slide>
         <template #addons>
@@ -139,9 +139,7 @@ onMounted(()=>{
   right: -4%;
 }
 
-.my-carrousel::v-deep(.carousel__viewport){
-  @apply !tw-rounded-xl
-}
+
 
 .my-carrousel::v-deep(.carousel__pagination-button::after){
   height: 10px !important;

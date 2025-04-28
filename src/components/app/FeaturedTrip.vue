@@ -129,7 +129,7 @@ onMounted(()=>{
     <div class="tw-flex tw-flex-col tw-gap-5 lg:tw-flex-row tw-h-full  tw-justify-between !tw-mt-5 tw-w-full">
 
       <div class="lg:!tw-w-[50%] !tw-w-full lg:!tw-rounded-xl ">
-        <Carousel @drag="isDragging=true" @slideEnd="isDragging=false" v-bind="config_1" class="tw-w-[100vw] lg:!tw-rounded-xl lg:tw-w-full tw-mb-4 my-carrousel my-carrousel">
+        <Carousel @drag="isDragging=true" @touchend="isDragging = false" @slideEnd="isDragging=false" v-bind="config_1" class="tw-w-[100vw] lg:!tw-rounded-xl lg:tw-w-full tw-mb-4 my-carrousel my-carrousel">
           <Slide v-for="(item,n) in travels_more_important" :key="item.id"  class="tw-px-5 lg:tw-px-0 tw-h-full">
             <CardTripFull :dragging="isDragging" :data="item" class="tw-h-full"/>
           </Slide>
@@ -140,7 +140,7 @@ onMounted(()=>{
         </Carousel>
       </div>
       <div class="lg:!tw-w-[50%] tw-h-full tw-hidden lg:tw-block" v-if="travels_les_important.length > 0">
-        <Carousel @drag="isDragging=true" @slideEnd="isDragging=false" v-bind="config_2" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-h-full tw-mb-4 my-carrousel">
+        <Carousel @drag="isDragging=true" @touchend="isDragging = false" @slideEnd="isDragging=false" v-bind="config_2" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-h-full tw-mb-4 my-carrousel">
           <Slide v-for="(item,n) in travels_les_important" :key="item.id" >
             <CardTicket :dragging="isDragging" :data="item" :active="currentSlide === n -1"/>
 
