@@ -133,7 +133,6 @@ export const useCartStore = defineStore('cart', {
         clearCartLocal() {
             this.order = null;
             localStorage.removeItem('cart');
-            router.push({name: "home"})
         },
 
         async clearCart() {
@@ -152,12 +151,15 @@ export const useCartStore = defineStore('cart', {
                 await routes['order.delete'](this.order.id,params).then((response) => {
                     console.log(response);
                     this.clearCartLocal()
+                    router.push({name: "home"})
                     this.loading = false;
                 }).catch((error) => {
                     console.log(error);
                 })
             }else {
                 this.clearCartLocal()
+                router.push({name: "home"})
+
                 this.loading = false;
             }
 
