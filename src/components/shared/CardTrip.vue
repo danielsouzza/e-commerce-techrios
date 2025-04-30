@@ -15,6 +15,8 @@ import {
 } from "../../Helper/Ultis.js";
 import router from "../../routes/index.js";
 import TravelImages from "./TravelImages.vue";
+import {computed} from "vue";
+
 
 const props = defineProps({
   data:Object,
@@ -26,6 +28,11 @@ const props = defineProps({
   }
 })
 
+const valor = computed(()=>{
+  return formatMoney(props.data?.valor) + formatMoney(props.data?.taxa_de_embarque);
+})
+
+
 function goToSalePage(){
   if(props.dragging)return;
   router.push({name: "sale",params:{tab:'escolher-passagem'},query: {
@@ -35,6 +42,8 @@ function goToSalePage(){
       type:'somente-ida'
     }})
 }
+
+
 
 </script>
 
@@ -59,10 +68,12 @@ function goToSalePage(){
       <div class="tw-flex tw-items-center tw-gap-3 tw-text-p tw-text-sm">
         <IconsBoat :type="data.tipo_embarcacao"/><span>{{formatDate(data?.saida)}} • {{formatarHora(data?.horario)}}</span>
       </div>
+
       <div class="tw-mt-4 tw-text-left">
-        <p v-if="data?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(data.valor))}}</span> por</p>
-        <div><span class="tw-text-2xl tw-text-primary tw-font-[900]">{{formatCurrency(calcularValor(formatMoney( data.valor), data.desconto?.desconto))}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
-        <p class="tw-text-[12px] tw-text-gray-500 tw-text-wrap">ou a partir de {{formatCurrency(calcularValor(formatMoney( data.valor), data.desconto?.desconto,-0.04))}}  no cartão</p>
+
+        <p v-if="data?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(valor)}}</span> por</p>
+        <div><span class="tw-text-2xl tw-text-primary tw-font-[900]">{{formatCurrency(calcularValor(valor, data.desconto?.desconto))}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
+        <p class="tw-text-[12px] tw-text-gray-500 tw-text-wrap">ou a partir de {{formatCurrency(calcularValor(valor, data.desconto?.desconto,-0.04))}}  no cartão</p>
       </div>
     </v-card-title>
   </v-card>

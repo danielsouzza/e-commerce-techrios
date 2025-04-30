@@ -67,19 +67,16 @@ const roomsSelected = ref({
 })
 
 const step = ref(1)
-const matrizRooms = ref({
-  ida:[],
-  volta:[]
-})
 const openRooms = ref(false)
 const windowWidth = ref(window.innerWidth)
+const matrizRooms = ref({ida:[], volta:[]})
 const isLargeScreen = computed(()=> windowWidth.value >= 1024)
-
 const hasCamarotesAndRede = computed(() => {
-  if(step.value === 1){
     return props.dataIda.tipos_comodos.some((item)=> item.id >= 2 && item.id <=4)
-  }
-  return props.dataVolta.tipos_comodos.some((item)=> item.id >= 2 && item.id <=4)
+})
+
+const valor = computed(()=>{
+  return formatMoney(props.dataIda?.valor) + formatMoney(props.dataIda?.taxa_de_embarque);
 })
 
 const quantityRoomsFree = computed(() => {
@@ -116,8 +113,6 @@ function allRooms (data, rooms) {
 
 const updateWidth = () => {
   windowWidth.value = window.innerWidth;
-  // const data = step.value === 1 ? props.dataIda : props.dataVolta
-  // const roomsStep = step.value === 1 ? rooms.value.ida : rooms.value.volta
   matrizRooms.value.ida = allRooms(props.dataIda, rooms.value.ida);
   if(step.value > 1){
     matrizRooms.value.volta = allRooms(props.dataVolta, rooms.value.volta);
@@ -215,18 +210,6 @@ function onClickRoom(room, type,typeTravel='dataIda') {
       }
     }else{
       const comodo = roomsSelected.value[typeTravel].selectedsById.find(it=>it.id == room.id)
-
-      // if(typeTravel == 'dataVolta'){
-      //   const totalIda = qunatidadeTotalPassagens()
-      //   const totalVolta = qunatidadeTotalPassagens('dataVolta') + room.quantidade
-      //   if (totalVolta > totalIda) {
-      //     throw new Error('Número de passagens de volta não pode ser maior que as de ida.');
-      //   }
-      //
-      // }
-
-
-
       if(comodo){
         deleteReserva(room)
       }else{
@@ -273,7 +256,6 @@ function decrementComodo(type,typeTravel='dataIda') {
 
   if(type_comodo.quantidade === 0){
       roomsSelected.value[typeTravel].selectedsByType.splice(roomsSelected.value[typeTravel].selectedsByType.indexOf(type_comodo), 1)
-
   }
 }
 
@@ -286,13 +268,6 @@ function postReserva(room){
 
   params.append('comodo_id', room.id);
   routes['rooms.reservas'](params).then((response) => {
-    // if(response.data.success){
-    //   if(step.value === 1){
-    //     roomsSelected.value.dataIda.selectedsById.push(room)
-    //   }else {
-    //     roomsSelected.value.dataVolta.selectedsById.push(room)
-    //   }
-    // }
     loadingReserva.value = false
   }).catch(error => {
     loadingReserva.value = false
@@ -442,21 +417,6 @@ function generateLayout() {
   }
 }
 
-function nextStep(){
-  scrollToStartDiv()
-  if(roomsSelected.value.dataIda.selectedsById.length > 0 || roomsSelected.value.dataIda.selectedsByType.length > 0){
-    step.value = 2
-    getRoomsByTrecho()
-    getQuantityRoomsFree()
-  }
-}
-
-function beforeStep(){
-  scrollToStartDiv()
-  step.value = 1
-  getRoomsByTrecho()
-  getQuantityRoomsFree()
-}
 
 
 watch(()=>props.dataIda.id_viagem,()=>{
@@ -522,9 +482,9 @@ onBeforeUnmount(() => {
         <v-divider  :thickness="1" class="border-opacity-100 tw-mt-2 lg:!tw-hidden" ></v-divider>
         <div class="tw-flex tw-justify-end tw-items-center tw-w-full  md:tw-w-1/2  lg:tw-ml-10 lg:tw-mr-5">
           <div class="tw-mt-4 tw-text-right ">
-            <p v-if="dataIda?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(formatMoney(dataIda.valor))}}</span> por</p>
-            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{formatCurrency(calcularValor(formatMoney( dataIda.valor), dataIda.desconto?.desconto))}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
-            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(calcularValor(formatMoney( dataIda.valor), dataIda.desconto?.desconto,-0.04))}} no cartão</p>
+            <p v-if="dataIda?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(valor)}}</span> por</p>
+            <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{formatCurrency(calcularValor(valor, dataIda.desconto?.desconto))}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
+            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(calcularValor(valor, dataIda.desconto?.desconto,-0.04))}} no cartão</p>
           </div>
         </div>
       </div>
@@ -612,7 +572,7 @@ onBeforeUnmount(() => {
                                 Valor
                               </v-col>
                               <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                                {{formatCurrency(calcularValor(formatMoney(dataIda.valor), dataIda.desconto?.desconto))}}<br>
+                                {{formatCurrency(calcularValor(valor, dataIda.desconto?.desconto))}}<br>
                                 <span class=" tw-text-[10px]"> no PIX</span>
                               </v-col>
                             </v-row>
@@ -636,7 +596,7 @@ onBeforeUnmount(() => {
                               Valor
                             </v-col>
                             <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                              {{formatCurrency(calcularValor(item.comodo_trechos.valor, null))}}<br>
+                              {{formatCurrency(calcularValor(item.comodo_trechos.valor + formatMoney(dataIda.taxa_de_embarque), null))}}<br>
                               <span class=" tw-text-[10px]"> no PIX</span>
                             </v-col>
                           </v-row>
@@ -665,7 +625,7 @@ onBeforeUnmount(() => {
                           </div>
                         </div>
                       </v-col>
-                      <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? formatCurrency(calcularValor(room.comodo_trechos?.valor)) : formatCurrency(calcularValor(formatMoney(dataIda.valor),dataIda.desconto?.desconto))}} <Icon @click="onClickRoom(room, null)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /></v-col>
+                      <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? formatCurrency(calcularValor(room.comodo_trechos?.valor + formatMoney(dataIda.taxa_de_embarque))) : formatCurrency(calcularValor(valor,dataIda.desconto?.desconto))}} <Icon @click="onClickRoom(room, null)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /></v-col>
                     </v-row>
                   </div>
                   <div class=" mt-3" v-if="roomsSelected.dataIda.selectedsByType?.length > 0">
@@ -676,7 +636,7 @@ onBeforeUnmount(() => {
                         </div>
                       </v-col>
                       <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end ">  <Icon @click="decrementComodo(room.type_comodo_id )" icon="ph:minus-fill"  width="20"  class="mr-3 tw-cursor-pointer" />  {{ room.quantidade}} <Icon @click="incrementComodo(room.type_comodo_id )" icon="ph:plus-fill"  width="20"  class="ml-3 tw-cursor-pointer" /></v-col>
-                      <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">     {{formatCurrency(room.quantidade * calcularValor( formatMoney( dataIda.valor), dataIda.desconto?.desconto))}} <Icon @click="onClickRoom(null,room.type_comodo_id)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /> </v-col>
+                      <v-col cols="4" class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">     {{formatCurrency(room.quantidade * calcularValor(valor, dataIda.desconto?.desconto))}} <Icon @click="onClickRoom(null,room.type_comodo_id)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /> </v-col>
                     </v-row>
                   </div>
                   <div v-if="roomsSelected.dataIda.selectedsByType?.length === 0 && roomsSelected.dataIda.selectedsById?.length === 0" class="tw-flex  tw-items-center tw-gap-1  tw-text-xs tw-text-p  !tw-m-0">

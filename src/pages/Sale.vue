@@ -761,9 +761,10 @@ function checkStatusPayment() {
         }
       }
     }
-  }).catch(() => {
+  }).catch((error) => {
     whatPayment.value = false;
     showErrorNotification(error.response.data.data?.error ?? error.response.data.details ?? error.response.data?.message );
+    stepSale.value = 3
   });
 }
 
