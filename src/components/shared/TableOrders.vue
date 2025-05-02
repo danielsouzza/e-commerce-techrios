@@ -1,6 +1,6 @@
 <script setup>
 
-import {computed, onMounted, onUnmounted, reactive, ref} from "vue";
+import {computed, nextTick, onMounted, onUnmounted, reactive, ref} from "vue";
 import {routes} from "../../services/fetch.js";
 import {Icon} from "@iconify/vue";
 import {formatCurrency, formatDate, formatDateToServe, formatMoney} from "../../Helper/Ultis.js";
@@ -88,7 +88,7 @@ const orders = computed(() => {
           status: item.status,
           embarque_passado: dataEmbarque < agora,
           detalhes: {
-            boat: passage.viagem.embarcacao,
+            boat: passage.viagem?.embarcacao,
             passageiros: passage.passagem_pedidos,
             valor: passage.passagem_pedidos.reduce((acc, item) => acc + item.valor, 0),
             taxa: passage.passagem_pedidos.reduce((acc, item) => acc + item.taxa_embarque, 0),
@@ -113,7 +113,6 @@ function updateFormattedDate(value,type) {
 function getOrder(){
   routes['order.my']({subdomain: window.subdomain || ''}).then((res) => {
     myOrders.value = res.data.data;
-    console.log(myOrders.value)
   })
 }
 
@@ -203,7 +202,7 @@ function submitPaymentPix(order_id){
   }).catch(error=>{
     loadingStore.stopLoading();
     whatPayment.value = false
-    showErrorNotification(error.response.data.data.error);
+    showErrorNotification(error.response.data.data.details ?? error.response.data.data?.error  ?? error.response.data?.message );
   })
 }
 
@@ -228,18 +227,23 @@ function submitPaymentCredit(){
     loadingStore.stopLoading();
   }).catch(error=>{
     loadingStore.stopLoading();
-    showErrorNotification(error.response.data.data?.error ?? error.response.data.message);
+    showErrorNotification(error.response.data.data.details ?? error.response.data.data?.error  ?? error.response.data?.message );
   })
 }
 
 function cancelarPaymentPix(){
+  showPaymentCredit.value = false
+  showPaymentPix.value = false
   clearInterval(intervalo);
   clearTimeout(checkTimeout);
-  orderToPay.value = null
-  showPaymentPix.value = false
+
   timeToPay.value = 30 * 60
   percentToPay.value = 0
-  getOrder()
+  nextTick(()=>{
+    orderToPay.value = null
+    orderConfirmation.value = null
+    getOrder()
+  })
 }
 
 onUnmounted(() => {
@@ -256,7 +260,7 @@ onMounted(()=>{
 </script>
 
 <template>
-  <v-dialog max-width="800" v-model="showPaymentPix">
+  <v-dialog max-width="800" v-model="showPaymentPix" @after-leave="cancelarPaymentPix">
     <template v-slot:default="{ isActive }">
       <BaseCard title="Confirmação da compra"  class="mt-3 rounded-lg" v-if="orderConfirmation?.status == 'Pago'">
         <div class="tw-flex tw-justify-center tw-flex-col tw-items-center tw-text-center">
@@ -319,7 +323,7 @@ onMounted(()=>{
       </BaseCard>
     </template>
   </v-dialog>
-  <v-dialog max-width="800" v-model="showPaymentCredit">
+  <v-dialog max-width="800" v-model="showPaymentCredit" @after-leave="cancelarPaymentPix">
     <template v-slot:default="{ isActive }">
       <BaseCard title="Confirmação da compra"  class="mt-3 rounded-lg" v-if="orderConfirmation != null">
         <div class="tw-flex tw-justify-center tw-flex-col tw-items-center tw-text-center">
@@ -475,7 +479,7 @@ onMounted(()=>{
                 <v-col  cols="12" lg="6" class="py-0 ">
                   <v-row >
                     <v-col cols="12" class="tw-flex tw-items-center tw-font-semibold">
-                      <Icon icon="mingcute:ship-fill" width="20" class="mr-3" />{{passage.detalhes.boat.nome}}
+                      <Icon icon="mingcute:ship-fill" width="20" class="mr-3" />{{passage.detalhes.boat?.nome}}
                     </v-col>
                     <v-col cols="12" class="tw-flex tw-items-center tw-gap-3 py-0">
                       <Icon icon="flowbite:map-pin-alt-solid" width="20"/>

@@ -790,7 +790,7 @@ function checkStatusPayment() {
     }
   }).catch((error) => {
     whatPayment.value = false;
-    showErrorNotification(error.response.data.data?.error ?? error.response.data.details ?? error.response.data?.message );
+    showErrorNotification(error.response.data.data.details ?? error.response.data.data?.error  ?? error.response.data?.message );
     stepSale.value = 3
   });
 }
@@ -830,7 +830,7 @@ function submitPaymentCredit(){
     loadingStore.stopLoading();
   }).catch(error=>{
     loadingStore.stopLoading();
-    showErrorNotification(error.response.data.data?.error ?? error.response.data.details ?? error.response.data?.message );
+    showErrorNotification(error.response.data.data.details ?? error.response.data.data?.error  ?? error.response.data?.message );
     if(error.response.data.data?.pedido){
       cartStore.addItem(error.response.data.data.pedido)
       cartStore.loadCart()
