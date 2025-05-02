@@ -70,7 +70,8 @@ const formPayment = reactive({
     expiration_date:'',
     security_code:null,
     installment_quantity:{value:1,pencet:0.04},
-  }
+  },
+  errors:{}
 })
 const filtersSelected = ref({
   origem:route.query.origem || null,
@@ -632,6 +633,32 @@ const validateForm = () => {
   return !hasError
 };
 
+
+const validateFormCredit = () => {
+  let hasError = false;
+  const validateField = (field, value, errorMessage,form) => {
+    if (value === null || value === undefined || value === '') {
+      form.errors[field] = errorMessage;
+      hasError = true;
+    } else {
+      delete form.errors[field];
+    }
+  };
+
+
+  validateField('credit_card.holder', formPayment.credit_card.holder, 'Por favor, insira seu nome que esta no cartão.',formPayment);
+  validateField('credit_card.card_number', formPayment.credit_card.card_number, 'Por favor, insira o número do cartão.',formPayment);
+  validateField('credit_card.expiration_date', formPayment.credit_card.expiration_date, 'Por favor, insira a data de vencimento.',formPayment);
+  validateField('credit_card.installment_quantity', formPayment.credit_card.installment_quantity, 'Por favor, insira a quantidade de parcelas.',formPayment);
+  validateField('credit_card.security_code', formPayment.credit_card.security_code, 'Por favor, insira um código de validação.',formPayment);
+
+  if(formPayment.credit_card.card_number && formPayment.credit_card.card_number.length < 16){
+    formPayment.errors['credit_card.card_number'] = 'O número do cartão deve ter exatamente 16 dígitos.'
+  }
+
+  return !hasError
+};
+
 async function focusErro() {
   nextTick(async () => {
     const errors = await formRef.value.validate()
@@ -779,6 +806,9 @@ function reSendTickets(){
   })
 }
 function submitPaymentCredit(){
+
+  if(!validateFormCredit()) return
+
   const data = {
     ...formPayment,
     order_id:cartStore.order?.id.toString(),
@@ -1744,10 +1774,19 @@ watch(()=>props.tab,()=>{
                 <div v-if="userAuthStore().isAuthenticated()" class="tw-w-full tw-flex tw-flex-col">
                   <v-row class="mt-3" >
                     <v-col cols="12" >
-                      <v-text-field variant="outlined" v-model="formPayment.credit_card.holder" label="Nome no cartão"/>
+                      <v-text-field
+                          variant="outlined"
+                          v-model="formPayment.credit_card.holder"
+                          :error-messages="formPayment.errors['credit_card.holder']"
+                          label="Nome no cartão"/>
                     </v-col>
                     <v-col cols="12" >
-                      <v-text-field  variant="outlined" v-model="formPayment.credit_card.card_number" v-mask="'#### #### #### ####'" label="Numero do cartão"/>
+                      <v-text-field
+                          :error-messages="formPayment.errors['credit_card.card_number']"
+                          variant="outlined"
+                          v-model="formPayment.credit_card.card_number"
+                          v-mask="'#### #### #### ####'"
+                          label="Numero do cartão"/>
                     </v-col>
                     <v-col>
                       <v-row justify="center">
@@ -1755,6 +1794,7 @@ watch(()=>props.tab,()=>{
                           <v-select
                               variant="outlined"
                               :items="months"
+                              :error-messages="formPayment.errors['credit_card.expiration_date']"
                               @update:modelValue="(args)=>updateFormattedDate(args, 'month')"
                               label="Mês"
                           ></v-select>
@@ -1762,6 +1802,7 @@ watch(()=>props.tab,()=>{
                         <v-col cols="12"  md="6" >
                           <v-select
                               variant="outlined"
+                              :error-messages="formPayment.errors['credit_card.expiration_date']"
                               @update:modelValue="(args)=>updateFormattedDate(args, 'year')"
                               :items="years"
                               label="Ano"
@@ -1771,6 +1812,7 @@ watch(()=>props.tab,()=>{
                           <v-select
                               variant="outlined"
                               hide-details="auto"
+                              :error-messages="formPayment.errors['credit_card.installment_quantity']"
                               v-model="formPayment.credit_card.installment_quantity"
                               :items="pacerls"
 
@@ -1793,6 +1835,7 @@ watch(()=>props.tab,()=>{
                               variant="outlined"
                               hide-details="auto"
                               v-mask="'###'"
+                              :error-messages="formPayment.errors['credit_card.security_code']"
                               v-model="formPayment.credit_card.security_code"
                               label="CV"
                           ></v-text-field>
@@ -1886,7 +1929,7 @@ watch(()=>props.tab,()=>{
           <v-col v-if="userAuthStore().isAuthenticated()" cols="12" class="tw-flex tw-justify-center tw-items-center tw-gap-1 py-2 pb-5" >
             <RouterLink :to="{name:'area-do-cliente',params:{tab:'pedidos'}}">
               <v-btn  flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
-                <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/>  Ver pedidoss</span>
+                <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/>  Ver pedidos</span>
               </v-btn>
             </RouterLink>
             <v-btn @click="getTicketPdf()" flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
