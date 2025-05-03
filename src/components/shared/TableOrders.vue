@@ -57,7 +57,8 @@ const formPayment = reactive({
     expiration_date:'',
     security_code:null,
     installment_quantity:{value:1,pencet:0.04},
-  }
+  },
+  errors:{}
 })
 
 const years = computed(() => {
@@ -140,6 +141,31 @@ function getTicketPdf(passagem){
   })
 }
 
+const validateFormCredit = () => {
+  let hasError = false;
+  const validateField = (field, value, errorMessage,form) => {
+    if (value === null || value === undefined || value === '') {
+      form.errors[field] = errorMessage;
+      hasError = true;
+    } else {
+      delete form.errors[field];
+    }
+  };
+
+
+  validateField('credit_card.holder', formPayment.credit_card.holder, 'Por favor, insira seu nome que esta no cartão.',formPayment);
+  validateField('credit_card.card_number', formPayment.credit_card.card_number, 'Por favor, insira o número do cartão.',formPayment);
+  validateField('credit_card.expiration_date', formPayment.credit_card.expiration_date, 'Por favor, insira a data de vencimento.',formPayment);
+  validateField('credit_card.installment_quantity', formPayment.credit_card.installment_quantity, 'Por favor, insira a quantidade de parcelas.',formPayment);
+  validateField('credit_card.security_code', formPayment.credit_card.security_code, 'Por favor, insira um código de validação.',formPayment);
+
+  if(formPayment.credit_card.card_number && formPayment.credit_card.card_number.length < 16){
+    formPayment.errors['credit_card.card_number'] = 'O número do cartão deve ter exatamente 16 dígitos.'
+  }
+
+  return !hasError
+};
+
 function checkStatusPayment() {
   routes["payment.status"](orderToPay.value).then(res => {
     if (res.data.success) {
@@ -207,6 +233,9 @@ function submitPaymentPix(order_id){
 }
 
 function submitPaymentCredit(){
+
+  if(!validateFormCredit()) return
+
   const data = {
     ...formPayment,
     order_id:orderToPay.value.codigo.toString(),
@@ -354,10 +383,19 @@ onMounted(()=>{
         <div v-if="userAuthStore().isAuthenticated()" class="tw-w-full tw-flex tw-flex-col">
           <v-row class="mt-3" >
             <v-col cols="12" >
-              <v-text-field variant="outlined" v-model="formPayment.credit_card.holder" label="Nome no cartão"/>
+              <v-text-field
+                  variant="outlined"
+                  :error-messages="formPayment.errors['credit_card.holder']"
+                  v-model="formPayment.credit_card.holder"
+                  label="Nome no cartão"/>
             </v-col>
             <v-col cols="12" >
-              <v-text-field  variant="outlined" v-model="formPayment.credit_card.card_number" v-mask="'#### #### #### ####'" label="Numero do cartão"/>
+              <v-text-field
+                  variant="outlined"
+                  :error-messages="formPayment.errors['credit_card.card_number']"
+                  v-model="formPayment.credit_card.card_number"
+                  v-mask="'#### #### #### ####'"
+                  label="Numero do cartão"/>
             </v-col>
             <v-col>
               <v-row justify="center">
@@ -365,6 +403,7 @@ onMounted(()=>{
                   <v-select
                       variant="outlined"
                       :items="months"
+                      :error-messages="formPayment.errors['credit_card.expiration_date']"
                       @update:modelValue="(args)=>updateFormattedDate(args, 'month')"
                       label="Mês"
                   ></v-select>
@@ -372,6 +411,7 @@ onMounted(()=>{
                 <v-col cols="12"  md="6" >
                   <v-select
                       variant="outlined"
+                      :error-messages="formPayment.errors['credit_card.expiration_date']"
                       @update:modelValue="(args)=>updateFormattedDate(args, 'year')"
                       :items="years"
                       label="Ano"
@@ -383,7 +423,7 @@ onMounted(()=>{
                       hide-details="auto"
                       v-model="formPayment.credit_card.installment_quantity"
                       :items="pacerls"
-
+                      :error-messages="formPayment.errors['credit_card.installment_quantity']"
                       item-value="value"
                       item-title="value"
                       return-object
@@ -403,6 +443,7 @@ onMounted(()=>{
                       variant="outlined"
                       hide-details="auto"
                       v-mask="'###'"
+                      :error-messages="formPayment.errors['credit_card.security_code']"
                       v-model="formPayment.credit_card.security_code"
                       label="CV"
                   ></v-text-field>
