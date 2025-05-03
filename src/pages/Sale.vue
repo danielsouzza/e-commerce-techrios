@@ -437,6 +437,13 @@ function formatDates(date) {
   return `${dayOfWeek} ${day}`;
 }
 
+function clearCheckTimeout() {
+  if (checkTimeout) {
+    clearTimeout(checkTimeout);
+    checkTimeout = null;
+  }
+}
+
 function nextStep(){
   if(stepSale.value < 4){
     stepSale.value++;
@@ -458,9 +465,7 @@ function prevStep(){
     });
   }
 
-  if (checkTimeout) {
-    clearTimeout(checkTimeout);
-  }
+  clearCheckTimeout()
 }
 
 function removerPasseger(index,type){
@@ -764,7 +769,7 @@ function addCart(){
       formSale.processing = false
       loadingStore.stopLoading();
       scrollToStartDiv()
-      showErrorNotification(error.response.data.data?.details ?? error.response.data.data?.error  ?? error.response.data?.message );
+      showErrorNotification(error.response?.data?.data?.details ?? error.response?.data?.data?.error ?? error.response?.data?.message);
     })
   }
 }
@@ -790,7 +795,7 @@ function checkStatusPayment() {
     }
   }).catch((error) => {
     whatPayment.value = false;
-    showErrorNotification(error.response.data.data?.details ?? error.response.data.data?.error  ?? error.response.data?.message );
+    showErrorNotification(error.response?.data?.data?.details ?? error.response?.data?.data?.error ?? error.response?.data?.message);
     stepSale.value = 3
   });
 }
@@ -830,7 +835,7 @@ function submitPaymentCredit(){
     loadingStore.stopLoading();
   }).catch(error=>{
     loadingStore.stopLoading();
-    showErrorNotification(error.response.data.data?.details ?? error.response.data.data?.error  ?? error.response.data?.message );
+    showErrorNotification(error.response?.data?.data?.details ?? error.response?.data?.data?.error ?? error.response?.data?.message);
     if(error.response.data.data?.pedido){
       cartStore.addItem(error.response.data.data.pedido)
       cartStore.loadCart()
@@ -855,7 +860,7 @@ function submitPaymentPix(){
   }).catch(error=>{
     loadingStore.stopLoading();
     whatPayment.value = false
-    showErrorNotification(error.response.data.data?.error ?? error.response.data.data?.details ?? error.response.data?.message );
+    showErrorNotification(error.response?.data?.data?.details ?? error.response?.data?.data?.error ?? error.response?.data?.message);
     if(error.response.data.data?.pedido){
       cartStore.addItem(error.response.data.data.pedido)
       cartStore.loadCart()
@@ -1048,20 +1053,25 @@ onMounted(() => {
     };
   })
   if(stepChooseTrip.value == 1){
-loadData()
-  getEmpresas()
+  loadData()
+    getEmpresas()
   }
 
   window.addEventListener('resize', updateWidth);
   window.addEventListener('popstate', handleBackStep);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible" && whatPayment.value) {
+      checkStatusPayment();
+    } else {
+      clearCheckTimeout();
+    }
+  });
 
 
 });
 
 onUnmounted(() => {
-  if (checkTimeout) {
-    clearTimeout(checkTimeout);
-  }
+  clearCheckTimeout()
 });
 
 

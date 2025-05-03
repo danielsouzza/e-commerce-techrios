@@ -228,7 +228,7 @@ function submitPaymentPix(order_id){
   }).catch(error=>{
     loadingStore.stopLoading();
     whatPayment.value = false
-    showErrorNotification(error.response.data.data?.details ?? error.response.data.data?.error  ?? error.response.data?.message );
+    showErrorNotification(error.response?.data?.data?.details ?? error.response?.data?.data?.error ?? error.response?.data?.message);
   })
 }
 
@@ -256,7 +256,7 @@ function submitPaymentCredit(){
     loadingStore.stopLoading();
   }).catch(error=>{
     loadingStore.stopLoading();
-    showErrorNotification(error.response.data.data?.details ?? error.response.data.data?.error  ?? error.response.data?.message );
+    showErrorNotification(error.response?.data?.data?.details ?? error.response?.data?.data?.error ?? error.response?.data?.message);
   })
 }
 
