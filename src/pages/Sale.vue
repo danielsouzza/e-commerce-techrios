@@ -357,7 +357,7 @@ async function getTrechos(nextTrip=false, type='ida'){
         dataVolta: formatDateToServe(filtersSelected.value.dataVolta),
         step: stepSale.value
       };
-      
+
       // Constrói a URL com os novos parâmetros
       const url = new URL(window.location.href);
       Object.keys(queryParams).forEach(key => {
@@ -367,10 +367,10 @@ async function getTrechos(nextTrip=false, type='ida'){
           url.searchParams.delete(key);
         }
       });
-      
+
       // Atualiza a URL sem recarregar a página
-      history.replaceState({ 
-        ...queryParams, 
+      history.replaceState({
+        ...queryParams,
         path: url.pathname,
         tab: 'escolher-passagem'
       }, '', url.toString());
@@ -1757,7 +1757,7 @@ watch(()=>props.tab,()=>{
                 <template #icon>
                   <Icon icon="ic:baseline-pix"  class="mr-2 tw-text-green-400" width="26"/>
                 </template>
-                <p class="tw-text-p mt-3">Você deve informar o nome completo e o CPF/CNPJ de quem irá realizar o PIX. <strong>O QR Code será exibido após a confirmação de compra.</strong></p>
+<!--                <p class="tw-text-p mt-3">Você deve informar o nome completo e o CPF/CNPJ de quem irá realizar o PIX. <strong>O QR Code será exibido após a confirmação de compra.</strong></p>-->
                 <div class="tw-text-p mt-4 tw-border-2 tw-border-red-200 tw-bg-red-50 tw-rounded-lg tw-py-2 tw-px-3">
                   <p class="tw-text-red-400">
                     <strong>IMPORTANTE:</strong> Após finalizar a compra, o PIX gerado ficará
@@ -1768,7 +1768,7 @@ watch(()=>props.tab,()=>{
                 <div class="mt-3 tw-px-3">
                   <ul class="tw-list-disc">
                     <li>O pagamento poderá ser efetuado via aplicativos de pagamento, lendo o QR Code ou copiar e colando a URL gerada</li>
-                    <li>Caso você tenha um programa anti pop-up, você deverá desativá-lo.</li>
+<!--                    <li>Caso você tenha um programa anti pop-up, você deverá desativá-lo.</li>-->
                   </ul>
                 </div>
                 <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2  mt-3 lg:!tw-py-5"  @click="submitPaymentPix">
