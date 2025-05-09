@@ -95,26 +95,29 @@ function onOpenRooms(){
   <v-card variant="outlined" rounded="lg" class="!tw-p-4 !tw-border-secondary">
     <div class="tw-flex  mt-3 tw-w-full ">
 
-      <div class="tw-mr-5">
-        <TravelImages :alt="data.trecho.municipio_destino?.nome" :images="[data.trecho.municipio_destino.random_image]" class="bg-grey-lighten-2 !tw-w-[120px] !tw-h-[50px]"/>
-      </div>
+<!--      <div class="tw-mr-5">-->
+<!--        <TravelImages :alt="data.trecho.municipio_destino?.nome" :images="[data.trecho.municipio_destino.random_image]" class="bg-grey-lighten-2 !tw-w-[120px] !tw-h-[50px]"/>-->
+<!--      </div>-->
       <v-row>
-        <v-col cols="6" class="pb-0 !tw-font-bold">
+          <v-col cols="12" sm="6" md="6" lg="4">
+              <TravelImages :alt="data.trecho.municipio_destino?.nome" :images="[data.trecho.municipio_destino.random_image]" class="bg-grey-lighten-2 lg:!tw-w-[120px] lg:!tw-h-[50px] !tw-h-[80px] rounded-lg"/>
+          </v-col>
+        <v-col  lg="4" class="pb-0 !tw-font-bold">
           {{data.trecho.municipio_origem.nome +" - "+ data.trecho.municipio_destino.nome}}
-          <br><span class="tw-font-normal">{{ data.viagem.saida }}</span>
+          <br><span class="tw-font-normal">{{ data.trecho_viagem.data_embarque }}</span>
         </v-col>
-        <v-col cols="6" class="pb-0 ! !tw-font-black tw-text-lg !tw-text-primary text-end">
+        <v-col lg="4" class="pb-0 ! !tw-font-black tw-text-lg !tw-text-primary text-end">
           {{formatCurrency(valorTotal.total)}} <br> <small v-if="valorTotal.taxa > 0" class="tw-text-[12px] tw-font-semibold">Taxa de embarque: {{formatCurrency(valorTotal.taxa)}}</small>
         </v-col>
         <v-col cols="12" class="py-0">
           <v-divider  :thickness="1" class="border-opacity-100 tw-mt-2 " ></v-divider>
         </v-col>
-        <v-col  class="tw-flex  tw-items-center tw-gap-3 ">
+        <v-col cols="8"  class="tw-flex  tw-items-center tw-gap-3 ">
           <Icon icon="icon-park-outline:ticket"  width="20"/>
           <span class="tw-font-semibold">{{data.passagem_pedidos.length}} {{data.passagem_pedidos.length > 1 ? 'passagens' : 'passagem'}}</span>
         </v-col>
-        <v-col  class="tw-flex  tw-items-center justify-end tw-gap-3 ">
-          <v-btn @click="onOpenRooms" variant="tonal" color="info"><Icon icon="weui:eyes-on-outlined" width="25"  class="mr-1 "/>Passagens</v-btn>
+        <v-col cols="4"  class="tw-flex  tw-items-center justify-end tw-gap-3 ">
+          <v-btn @click="onOpenRooms" variant="tonal" color="info"><Icon icon="weui:eyes-on-outlined" width="25"  class="mr-1 "/><span class="hidden-sm-and-down">Passagens</span></v-btn>
         </v-col>
       </v-row>
     </div>
