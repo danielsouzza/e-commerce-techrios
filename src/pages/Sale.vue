@@ -1052,6 +1052,7 @@ onMounted(() => {
       document:authStore.user?.comprador.cpf_cnpj,
     };
   })
+
   if(stepChooseTrip.value == 1){
   loadData()
     getEmpresas()

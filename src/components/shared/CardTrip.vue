@@ -66,7 +66,7 @@ function goToSalePage(){
         </p>
       </div>
       <div class="tw-flex tw-items-center tw-gap-3 tw-text-p tw-text-sm">
-        <IconsBoat :type="data.tipo_embarcacao"/><span>{{formatDate(data?.saida)}} • {{formatarHora(data?.horario)}}</span>
+        <IconsBoat :type="data.tipo_embarcacao"/><span>{{formatDate(data?.data_embarque)}} • {{formatarHora(data?.horario)}}</span>
       </div>
 
       <div class="tw-mt-4 tw-text-left">
