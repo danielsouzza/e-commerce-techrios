@@ -176,12 +176,12 @@ onMounted(()=>{
               <a href="https://www.instagram.com/yjaraviagens/" target="_blank">
                 <Icon icon="mdi:instagram" width="40" class=" tw-text-xl tw-text-white"/>
               </a>
-              <a href="https://www.instagram.com/yjaraviagens/" target="_blank">
+              <a href="https://www.facebook.com/yjaraviagens" target="_blank">
                 <Icon icon="ic:baseline-facebook" width="40" class=" tw-text-xl tw-text-white"/>
               </a>
-              <a href="https://www.instagram.com/yjaraviagens/" target="_blank">
-                <Icon icon="mdi:youtube" width="40" class=" tw-text-xl tw-text-white"/>
-              </a>
+<!--              <a href="https://www.instagram.com/yjaraviagens/" target="_blank">-->
+<!--                <Icon icon="mdi:youtube" width="40" class=" tw-text-xl tw-text-white"/>-->
+<!--              </a>-->
             </div>
           </div>
         </div>
