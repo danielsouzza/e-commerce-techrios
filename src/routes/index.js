@@ -112,6 +112,13 @@ const routes = [
         props: true,
     },
     {
+        path: '/pagamento/:id',
+        component: () => import('../pages/PaymentPage.vue'),
+        name: 'payment',
+        props: true,
+        meta: { title: 'Pagamento' }
+    },
+    {
         path: '/:pathMatch(.*)*',
         component: () => import('../pages/NotFound.vue'),
         name: 'not-found',

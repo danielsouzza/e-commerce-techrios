@@ -21,7 +21,7 @@ export const routes = {
     'order.my': (params= {}) => api.get('/pedidos',params),
     'order': (params= {}) => api.post('/pedidos',params),
     'order.sync': (order_id) => api.patch(`/pedidos/${order_id}/associar`),
-    'order.open': (params= {}) => api.get('/pedidos/ultimo-aberto/dados'),
+    'order.open': (params= {}) => api.get('/pedidos/ultimo-aberto/dados',{params:params}),
     'order.delete': (order_id,params= {}) => api.delete(`/pedidos/${order_id}/remover-comodo`,{data:params}),
     'order.confirm': (order_id,params= {}) => api.post(`/pedidos/${order_id}/gerar-passagens`,params),
     'payment.pix': (params= {}) => api.post('/pagamentos/pix',params),
