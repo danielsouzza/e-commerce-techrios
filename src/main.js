@@ -36,9 +36,12 @@ document.head.appendChild(mdiStyles)
 
 const hostname = window.location.hostname;
 const parts = hostname.split(".");
-const subdomain = parts.length > 1 && parts[0] !== "loja" ? parts[0] : null;
 
-window.subdomain = subdomain;
+if(import.meta.env.VITE_APP_ENV === 'producao') {
+    window.subdomain = parts.length > 2  ? parts[0] : null;
+}else{
+    window.subdomain = parts.length > 2 && parts[0] !== "loja" ? parts[0] : null;
+}
 
 const themeConfig = reactive({
     primaryColor: '#00579d',

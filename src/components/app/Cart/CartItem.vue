@@ -73,9 +73,7 @@ function onOpenRooms(){
             <span class="message mt-2">Você realmente deseja  excluir essa passagem? Essa ação não pode ser desfeita</span>
           </div>
         </v-card-text>
-
         <v-card-actions>
-
           <v-btn
               text="cancelar"
               @click="showDialogDelete = false"
@@ -94,10 +92,6 @@ function onOpenRooms(){
   </v-dialog>
   <v-card variant="outlined" rounded="lg" class="!tw-p-4 !tw-border-secondary">
     <div class="tw-flex  mt-3 tw-w-full ">
-
-<!--      <div class="tw-mr-5">-->
-<!--        <TravelImages :alt="data.trecho.municipio_destino?.nome" :images="[data.trecho.municipio_destino.random_image]" class="bg-grey-lighten-2 !tw-w-[120px] !tw-h-[50px]"/>-->
-<!--      </div>-->
       <v-row>
           <v-col cols="12" sm="6" md="6" lg="4">
               <TravelImages :alt="data.trecho.municipio_destino?.nome" :images="[data.trecho.municipio_destino.random_image]" class="bg-grey-lighten-2 lg:!tw-w-[120px] lg:!tw-h-[50px] !tw-h-[80px] rounded-lg"/>
