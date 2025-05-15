@@ -50,7 +50,7 @@ const themeConfig = reactive({
 });
 
 async function fetchTheme() {
-    if (subdomain) {
+    if (window.subdomain) {
         try {
             const response = await  routes['empresa.theme']({subdomain:window.subdomain})
             const baseurl = getApiBaseUrl()?.replaceAll('api','')
