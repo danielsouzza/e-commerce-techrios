@@ -168,7 +168,7 @@ onMounted(()=>{
             <img src="/assets/images/footer/elo.svg" alt="" width="60"/>
             <img src="/assets/images/footer/hipercard.svg" alt="" width="60"/>
           </div>
-          <div class="tw-flex tw-flex-col tw-justify-center tw-gap-10 lg:tw-flex-row hidden-md-and-down tw-items-center   ">
+          <div v-if="!is_enterprise" class="tw-flex tw-flex-col tw-justify-center tw-gap-10 lg:tw-flex-row hidden-md-and-down tw-items-center   ">
             <div class="tw-flex tw-gap-4  tw-items-center">
               <p class="tw-text-white tw-text-[15px] tw-font-[800]">SIGA A YJARA</p>
             </div>
@@ -186,21 +186,21 @@ onMounted(()=>{
           </div>
         </div>
         <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 hidden-md-and-up" color="secondary"></v-divider>
-        <div class="tw-flex tw-flex-col tw-justify-center  tw-items-center mt-3 tw-w-full tw-pt-4 mb-2 hidden-md-and-up">
-          <div class="tw-flex tw-gap-4  tw-items-center">
-            <p class="tw-text-white tw-text-[12px] tw-font-[800]">SIGA TECHRIOS</p>
-          </div>
-          <div class="tw-flex tw-gap-2  tw-items-center mt-4">
-            <a href="#">
-              <img src="/assets/images/footer/instagram.svg" alt="" width="40"/>
-            </a>
-            <a href="#">
-              <img src="/assets/images/footer/facebook.svg" alt="" width="40"/>
-            </a>
-            <a href="#">
-              <img src="/assets/images/footer/youtube.svg" alt="" width="40"/>
-            </a>
-          </div>
+        <div v-if="!is_enterprise" class="tw-flex tw-flex-col tw-justify-center  tw-items-center  tw-w-full tw-pt-4 mb-2 hidden-md-and-up">
+            <div class="tw-flex tw-gap-4  tw-items-center">
+                <p class="tw-text-white tw-text-[12px] tw-font-[800]">SIGA A YJARA</p>
+            </div>
+            <div class="tw-flex tw-gap-2 mt-3 tw-items-center ">
+                <a href="https://www.instagram.com/yjaraviagens/" target="_blank">
+                    <Icon icon="mdi:instagram" width="40" class=" tw-text-xl tw-text-white"/>
+                </a>
+                <a href="https://www.facebook.com/yjaraviagens" target="_blank">
+                    <Icon icon="ic:baseline-facebook" width="40" class=" tw-text-xl tw-text-white"/>
+                </a>
+                <!--              <a href="https://www.instagram.com/yjaraviagens/" target="_blank">-->
+                <!--                <Icon icon="mdi:youtube" width="40" class=" tw-text-xl tw-text-white"/>-->
+                <!--              </a>-->
+            </div>
         </div>
         <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 " color="secondary"></v-divider>
         <div class="tw-flex tw-flex-col tw-justify-center  tw-items-center my-3 tw-w-full  mb-2">
