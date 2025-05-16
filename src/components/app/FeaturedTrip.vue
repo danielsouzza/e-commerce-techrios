@@ -9,6 +9,13 @@ import {computed, onMounted, ref} from "vue";
 import {routes} from "../../services/fetch.js";
 import 'vue3-carousel/dist/carousel.css'
 
+// Nova prop para alternar layout
+const props = defineProps({
+  empresa: {
+    type: Boolean,
+    default: false
+  }
+});
 
 const isDragging = ref(false);
 const config_1 = {
@@ -16,22 +23,9 @@ const config_1 = {
   gap:5,
   wrapAround: true,
   breakpoints: {
-    // 300px and up
-    300: {
-      itemsToShow: 1,
-      snapAlign: 'center',
-    },
-    // 400px and up
-    400: {
-      itemsToShow: 1,
-      snapAlign: 'start',
-    },
-    // 500px and up
-    500: {
-      itemsToShow: 1,
-      gap:5,
-      snapAlign: 'start',
-    },
+    300: { itemsToShow: 1, snapAlign: 'center' },
+    400: { itemsToShow: 1, snapAlign: 'start' },
+    500: { itemsToShow: 1, gap:5, snapAlign: 'start' },
   },
 };
 
@@ -40,35 +34,31 @@ const config_2 = {
   gap:5,
   wrapAround: true,
   breakpoints: {
-    300: {
-      itemsToShow: 1.5,
-      snapAlign: 'center',
-    },
-    400: {
-      itemsToShow: 2,
-      snapAlign: 'center',
-    },
-    500: {
-      mouseDrag:false,
-      itemsToShow: 2,
-      snapAlign: 'start',
-      gap:10,
-    },
+    300: { itemsToShow: 1.5, snapAlign: 'center' },
+    400: { itemsToShow: 2, snapAlign: 'center' },
+    500: { mouseDrag:false, itemsToShow: 2, snapAlign: 'start', gap:10 },
   },
 };
 
 const trechosWithTravels = ref([])
 const currentSlide = ref(0);
 
+const travels = computed(()=> trechosWithTravels.value.data?.trechos?.data || [])
 
-const travels_more_important = computed(()=>{
-  return trechosWithTravels.value.data?.trechos?.data.slice(0,3)
+const travels_more_important = computed(()=> travels.value.slice(0,3))
+const travels_les_important = computed(()=> travels.value.slice(3))
+
+const fullCarouselItems = computed(() => travels.value.slice(0, 3))
+const sideTickets = computed(() => [travels.value[3], travels.value[4]].filter(Boolean))
+const gridRows = computed(() => {
+  // Remove os 5 primeiros (3 full + 2 pequenos)
+  const restantes = travels.value.slice(5)
+  const linhas = []
+  for(let i=0; i<restantes.length; i+=4) {
+    linhas.push(restantes.slice(i, i+4))
+  }
+  return linhas
 })
-
-const travels_les_important = computed(()=>{
-  return trechosWithTravels.value.data?.trechos?.data.slice(3,trechosWithTravels.value.data?.trechos?.data.length)
-})
-
 
 async function getTrechosWithTravels() {
   const params = new URLSearchParams()
@@ -78,8 +68,6 @@ async function getTrechosWithTravels() {
 
   routes["trechos-viagem"](params).then(response => {
     const trechos = response.data.data?.trechos?.data || []
-
-
     trechos.forEach(trecho => {
       const images = trecho.municipio_destino?.images || []
       if (images.length > 0) {
@@ -87,7 +75,6 @@ async function getTrechosWithTravels() {
         trecho.municipio_destino.random_image = images[randomIndex]
       }
     })
-
     trechosWithTravels.value = {
       ...response.data,
       data: {
@@ -100,69 +87,109 @@ async function getTrechosWithTravels() {
     }
   }).catch(error => {
     console.log(error)
-    // showErrorNotification(error.response.data.data.error);
   })
 }
-
 
 onMounted(()=>{
   getTrechosWithTravels()
 })
-
 </script>
 
 <template>
-  <div class=" tw-flex tw-flex-col tw-items-center tw-justify-center !tw-my-5" v-if="trechosWithTravels.data?.trechos?.data.length > 0">
-    <div class="tw-flex tw-flex-col lg:tw-flex-row  tw-items-center tw-justify-center lg:tw-justify-between tw-w-full">
-      <div class=" tw-text-[25px] tw-font-extrabold tw-text-center tw-text-primary " style="line-height: 28px">
+  <div v-if="travels.length > 0" class="tw-flex tw-flex-col tw-items-center tw-justify-center !tw-my-5">
+    <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-center lg:tw-justify-between tw-w-full">
+      <div class="tw-text-[25px] tw-font-extrabold tw-text-center tw-text-primary" style="line-height: 28px">
         Viagens em destaques
       </div>
-      <RouterLink  :to="{name: 'viagens-em-destaque'}">
+      <RouterLink :to="{name: 'viagens-em-destaque'}">
         <v-btn color="secondary" class="my-5" variant="outlined" rounded>
-          <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs" >VER MAIS VIAGENS
+          <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs">VER MAIS VIAGENS
             <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>
           </div>
         </v-btn>
       </RouterLink>
-
     </div>
-    <div class="tw-flex tw-flex-col tw-gap-5 lg:tw-flex-row tw-h-full  tw-justify-between !tw-mt-5 tw-w-full">
 
-      <div class="lg:!tw-w-[50%] !tw-w-full lg:!tw-rounded-xl ">
-        <Carousel @drag="isDragging=true" @touchend="isDragging = false" @slideEnd="isDragging=false" v-bind="config_1" class="tw-w-[100vw] lg:!tw-rounded-xl lg:tw-w-full tw-mb-4 my-carrousel my-carrousel">
-          <Slide v-for="(item,n) in travels_more_important" :key="item.id"  class="tw-px-5 lg:tw-px-0 tw-h-full">
-            <CardTripFull :dragging="isDragging" :data="item" class="tw-h-full"/>
-          </Slide>
-          <template #addons>
-            <CarouselNavigation />
-            <Pagination class="!tw-bottom-[-30px] "/>
-          </template>
-        </Carousel>
+    <!-- Layout para empresa -->
+    <template v-if="props.empresa">
+      <div class="tw-w-full tw-flex tw-flex-col tw-gap-5 tw-px-5">
+        <!-- Primeira linha: carrossel de até 3 full + 2 cards pequenos lado a lado -->
+        <!-- <div class="tw-flex tw-gap-5 tw-mb-5">
+          <div class="lg:!tw-w-[50%] !tw-w-full lg:!tw-rounded-xl">
+            <Carousel v-bind="config_1" class="tw-w-full lg:!tw-rounded-xl">
+              <Slide v-for="item in fullCarouselItems" :key="item.id">
+                <CardTripFull :data="item" />
+              </Slide>
+              <template #addons>
+                <CarouselNavigation />
+                <Pagination class="!tw-bottom-[-30px] "/>
+              </template>
+            </Carousel>
+          </div>
+          <div class="lg:!tw-w-[50%] tw-flex tw-flex-row tw-gap-5 tw-h-full" v-if="sideTickets.length">
+            <CardTicket v-for="item in sideTickets" :key="item.id" :data="item" class="tw-flex-1" />
+          </div>
+        </div> -->
+        <!-- Demais linhas: grid de até 4 cards -->
+         <v-row >
+          <v-col cols="12" sm="6"  >
+            <Carousel v-bind="config_1" class="tw-w-full lg:!tw-rounded-xl my-carrousel my-carrousel">
+              <Slide v-for="item in travels_more_important" :key="item.id">
+                <CardTripFull :data="item" />
+              </Slide>
+              <template #addons>
+                <CarouselNavigation />
+                <Pagination class="!tw-bottom-[-15px] "/>
+              </template>
+            </Carousel>
+          </v-col>
+          <v-col cols="12" sm="6" md="4" lg="3" v-for="(item, idx) in travels_les_important" :key="'row-'+idx" class=" tw-h-full ">
+            <CardTicket  :data="item" class="tw-mb-5 tw-mx-auto" />
+          </v-col>
+         </v-row>
+      
       </div>
-      <div class="lg:!tw-w-[50%] tw-h-full tw-hidden lg:tw-block" v-if="travels_les_important.length > 0">
-        <Carousel @drag="isDragging=true" @touchend="isDragging = false" @slideEnd="isDragging=false" v-bind="config_2" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-h-full tw-mb-4 my-carrousel">
-          <Slide v-for="(item,n) in travels_les_important" :key="item.id" >
-            <CardTicket :dragging="isDragging" :data="item" :active="currentSlide === n -1"/>
+    </template>
 
-          </Slide>
-          <template #addons>
-            <CarouselNavigation />
-            <Pagination class="!tw-bottom-[-30px] "/>
-          </template>
-        </Carousel>
+    <!-- Layout padrão (carrossel) -->
+    <template v-else>
+      <div class="tw-flex tw-flex-col tw-gap-5 lg:tw-flex-row tw-h-full tw-justify-between !tw-mt-5 tw-w-full">
+        <div class="lg:!tw-w-[50%] !tw-w-full lg:!tw-rounded-xl ">
+          <Carousel @drag="isDragging=true" @touchend="isDragging = false" @slideEnd="isDragging=false" v-bind="config_1" class="tw-w-[100vw] lg:!tw-rounded-xl lg:tw-w-full tw-mb-4 my-carrousel my-carrousel">
+            <Slide v-for="(item,n) in travels_more_important" :key="item.id" class="tw-px-5 lg:tw-px-0 tw-h-full">
+              <CardTripFull :dragging="isDragging" :data="item" class="tw-h-full"/>
+            </Slide>
+            <template #addons>
+              <CarouselNavigation />
+              <Pagination class="!tw-bottom-[-30px] "/>
+            </template>
+          </Carousel>
+        </div>
+        <div class="lg:!tw-w-[50%] tw-h-full tw-hidden lg:tw-block" v-if="travels_les_important.length > 0">
+          <Carousel @drag="isDragging=true" @touchend="isDragging = false" @slideEnd="isDragging=false" v-bind="config_2" v-model="currentSlide" class="tw-w-[100vw] lg:tw-w-full tw-h-full tw-mb-4 my-carrousel">
+            <Slide v-for="(item,n) in travels_les_important" :key="item.id" >
+              <CardTicket :dragging="isDragging" :data="item" :active="currentSlide === n -1"/>
+            </Slide>
+            <template #addons>
+              <CarouselNavigation />
+              <Pagination class="!tw-bottom-[-30px] "/>
+            </template>
+          </Carousel>
+        </div>
       </div>
-    </div>
+    </template>
   </div>
 </template>
 
 <style scoped>
-
 .my-carrousel::v-deep(.carousel__prev){
   left: -4%;
+  @apply tw-text-white
 }
 
 .my-carrousel::v-deep(.carousel__next){
   right: -4%;
+  @apply tw-text-white
 }
 
 .my-carrousel::v-deep(.carousel__pagination-button){

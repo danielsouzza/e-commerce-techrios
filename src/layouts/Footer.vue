@@ -186,7 +186,7 @@ onMounted(()=>{
           </div>
         </div>
         <v-divider  :thickness="1" class="border-opacity-25 tw-my-2 hidden-md-and-up" color="secondary"></v-divider>
-        <div v-if="!is_enterprise" class="tw-flex tw-flex-col tw-justify-center  tw-items-center  tw-w-full tw-pt-4 mb-2 hidden-md-and-up">
+        <div v-if="!is_enterprise" class="tw-flex tw-flex-col tw-justify-center  tw-items-center     tw-w-full tw-pt-4 mb-2 hidden-md-and-up">
             <div class="tw-flex tw-gap-4  tw-items-center">
                 <p class="tw-text-white tw-text-[12px] tw-font-[800]">SIGA A YJARA</p>
             </div>

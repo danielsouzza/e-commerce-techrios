@@ -25,7 +25,7 @@ const logo = computed(()=>{
 <template>
 <!--    <img v-if="footer" src="/assets/images/logo-yjara-white.svg" :width="size" alt=""/>-->
     <v-avatar   :size="size" >
-      <img  :src="logo"  alt="" :class="footer && !is_enterprise  ? 'tw-invert tw-brightness-200 tw-contrast-150 footer':'' " />
+      <img  :src="logo" :width="is_enterprise && !footer? '70px':''"  alt="" :class="footer && !is_enterprise  ? 'tw-invert tw-brightness-200 tw-contrast-150 footer':'' " />
     </v-avatar>
 
 </template>

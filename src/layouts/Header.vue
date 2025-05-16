@@ -88,7 +88,7 @@ onMounted(()=>{
               </v-btn>
 
               <RouterLink  :to="{name: 'home'}">
-                <AppLogo />
+                <AppLogo class=""/>
               </RouterLink>
               <div class="d-flex align-center justify-end tw-gap-3">
                 <div class="navigation d-lg-flex d-none">

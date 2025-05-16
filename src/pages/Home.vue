@@ -59,8 +59,8 @@ onMounted(() => {
       <Banner2 v-for="i in slides.slice(0,2)" :key="i" :src="i.image_url"  :link="i.redirect_url"/>
     </div>
 
-    <FeaturedTrip/>
-    <TravelAtUnbeatablePrices  class="!tw-my-5 !tw-mb-10"/>
+    <FeaturedTrip :empresa="is_enterprise" />
+    <TravelAtUnbeatablePrices v-if="!is_enterprise" class="!tw-my-5 !tw-mb-10"/>
   </div>
 
 </template>

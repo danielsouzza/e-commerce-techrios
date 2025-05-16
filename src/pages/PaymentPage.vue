@@ -45,7 +45,7 @@ const formPayment = reactive({
 
 const months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
 const pacerls = [
-  { value: 1, pencet: 0.4 },
+  { value: 1, pencet: 0.04 },
   { value: 2, pencet: 0.06 },
   { value: 3, pencet: 0.07 },
   { value: 4, pencet: 0.08 },
@@ -438,7 +438,7 @@ onUnmounted(() => {
                   <span class="!tw-text-xs lg:!tw-text-sm tw-text-white ml-1">REALIZAR PAGAMENTO</span>
                 </v-btn>
               </div>
-          
+
             </CardPayment>
           </BaseCard>
         </template>
@@ -509,4 +509,4 @@ onUnmounted(() => {
       </v-col>
     </v-row>
   </div>
-</template> 
+</template>
