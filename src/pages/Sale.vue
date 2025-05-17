@@ -484,6 +484,9 @@ function removerPasseger(index,type){
     }
     formSale.dataVolta?.dataComodos.splice(index,1)
   }
+
+    calculateTaxa()
+
 }
 
 function removerMeToPassenger(index,type){
@@ -513,6 +516,7 @@ function addComodoRelated(index,type){
     formSale.dataVolta.dataComodos[index].qtd_comodos_filhos++
     formSale.dataVolta?.dataComodos.push({...item, comodo_relacionado: item.comodo, comodos_filhos: 1,qtd_comodos_filhos: 1, })
   }
+    calculateTaxa()
 }
 
 function clearFilterSide(){
@@ -540,30 +544,31 @@ function saveTrips(item){
 }
 
 function saveTicket() {
-  const totalIda = calculateTotal(tripsSelecteds.value.dataIda);
+    const totalIda = calculateTotal(tripsSelecteds.value.dataIda);
 
-  Object.assign(formSale, {
-    total_passagems: totalIda.passagens,
-    total_taxas: totalIda.taxa,
-    trecho: tripsSelecteds.value.dataIda.trecho,
-    viagem: tripsSelecteds.value.dataIda.trecho.id_viagem,
-    data_hora: tripsSelecteds.value.dataIda.trecho.data_embarque,
-    dataComodos: populateComodos(tripsSelecteds.value.dataIda.rooms, tripsSelecteds.value.dataIda.trecho)
-  });
+    Object.assign(formSale, {
+        total_passagems: totalIda.passagens,
+        total_taxas: 0,
+        trecho: tripsSelecteds.value.dataIda.trecho,
+        viagem: tripsSelecteds.value.dataIda.trecho.id_viagem,
+        data_hora: tripsSelecteds.value.dataIda.trecho.data_embarque,
+        dataComodos: populateComodos(tripsSelecteds.value.dataIda.rooms, tripsSelecteds.value.dataIda.trecho)
+    });
 
-  if (filtersSelected.value.type === "ida-e-volta") {
-    const totalVolta = calculateTotal(tripsSelecteds.value.dataVolta);
-    formSale.total_passagems += totalVolta.passagens;
-    formSale.total_taxas += totalVolta.taxa;
+    formSale.total_taxas = formSale.dataComodos.length * parseInt(formatMoney(tripsSelecteds.value.dataIda.trecho.taxa_de_embarque))
+    if (filtersSelected.value.type === "ida-e-volta") {
+        const totalVolta = calculateTotal(tripsSelecteds.value.dataVolta);
+        formSale.total_passagems += totalVolta.passagens;
 
-    formSale.dataVolta = {
-      trecho: tripsSelecteds.value.dataVolta.trecho,
-      viagem: tripsSelecteds.value.dataVolta.trecho.id_viagem,
-      dataComodos: populateComodos(tripsSelecteds.value.dataVolta.rooms, tripsSelecteds.value.dataVolta.trecho)
-    };
-  }
+        formSale.dataVolta = {
+            trecho: tripsSelecteds.value.dataVolta.trecho,
+            viagem: tripsSelecteds.value.dataVolta.trecho.id_viagem,
+            dataComodos: populateComodos(tripsSelecteds.value.dataVolta.rooms, tripsSelecteds.value.dataVolta.trecho)
+        };
+        formSale.total_taxas += formSale.dataVolta.dataComodos.length * parseInt(formatMoney(tripsSelecteds.value.dataVolta.trecho.taxa_de_embarque));
+    }
 
-  nextStep();
+    nextStep();
 }
 
 function populateComodos(rooms, trecho) {
@@ -594,6 +599,13 @@ function populateComodos(rooms, trecho) {
   });
 
   return comodos;
+}
+
+function calculateTaxa(){
+    formSale.total_taxas = formSale.dataComodos.reduce((i,j)=>i + j.embarque, 0)
+    if(filtersSelected.value.type == 'ida-e-volta'){
+        formSale.total_taxas += formSale.dataVolta.dataComodos.reduce((i,j)=>i + j.embarque, 0)
+    }
 }
 
 function calculateTotal(items){

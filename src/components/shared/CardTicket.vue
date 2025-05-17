@@ -452,7 +452,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <BaseCard  :active="openRooms" :id="'cardTicket-' + dataIda.id_viagem + (dataVolta?.id_viagem ?? 0)" >
+  <BaseCard  :active="openRooms" :id="'cardTicket-' + dataIda.id_viagem + (dataVolta?.id_viagem ?? 0)" class="mb-3" >
     <div class="tw-flex tw-flex-col " >
       <div class="tw-flex tw-items-center tw-justify-between">
         <div  class="tw-flex  tw-text-primary tw-px-2  tw-rounded-lg tw-font-bold lg:tw-mr-5 tw-w-full tw-items-center">
@@ -595,10 +595,13 @@ onBeforeUnmount(() => {
                             <v-col cols="6" class=" tw-text-xs !tw-pt-0 ">
                               Valor
                             </v-col>
-                            <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0">
-                              {{formatCurrency(calcularValor(item.comodo_trechos.valor + formatMoney(dataIda.taxa_de_embarque), null))}}<br>
+                            <v-col cols="6" class="text-right  tw-text-sm tw-font-semibold !tw-pt-0" :class="formatMoney(dataIda.taxa_de_embarque) > 0 ? '!tw-pb-0' :''">
+                              {{formatCurrency(calcularValor(item.comodo_trechos.valor, null))}}<br>
                               <span class=" tw-text-[10px]"> no PIX</span>
                             </v-col>
+                              <v-col cols="12" class="!tw-py-0 !tw-pb-1" v-if="formatMoney(dataIda.taxa_de_embarque) > 0">
+                                  <span class=" tw-text-[10px]">+ Taxa de embarque por pessoa: {{formatCurrency(formatMoney(dataIda.taxa_de_embarque))}}</span>
+                              </v-col>
                           </v-row>
                         </v-card>
                       </v-col>
@@ -625,7 +628,7 @@ onBeforeUnmount(() => {
                           </div>
                         </div>
                       </v-col>
-                      <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? formatCurrency(calcularValor(room.comodo_trechos?.valor + formatMoney(dataIda.taxa_de_embarque))) : formatCurrency(calcularValor(valor,dataIda.desconto?.desconto))}} <Icon @click="onClickRoom(room, null)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /></v-col>
+                      <v-col class="tw-flex tw-items-center tw-gap-1 !tw-p-0 tw-justify-end">{{room.comodo_trechos?.valor ? formatCurrency(calcularValor(room.comodo_trechos?.valor)) : formatCurrency(calcularValor(valor,dataIda.desconto?.desconto))}} <Icon @click="onClickRoom(room, null)" icon="iconamoon:trash"  width="25"  class="tw-cursor-pointer ml-3 tw-text-red-500" /></v-col>
                     </v-row>
                   </div>
                   <div class=" mt-3" v-if="roomsSelected.dataIda.selectedsByType?.length > 0">

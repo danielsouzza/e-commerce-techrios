@@ -24,8 +24,6 @@ const showQRCode = ref(false);
 const timeToPay = ref(30 * 60);
 const percentToPay = ref(0);
 const whatPayment = ref(false);
-const showPaymentPix = ref(false);
-const showPaymentCredit = ref(false);
 
 let intervalo = null;
 let checkTimeout = null;
@@ -79,12 +77,14 @@ const orderDetails = computed(() => {
   });
 
   return {
-    codigo: order.value.id,
-    total: (order.value.total),
-    data: formatDate(order.value.data),
-    status: order.value.status,
-    contato: order.value.contato,
-    passagens
+      codigo: order.value.id,
+      total: (order.value.total),
+      total_passagens: passagens.reduce((acc, passagem) => acc + passagem.detalhes.valor, 0),
+      total_taxa: passagens.reduce((acc, passagem) => acc + passagem.detalhes.taxa, 0),
+      data: formatDate(order.value.data),
+      status: order.value.status,
+      contato: order.value.contato,
+      passagens
   };
 });
 
@@ -469,13 +469,13 @@ onUnmounted(() => {
                 Total passagens
               </v-col>
               <v-col cols="6">
-                +{{ formatCurrency(orderDetails.total) }}
+                +{{ formatCurrency(orderDetails.total_passagens)}}
               </v-col>
-              <v-col cols="6" class="pt-0" v-if="orderDetails.passagens.reduce((acc, passagem) => acc + passagem.detalhes.taxa, 0) > 0">
+              <v-col cols="6" class="pt-0" v-if="orderDetails.total_taxa > 0">
                 Taxa de embarque
               </v-col>
-              <v-col cols="6" class="pt-0" v-if="orderDetails.passagens.reduce((acc, passagem) => acc + passagem.detalhes.taxa, 0) > 0">
-                +{{ formatCurrency(orderDetails.passagens.reduce((acc, passagem) => acc + passagem.detalhes.taxa, 0)) }}
+              <v-col cols="6" class="pt-0" v-if="orderDetails.total_taxa > 0">
+                +{{ formatCurrency(orderDetails.total_taxa) }}
               </v-col>
               <v-col cols="6" class="tw-font-bold">
                 Total
