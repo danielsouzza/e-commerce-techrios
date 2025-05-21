@@ -74,7 +74,7 @@ watch(()=>props.auth,()=>{
           <Icon icon="carbon:close-outline" class="mr-2 tw-cursor-pointer !tw-text-red-500" width="30" @click="$emit('close')"/>
         </div>
       </v-card>
-     
+
     </div>
 
     <!-- Conteúdo com Rolagem -->
@@ -89,7 +89,8 @@ watch(()=>props.auth,()=>{
     </div>
 
     <!-- Footer Fixo -->
-    <div v-if="!useCartStore().isEmptyCart()" class="  bg-containerBg pb-5">
+
+    <div v-if="!useCartStore().isEmptyCart()" class=" bg-containerBg pb-5">
       <v-divider  :thickness="1"  class="border-opacity-100 tw-my-2 " ></v-divider>
       <v-row class="px-5">
         <v-col cols="6" class="tw-text-p tw-text-lg tw-font-bold">
@@ -104,7 +105,7 @@ watch(()=>props.auth,()=>{
           </v-btn>
         </v-col>
         <v-col  >
-          <RouterLink :to="{name:'sale',params:{tab:'pagamento'}}">
+          <RouterLink :to="{name:'pagamento',params:{tab:'pagamento'}}">
             <v-btn color="primary" rounded="lg" class="tw-w-full" size="large"> Finalizar compra </v-btn>
           </RouterLink>
         </v-col>
@@ -201,7 +202,7 @@ watch(()=>props.auth,()=>{
   .cart-container {
     height: 100dvh; /* Viewport height dinâmico para mobile */
   }
-  
+
   .cart-footer {
     padding-bottom: max(env(safe-area-inset-bottom), 1rem);
   }

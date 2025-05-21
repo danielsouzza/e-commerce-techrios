@@ -2,7 +2,7 @@
 
 import {Icon} from "@iconify/vue";
 import {computed, nextTick, onMounted, onUnmounted, reactive, ref, watch} from "vue";
-import {useRoute} from "vue-router";
+import { useRoute} from "vue-router";
 import {routes} from "../services/fetch.js";
 import BaseCard from "../components/shared/BaseCard.vue";
 import CardTicket from "../components/shared/CardTicket.vue";
@@ -27,8 +27,9 @@ import {userAuthStore} from "../store/AuthStore.js";
 import {getApiBaseUrl, getAppBaseUrl} from "../services/api.js";
 import {closeAllCards, showErrorNotification, showInfoNotification, showSuccessNotification} from "../event-bus.js";
 import {useLoadingStore} from "../store/states.js";
+import {clearFormSaleSession, restoreFormSaleFromSession, saveFormSaleToSession} from "../store/SalesSection.js";
 const props = defineProps({
-  tab:String,
+  step:String,
 })
 
 const formRef = ref()
@@ -74,7 +75,7 @@ const formPayment = reactive({
   errors:{}
 })
 const filtersSelected = ref({
-  origem:route.query.origem || null,
+  origem:route.params.origem || null,
   destino:null,
   dataIda:new Date(),
   dataVolta:null,
@@ -129,7 +130,7 @@ const tabs = [
   },
   {
     step:2,
-    value:'infor-data',
+    value:'informa-dados',
     title: 'Informa dados'
   },
   {
@@ -148,7 +149,8 @@ const tabs = [
     title:'Pagamento concluído'
   }
 ]
-const stepSale = ref(tabs.find(it=>it.value == props.tab).step)
+
+const stepSale = ref(tabs.find(it=>it.value == props.step).step)
 const cart = computed(()=>{
   return cartStore
 })
@@ -199,15 +201,22 @@ const updateWidth = () => {
 };
 
 const updateFilters = () => {
-  filtersSelected.value.origem = route.query.origem || null;
-  filtersSelected.value.destino = route.query.destino || null;
-  filtersSelected.value.type = route.query.type;
-  filtersSelected.value.dataIda = new Date(route.query.dataIda + 'T00:00:00') || new Date().toISOString().split('T')[0];
-  filtersSelected.value.dataVolta = route.query.dataVolta ? new Date(route.query.dataVolta + 'T00:00:00') : null;
-  generateNextDays()
-  if(filtersSelected.value.type == 'ida-e-volta'){
-    generateNextDays('volta')
-  }
+    filtersSelected.value.origem = route.params.origem || null;
+    filtersSelected.value.destino = route.params.destino || null;
+    filtersSelected.value.type = route.params.type;
+
+    filtersSelected.value.dataIda = route.params.dataIda
+        ? new Date(route.params.dataIda + 'T00:00:00')
+        : new Date();
+
+    filtersSelected.value.dataVolta = route.params.dataVolta
+        ? new Date(route.params.dataVolta + 'T00:00:00')
+        : null;
+
+    generateNextDays();
+    if (filtersSelected.value.type === 'ida-e-volta') {
+        generateNextDays('volta');
+    }
 };
 
 function generateNextDays( type='ida') {
@@ -351,29 +360,8 @@ async function getTrechos(nextTrip=false, type='ida'){
         generateNextDays(type);
       }
 
-      const queryParams = {
-              ...filtersSelected.value,
-        dataIda: formatDateToServe(filtersSelected.value.dataIda),
-        dataVolta: formatDateToServe(filtersSelected.value.dataVolta),
-        step: stepSale.value
-      };
+      // updateUrlPage('escolher-passagem')
 
-      // Constrói a URL com os novos parâmetros
-      const url = new URL(window.location.href);
-      Object.keys(queryParams).forEach(key => {
-        if (queryParams[key] !== null && queryParams[key] !== undefined) {
-          url.searchParams.set(key, queryParams[key]);
-        } else {
-          url.searchParams.delete(key);
-        }
-      });
-
-      // Atualiza a URL sem recarregar a página
-      history.replaceState({
-        ...queryParams,
-        path: url.pathname,
-        tab: 'escolher-passagem'
-      }, '', url.toString());
     }
 
     nextTick(()=>{
@@ -400,6 +388,33 @@ async function getTrechos(nextTrip=false, type='ida'){
     }
   })
 }
+
+
+function updateUrlPage(step) {
+    if(stepSale.value == 1){
+        const baseParams = {
+            origem: filtersSelected.value.origem,
+            destino: filtersSelected.value.destino,
+            dataIda: formatDateToServe(filtersSelected.value.dataIda),
+            type: filtersSelected.value.type
+        };
+
+        if (filtersSelected.value.type === 'ida-e-volta') {
+            baseParams.dataVolta = formatDateToServe(filtersSelected.value.dataVolta);
+        }
+
+        router.push({
+            name: step,
+            params: {
+                ...baseParams,
+            }
+        });
+    }
+    router.push({
+        name: step
+    });
+}
+
 
 function goToNextTrip(type='ida'){
   if(type == 'ida'){
@@ -450,22 +465,22 @@ function nextStep(){
     nextTick(() => {
       scrollToStartDiv();
     });
-    const url = new URL(window.location.href);
-    url.searchParams.set('step', stepSale.value.toString());
-    history.pushState({ step: stepSale.value }, '', url.toString());
+      const currentTab = tabs.find(it=>it.step == stepSale.value).value
+      updateUrlPage(currentTab)
+      saveFormSaleToSession(formSale)
   }
 
 }
 
 function prevStep(){
-  if(stepSale.value > 1){
-    stepSale.value--;
-    nextTick(() => {
-      scrollToStartDiv();
-    });
+  if(stepSale.value > 1) {
+      stepSale.value--;
+      nextTick(() => {
+          scrollToStartDiv();
+          updateUrlPage(tabs.find(it => it.step == stepSale.value).value)
+          clearCheckTimeout()
+      });
   }
-
-  clearCheckTimeout()
 }
 
 function removerPasseger(index,type){
@@ -938,6 +953,8 @@ function resetFormSale(type='ida') {
   if(filtersSelected.value.type == 'ida-e-volta'){
     generateNextDays('volta')
   }
+
+  clearFormSaleSession()
 }
 
 function updateFormattedDate(value,type) {
@@ -1034,7 +1051,7 @@ function getTicketPdf(){
 
 function loadData(){
   if(stepSale.value === 1){
-    updateFilters()
+      updateFilters()
     generateNextDays()
     if(filtersSelected.value.type == 'ida-e-volta'){
       generateNextDays('volta')
@@ -1046,28 +1063,35 @@ function loadData(){
 function handleBackStep(e) {
   if (stepSale.value > 1) {
     // history.pushState(null, '', location.href); // repõe o estado
-    prevStep()
+    // prevStep()
   }
 }
 
 onMounted(() => {
-  authStore.loadUser()
-  authStore.getUser().then(()=>{
-    formSale.contato = {
-      nome: authStore.user?.name ?? null,
-      email: authStore.user?.email ?? null,
-      telefone: authStore.user?.comprador.telefone,
-      tipo_doc: authStore.user?.comprador.cpf_cnpj ? identificarCpfOuCnpj(authStore.user?.comprador.cpf_cnpj) : null,
-      nascimento: authStore.user?.comprador.nascimento ?
-          new Date(authStore.user?.comprador.nascimento+ 'T00:00:00') :
-          null,
-      document:authStore.user?.comprador.cpf_cnpj,
-    };
-  })
+   authStore.loadUser()
+   if(authStore.isAuthenticated()){
+       authStore.getUser().then(()=>{
+           formSale.contato = {
+               nome: authStore.user?.name ?? null,
+               email: authStore.user?.email ?? null,
+               telefone: authStore.user?.comprador.telefone,
+               tipo_doc: authStore.user?.comprador.cpf_cnpj ? identificarCpfOuCnpj(authStore.user?.comprador.cpf_cnpj) : null,
+               nascimento: authStore.user?.comprador.nascimento ?
+                   new Date(authStore.user?.comprador.nascimento+ 'T00:00:00') :
+                   null,
+               document:authStore.user?.comprador.cpf_cnpj,
+           };
+       })
+   }
+
 
   if(stepChooseTrip.value == 1){
-  loadData()
+    loadData()
     getEmpresas()
+  }
+
+  if(stepSale.value > 1){
+      restoreFormSaleFromSession(formSale)
   }
 
   window.addEventListener('resize', updateWidth);
@@ -1080,18 +1104,20 @@ onMounted(() => {
     }
   });
 
-
 });
+
+
 
 onUnmounted(() => {
   clearCheckTimeout()
 });
 
 
-watch(()=>props.tab,()=>{
-  cartStore.loadCart()
-  stepSale.value = tabs.find(it=>it.value == props.tab).step
-})
+// watch(()=>route.params.tab,()=>{
+//     restoreFormSaleFromSession(formSale)
+//     cartStore.loadCart()
+//     stepSale.value = tabs.find(it=>it.value == props.tab).step
+// })
 
 </script>
 
@@ -1526,7 +1552,7 @@ watch(()=>props.tab,()=>{
                     <Icon icon="iconamoon:clock-fill" class="mr-2" width="15"/>{{formatarTempoViagem(formSale.trecho.tempo_viagem)}}
                   </v-col>
                   <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
-                    <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}} -> {{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}
+                    <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{ formSale.trecho.municipio_origem.nome+'/'+formSale.trecho.municipio_origem.uf }} -> {{ formSale.trecho.municipio_origem.nome+'/'+formSale.trecho.municipio_origem.uf }}
                   </v-col>
                   <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
                     <Icon icon="solar:armchair-bold" class="mr-2" width="15"/>{{gerarStringTiposComodos(formSale.dataComodos.map(it=>it.tipo_comodidade))}}
@@ -1548,7 +1574,7 @@ watch(()=>props.tab,()=>{
                       <Icon icon="iconamoon:clock-fill" class="mr-2" width="15"/>{{formatarTempoViagem(formSale.dataVolta.trecho.tempo_viagem)}}
                     </v-col>
                     <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
-                      <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}} -> {{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}}
+                        <Icon icon="flowbite:map-pin-alt-solid" class="mr-2" width="15"/>{{ formSale.dataVolta.trecho.municipio_origem.nome+'/'+formSale.dataVolta.trecho.municipio_origem.uf }} -> {{ formSale.dataVolta.trecho.municipio_origem.nome+'/'+formSale.dataVolta.trecho.municipio_origem.uf }}
                     </v-col>
                     <v-col  cols="6" lg="12" class="tw-flex tw-items-center  ">
                       <Icon icon="solar:armchair-bold" class="mr-2" width="15"/>{{gerarStringTiposComodos(formSale.dataComodos.map(it=>it.tipo_comodidade))}}
@@ -1591,7 +1617,6 @@ watch(()=>props.tab,()=>{
           </v-col>
           <v-col cols="12" md="9">
             <v-form ref="formRef">
-
               <BaseCard title="Dados de quem irá viajar (IDA)" >
                 <PassegerForm
                     v-for="(item,index) in formSale.dataComodos"

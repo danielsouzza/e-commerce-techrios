@@ -31,11 +31,23 @@ async function getSlides() {
 }
 
 
-function goToSalePage(query){
-  query.dataIda = formatDateToServe(query.dataIda);
-  query.dataVolta = query.dataVolta ? formatDateToServe(query.dataVolta) : null;
-  router.push({name: "sale",params:{tab:'escolher-passagem'},query: query})
+function goToSalePage(query) {
+    query.dataIda = formatDateToServe(query.dataIda);
+    query.dataVolta = query.dataVolta ? formatDateToServe(query.dataVolta) : null;
+
+    router.push({
+        name: 'escolher-passagem', // <- Aqui é o nome da rota FILHA que tem os params
+        params: {
+            tab: 'escolher-passagem',
+            origem: query.origem,
+            destino: query.destino,
+            type: query.type,
+            dataIda: query.dataIda,
+            dataVolta: query.dataVolta || undefined
+        }
+    });
 }
+
 
 onMounted(() => {
   getSlides()

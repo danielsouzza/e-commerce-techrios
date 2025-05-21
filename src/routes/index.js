@@ -98,12 +98,22 @@ const routes = [
         meta: { title: 'Onde estamos' }
     },
     {
-        path: '/comprar-passagem/:tab',
-        component: () => import('../pages/Sale.vue'),
-        name: 'sale',
-        props: true,
-        meta: { title: 'Comprar Passagem' }
+        path: '/comprar-passagem/escolher-passagem/:origem/:destino/:type/:dataIda/:dataVolta?',
+        name: 'escolher-passagem',
+        component: () => import('../pages/Sale/ChooseTrip.vue'),
     },
+    {
+        path: '/comprar-passagem/informa-dados',
+        name: 'informa-dados',
+        component: () => import('../pages/Sale/InsertData.vue'),
+    },
+    {
+        path: '/comprar-passagem/pagamento',
+        name: 'pagamento',
+        component: () => import('../pages/Sale/PaymentMethods.vue'),
+    },
+
+
     {
         path: '/area-do-cliente/:tab',
         component: () => import('../pages/AreaDoCliente.vue'),
@@ -128,39 +138,40 @@ const routes = [
 
 const router = createRouter({
     history: createWebHistory(),
+    scrollBehavior(to, from, savedPosition) {return { top: 0 }},
     routes
 })
 
-router.afterEach((to, from) => {
-    document.title = to.meta.title + " - " + appName;
-    const loadingStore = useLoadingStore();
-    
-    setTimeout(() => {
-        loadingStore.stopLoading();
-        if (!to.hash) {
-            scrollBehavior();
-        }
-    }, 300);
-});
-
-router.beforeEach(async (to, from, next) => {
-    const cartStore = useCartStore();
-    const userStore = userAuthStore();
-
-    if (to.meta.requiresAuth && !userStore.isAuthenticated()) {
-        return next({ name: 'login' });
-    }
-
-    if (to.name === 'sale' && to.params.tab === 'pagamento') {
-        await cartStore.loadCart();
-        if (cartStore.isEmptyCart()) {
-            return next({ name: 'home' });
-        }
-    }
-
-    const loadingStore = useLoadingStore();
-    loadingStore.startLoading();
-    next();
-});
+// router.afterEach((to, from) => {
+//     document.title = to.meta.title + " - " + appName;
+//     const loadingStore = useLoadingStore();
+//
+//     setTimeout(() => {
+//         loadingStore.stopLoading();
+//         if (!to.hash) {
+//             scrollBehavior();
+//         }
+//     }, 300);
+// });
+//
+// router.beforeEach(async (to, from, next) => {
+//     const cartStore = useCartStore();
+//     const userStore = userAuthStore();
+//
+//     if (to.meta.requiresAuth && !userStore.isAuthenticated()) {
+//         return next({ name: 'login' });
+//     }
+//
+//     if (to.name === 'pagamento') {
+//         await cartStore.loadCart();
+//         if (cartStore.isEmptyCart()) {
+//             return next({ name: 'home' });
+//         }
+//     }
+//
+//     const loadingStore = useLoadingStore();
+//     loadingStore.startLoading();
+//     next();
+// });
 
 export default router;

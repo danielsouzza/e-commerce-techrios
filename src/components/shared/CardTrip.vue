@@ -35,12 +35,14 @@ const valor = computed(()=>{
 
 function goToSalePage(){
   if(props.dragging)return;
-  router.push({name: "sale",params:{tab:'escolher-passagem'},query: {
-      destino: props.data?.municipio_destino.slug,
-      origem: props.data?.municipio_origem.slug,
-      dataIda: formatDateToServe(new Date(props.data?.data_embarque)),
-      type:'somente-ida'
-    }})
+  router.push({name: "escolher-passagem",params:{
+          tab:'escolher-passagem',
+          origem: props.data?.municipio_origem.slug,
+          destino: props.data?.municipio_destino.slug,
+          dataIda: formatDateToServe(new Date(props.data?.data_embarque)),
+          type:'somente-ida'
+      }
+  })
 }
 
 
