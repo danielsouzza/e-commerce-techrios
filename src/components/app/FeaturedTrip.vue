@@ -17,6 +17,10 @@ const props = defineProps({
   }
 });
 
+const filtersSelected = ref({
+    quantia:!!window.subdomain ? 14 : 5
+})
+
 const isDragging = ref(false);
 const config_1 = {
   itemsToShow: 1,
@@ -48,21 +52,9 @@ const travels = computed(()=> trechosWithTravels.value.data?.trechos?.data || []
 const travels_more_important = computed(()=> travels.value.slice(0,3))
 const travels_les_important = computed(()=> travels.value.slice(3))
 
-const fullCarouselItems = computed(() => travels.value.slice(0, 3))
-const sideTickets = computed(() => [travels.value[3], travels.value[4]].filter(Boolean))
-const gridRows = computed(() => {
-  // Remove os 5 primeiros (3 full + 2 pequenos)
-  const restantes = travels.value.slice(5)
-  const linhas = []
-  for(let i=0; i<restantes.length; i+=4) {
-    linhas.push(restantes.slice(i, i+4))
-  }
-  return linhas
-})
-
 async function getTrechosWithTravels() {
   const params = new URLSearchParams()
-  params.append('quantia', !!window.subdomain ? '' : 5 )
+  params.append('quantia', filtersSelected.value.quantia )
   params.append('is_destaque', 1)
   params.append('subdomain', window.subdomain || '')
 
@@ -90,6 +82,11 @@ async function getTrechosWithTravels() {
   })
 }
 
+function showMoreticket(){
+    filtersSelected.value.quantia += 4
+    getTrechosWithTravels()
+}
+
 onMounted(()=>{
   getTrechosWithTravels()
 })
@@ -97,11 +94,11 @@ onMounted(()=>{
 
 <template>
   <div v-if="travels.length > 0" class="tw-flex tw-flex-col tw-items-center tw-justify-center !tw-my-5">
-    <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-center lg:tw-justify-between tw-w-full">
-      <div class="tw-text-[25px] tw-font-extrabold tw-text-center tw-text-primary" style="line-height: 28px">
-        Viagens em destaques
+    <div class="tw-flex tw-flex-col lg:tw-flex-row tw-items-center tw-justify-center  tw-w-full" :class="props.empresa  ? 'lg:tw-justify-center mb-7' : 'lg:tw-justify-between' ">
+      <div class=" tw-font-extrabold tw-text-center tw-text-primary" :class="props.empresa ?'tw-text-[30px]':'tw-text-[25px]'"  style="line-height: 28px">
+        Viagens em Destaques
       </div>
-      <RouterLink :to="{name: 'viagens-em-destaque'}">
+      <RouterLink :to="{name: 'viagens-em-destaque'}" v-if="!props.empresa">
         <v-btn color="secondary" class="my-5" variant="outlined" rounded>
           <div class="tw-flex tw-items-center !tw-font-extrabold !tw-text-xs">VER MAIS VIAGENS
             <Icon icon="material-symbols-light:arrow-right-alt-rounded" class="ml-2 tw-text-3xl"/>
@@ -113,24 +110,6 @@ onMounted(()=>{
     <!-- Layout para empresa -->
     <template v-if="props.empresa">
       <div class="tw-w-full tw-flex tw-flex-col tw-gap-5 tw-px-5">
-        <!-- Primeira linha: carrossel de até 3 full + 2 cards pequenos lado a lado -->
-        <!-- <div class="tw-flex tw-gap-5 tw-mb-5">
-          <div class="lg:!tw-w-[50%] !tw-w-full lg:!tw-rounded-xl">
-            <Carousel v-bind="config_1" class="tw-w-full lg:!tw-rounded-xl">
-              <Slide v-for="item in fullCarouselItems" :key="item.id">
-                <CardTripFull :data="item" />
-              </Slide>
-              <template #addons>
-                <CarouselNavigation />
-                <Pagination class="!tw-bottom-[-30px] "/>
-              </template>
-            </Carousel>
-          </div>
-          <div class="lg:!tw-w-[50%] tw-flex tw-flex-row tw-gap-5 tw-h-full" v-if="sideTickets.length">
-            <CardTicket v-for="item in sideTickets" :key="item.id" :data="item" class="tw-flex-1" />
-          </div>
-        </div> -->
-        <!-- Demais linhas: grid de até 4 cards -->
          <v-row >
           <v-col cols="12" sm="6"  >
             <Carousel v-bind="config_1" class="tw-w-full lg:!tw-rounded-xl my-carrousel my-carrousel">
@@ -147,7 +126,12 @@ onMounted(()=>{
             <CardTicket  :data="item" class="tw-mb-5 tw-mx-auto" />
           </v-col>
          </v-row>
-      
+          <div class="tw-flex tw-justify-center mb-5" v-if="filtersSelected.quantia <= trechosWithTravels.data?.trechos.total">
+              <v-btn @click="showMoreticket"  flat variant="plain" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
+                  <Icon icon="line-md:arrow-down" class="mr-2 tw-text-xl"/>
+                  Mostrar mais
+              </v-btn>
+          </div>
       </div>
     </template>
 
