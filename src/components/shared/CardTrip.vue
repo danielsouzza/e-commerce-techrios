@@ -16,6 +16,7 @@ import {
 import router from "../../routes/index.js";
 import TravelImages from "./TravelImages.vue";
 import {computed} from "vue";
+import {useLoadingStore} from "../../store/states.js";
 
 
 const props = defineProps({
@@ -35,8 +36,9 @@ const valor = computed(()=>{
 
 function goToSalePage(){
   if(props.dragging)return;
+    const loadingStore = useLoadingStore();
+    loadingStore.startLoading();
   router.push({name: "escolher-passagem",params:{
-          tab:'escolher-passagem',
           origem: props.data?.municipio_origem.slug,
           destino: props.data?.municipio_destino.slug,
           dataIda: formatDateToServe(new Date(props.data?.data_embarque)),

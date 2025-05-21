@@ -146,13 +146,14 @@ function scrollToStartDiv(){
 
 
 function nextStep(){
-    router.push({name: 'pagamento'});
     saveFormSaleToSession(formSale)
+    router.push({name: 'pagamento'});
 }
 
 function prevStep(){
-    router.back()
+
     saveFormSaleToSession(formSale)
+    router.back()
 }
 
 function removerPasseger(index,type){
@@ -332,15 +333,14 @@ function addCart(){
                 cartStore.loadCart()
                 formPayment.order_id = orderResponse.value.id;
                 showSuccessNotification('Viagem adicionado ao carrinho');
-                resetFormSale()
                 prevStep()
-                closeAllCards()
                 scrollToStartDiv()
             }
             loadingStore.stopLoading();
             formSale.processing = false
             router.push({name:'home'})
         }).catch(error=>{
+            console.log(error)
             formSale.processing = false
             loadingStore.stopLoading();
             scrollToStartDiv()
@@ -362,31 +362,6 @@ function identificarCpfOuCnpj(valor) {
     } else {
         return 0;
     }
-}
-
-function resetFormSale(type='ida') {
-    if(type == 'ida'){
-        formSale.trecho = null
-        formSale.viagem = null
-        formSale.data_hora = null
-        formSale.total_passagems = 0.0
-        formSale.total_taxas = 0.0
-
-        formSale.dataComodos = [];
-        formSale.dataVolta = null;
-        stepSale.value = 1
-        generateNextDays()
-
-    }else{
-        formSale.dataVolta = null;
-    }
-
-
-    if(filtersSelected.value.type == 'ida-e-volta'){
-        generateNextDays('volta')
-    }
-
-    clearFormSaleSession()
 }
 
 function addPassegerToContact(index,type){

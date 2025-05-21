@@ -11,6 +11,7 @@ import {
 import router from "../../routes/index.js";
 import { getApiBaseUrl } from "../../services/api.js";
 import { ref, onMounted, onUnmounted, computed } from "vue";
+import {useLoadingStore} from "../../store/states.js";
 
 const props = defineProps({
   data: Object,
@@ -41,14 +42,16 @@ const valor = computed(()=>{
 
 function goToSalePage() {
   if (props.dragging) return;
-  router.push({
-    name: "escolher-passagem",
-    params: {  destino: props.data?.municipio_destino.slug,
-        origem: props.data?.municipio_origem.slug,
-        dataIda: formatDateToServe(new Date(props.data?.data_embarque)),
-        type: "somente-ida",
-    }
-  });
+    const loadingStore = useLoadingStore();
+    loadingStore.startLoading();
+    router.push({
+        name: "escolher-passagem",
+        params: {  destino: props.data?.municipio_destino.slug,
+            origem: props.data?.municipio_origem.slug,
+            dataIda: formatDateToServe(new Date(props.data?.data_embarque)),
+            type: "somente-ida",
+        }
+    });
 }
 </script>
 

@@ -105,7 +105,7 @@ watch(()=>props.auth,()=>{
           </v-btn>
         </v-col>
         <v-col  >
-          <RouterLink :to="{name:'pagamento',params:{tab:'pagamento'}}">
+          <RouterLink :to="{name:'pagamento'}">
             <v-btn color="primary" rounded="lg" class="tw-w-full" size="large"> Finalizar compra </v-btn>
           </RouterLink>
         </v-col>

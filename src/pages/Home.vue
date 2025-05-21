@@ -6,6 +6,7 @@ import {routes} from "../services/fetch.js";
 import {onMounted, ref} from "vue";
 import router from "../routes/index.js";
 import {formatDateToServe} from "../Helper/Ultis.js";
+import {useLoadingStore} from "../store/states.js";
 
 // Componentes não críticos com lazy loading
 const RiversOfOffers = defineAsyncComponent(() => import("../components/app/RiversOfOffers.vue"));
@@ -32,13 +33,15 @@ async function getSlides() {
 
 
 function goToSalePage(query) {
+    const loadingStore = useLoadingStore();
     query.dataIda = formatDateToServe(query.dataIda);
     query.dataVolta = query.dataVolta ? formatDateToServe(query.dataVolta) : null;
 
+
+    loadingStore.startLoading();
     router.push({
         name: 'escolher-passagem', // <- Aqui é o nome da rota FILHA que tem os params
         params: {
-            tab: 'escolher-passagem',
             origem: query.origem,
             destino: query.destino,
             type: query.type,

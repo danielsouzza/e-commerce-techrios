@@ -286,19 +286,22 @@ function updateUrlPage() {
         origem: filtersSelected.value.origem,
         destino: filtersSelected.value.destino,
         dataIda: formatDateToServe(filtersSelected.value.dataIda),
-        type: filtersSelected.value.type
+        type: filtersSelected.value.type,
     };
 
-    if (filtersSelected.value.type === 'ida-e-volta') {
-        baseParams.dataVolta = formatDateToServe(filtersSelected.value.dataVolta);
+    let path = `/comprar-passagem/escolher-passagem/${baseParams.origem}/${baseParams.destino}/${baseParams.type}/${baseParams.dataIda}`;
+
+    if (baseParams.type === 'ida-e-volta') {
+        const dataVolta = formatDateToServe(filtersSelected.value.dataVolta);
+        path += `/${dataVolta}`;
     }
 
-    router.push({
-        name: 'escolher-passagem',
-        params: {
-            ...baseParams,
-        }
-    });
+// Atualiza a URL manualmente sem recarregar a página ou disparar navegação
+    history.pushState({
+        ...baseParams,
+        path
+    }, '', path);
+
 }
 
 
@@ -520,6 +523,7 @@ function loadData(){
 
 
 onMounted(() => {
+
     authStore.loadUser()
     if(authStore.isAuthenticated()){
         authStore.getUser().then(()=>{
@@ -605,7 +609,6 @@ onMounted(() => {
         </template>
     </v-dialog>
     <v-card   color="primary" rounded="0"  class="!tw-py-6">
-
         <div  class=" lg:!tw-mb-[70px] !tw-mb-[70px] maxWidth tw-flex  !tw-justify-center tw-flex-col tw-items-center lg:tw-items-start ">
             <div class="text-center lg:tw-text-start tw-py-4 px-5 lg:tw-text-lg">
                 Passagem de <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem',filtersData)}} </strong> para <strong class="tw-font-bold">{{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}}</strong>
@@ -619,7 +622,7 @@ onMounted(() => {
             @update:modelValue="getTrechosWithTravels()"
             @update:options="(args)=>filtersData = args"
             class=" tw-top-[-100px]  !tw-mb-[-60px] lg:tw-top-[-100px] lg:!tw-mb-[-90px] !tw-mx-5 lg:!tw-mx-0  lg:!tw-block" />
-        <Steps step-sale="1"></Steps>
+        <Steps :step-sale="1"></Steps>
         <div class="tw-flex tw-justify-between tw-items-center  tw-px-3 mt-5 lg:!tw-hidden">
             <div class="tw-font-bold  ">
                 Selecionar sua viagem
