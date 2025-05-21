@@ -151,6 +151,9 @@ router.afterEach((to, from) => {
 
     setTimeout(() => {
         loadingStore.stopLoading();
+        if (!to.hash) {
+            scrollBehavior();
+        }
     }, 300);
 });
 
