@@ -16,7 +16,6 @@ const route = useRoute();
 const orderId = ref(route.params.id);
 const order = ref(null);
 const loading = ref(false);
-const paymentMethod = ref('pix');
 const loadingStore = useLoadingStore();
 const orderConfirmation = ref(null);
 const paymentPending = ref(null);
@@ -31,6 +30,7 @@ let checkTimeout = null;
 const formPayment = reactive({
   order_id: null,
   payment_method_id: 6,
+    is_from_site:true,
   credit_card: {
     holder: null,
     card_number: null,

@@ -185,7 +185,7 @@ function checkStatusPayment() {
         if (res.data.success) {
             orderConfirmation.value = res.data.data;
             if (orderConfirmation.value.status === "Pago") {
-                stepSale.value = 5;
+                stepSale.value = 3;
                 whatPayment.value = false;
                 cartStore.clearCartLocal();
             } else {
@@ -201,7 +201,7 @@ function checkStatusPayment() {
     }).catch((error) => {
         whatPayment.value = false;
         showErrorNotification(error.response?.data?.data?.details ?? error.response?.data?.data?.error ?? error.response?.data?.message);
-        stepSale.value = 3
+        stepSale.value = 1
     });
 }
 
@@ -232,7 +232,7 @@ function submitPaymentCredit(){
     routes["payment.credito"](data).then(res => {
         if(res.data.success){
             orderConfirmation.value = res.data.data;
-            stepSale.value = 5
+            stepSale.value = 3
             useCartStore().clearCartLocal()
             showSuccessNotification(res.data.message);
 
@@ -245,7 +245,7 @@ function submitPaymentCredit(){
             cartStore.addItem(error.response.data.data.pedido)
             cartStore.loadCart()
         }
-        stepSale.value = 3
+        stepSale.value = 1
     })
 }
 
@@ -571,7 +571,7 @@ onUnmounted(() => {
                     </v-col>
                 </v-row>
             </v-tabs-window-item>
-            <v-tabs-window-item :value="2">
+            <v-tabs-window-item :value="3">
                 <v-row  >
                     <v-col cols="12" v-if="formPayment.payment_method_id == 6" >
                         <BaseCard title="Confirmação da compra"  class="mt-3">

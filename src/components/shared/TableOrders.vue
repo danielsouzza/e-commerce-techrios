@@ -75,19 +75,24 @@ const orders = computed(() => {
       data: formatDate(item.data),
       status: item.status,
       passagens: item.passagens_agrupadas.map(passage => {
-        const [dataParte, horaParte] = passage.trecho_viagem.data_embarque.split(' ');
-        const [dia, mes, ano] = dataParte.split('/');
-        const [hora, minuto] = horaParte ? horaParte.split(':') : ['00', '00'];
+          let embarque_passado = true
+          if(passage.trecho_viagem){
+              const [dataParte, horaParte] = passage.trecho_viagem?.data_embarque.split(' ');
+              const [dia, mes, ano] = dataParte.split('/');
+              const [hora, minuto] = horaParte ? horaParte.split(':') : ['00', '00'];
 
-        const dataEmbarque = new Date(ano, mes - 1, dia, hora, minuto);
-        const agora = new Date();
+              const dataEmbarque = new Date(ano, mes - 1, dia, hora, minuto);
+              const agora = new Date();
+              let embarque_passado = dataEmbarque < agora
+          }
+
 
         return {
           codigo: item.id + "-" + passage.viagem.id,
           viagem: passage.trecho.municipio_origem.nome + " - " + passage.trecho.municipio_destino.nome,
-          data: passage.trecho_viagem.data_embarque,
+          data: passage.trecho_viagem?.data_embarque,
           status: item.status,
-          embarque_passado: dataEmbarque < agora,
+          embarque_passado: embarque_passado,
           detalhes: {
             boat: passage.viagem?.embarcacao,
             passageiros: passage.passagem_pedidos,

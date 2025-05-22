@@ -289,7 +289,7 @@ function updateUrlPage() {
         type: filtersSelected.value.type,
     };
 
-    let path = `/comprar-passagem/escolher-passagem/${baseParams.origem}/${baseParams.destino}/${baseParams.type}/${baseParams.dataIda}`;
+    let path = `/escolher-passagem/${baseParams.origem}/${baseParams.destino}/${baseParams.type}/${baseParams.dataIda}`;
 
     if (baseParams.type === 'ida-e-volta') {
         const dataVolta = formatDateToServe(filtersSelected.value.dataVolta);

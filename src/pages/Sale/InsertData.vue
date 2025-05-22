@@ -151,7 +151,6 @@ function nextStep(){
 }
 
 function prevStep(){
-
     saveFormSaleToSession(formSale)
     router.back()
 }
@@ -305,7 +304,6 @@ function addCart(){
         item.data_nascimento = formatDate(item.nascimento)
     })
 
-
     formSale.total = formSale.total_passagems + formSale.total_taxas;
 
     const params = {
@@ -313,7 +311,6 @@ function addCart(){
         pedido_id: useCartStore().order?.id,
         ...formSale,
         trecho:formSale.trecho.id,
-
     }
 
     if(formSale.dataVolta){
@@ -333,7 +330,6 @@ function addCart(){
                 cartStore.loadCart()
                 formPayment.order_id = orderResponse.value.id;
                 showSuccessNotification('Viagem adicionado ao carrinho');
-                prevStep()
                 scrollToStartDiv()
             }
             loadingStore.stopLoading();

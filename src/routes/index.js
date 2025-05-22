@@ -5,8 +5,6 @@ import {useLoadingStore} from "../store/states.js";
 import {scrollBehavior} from "../event-bus.js";
 import {api} from "../services/api.js";
 
-const appName = import.meta.env.VITE_APP_NAME || 'Yjara Viagens';
-
 const routes = [
     {
         path: '/',
@@ -99,20 +97,19 @@ const routes = [
         meta: { title: 'Onde estamos' }
     },
     {
-        path: '/comprar-passagem/escolher-passagem/:origem/:destino/:type/:dataIda/:dataVolta?',
+        path: '/escolher-passagem/:origem/:destino/:type/:dataIda/:dataVolta?',
         name: 'escolher-passagem',
         meta: { title: 'Escolher Passagem'},
         component: () => import('../pages/Sale/ChooseTrip.vue'),
     },
     {
-        path: '/comprar-passagem/informa-dados',
+        path: '/informa-dados',
         name: 'informa-dados',
         meta: { title: 'Informar Dados'},
-
         component: () => import('../pages/Sale/InsertData.vue'),
     },
     {
-        path: '/comprar-passagem/pagamento',
+        path: '/pagamento',
         name: 'pagamento',
         meta: { title: 'Pagamento'},
         component: () => import('../pages/Sale/PaymentMethods.vue'),
@@ -146,7 +143,8 @@ const router = createRouter({
 })
 
 router.afterEach((to, from) => {
-    document.title = to.meta.title + " - " + appName;
+    const title = window.appname || import.meta.env.VITE_APP_NAME || 'Yjara Viagens'
+    document.title = to.meta.title + " - " + title;
     const loadingStore = useLoadingStore();
 
     setTimeout(() => {
@@ -162,6 +160,14 @@ router.beforeEach((to, from, next) => {
 
     if (to.meta.requiresAuth && !localStorage.getItem('auth_token')) {
         next({ name: 'login' });
+    }
+
+    if (to.name === 'pagamento' && useCartStore().isEmptyCart()) {
+        next({ name: 'home' });
+    }
+
+    if(to.name === 'informa-dados' && !sessionStorage.getItem('form-sale')){
+        next({ name: 'home' });
     }
     next();
 });
