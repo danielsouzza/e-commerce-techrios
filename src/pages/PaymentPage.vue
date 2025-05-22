@@ -29,8 +29,9 @@ let intervalo = null;
 let checkTimeout = null;
 
 const formPayment = reactive({
-  order_id: null,
-  payment_method_id: 6,
+    order_id: null,
+    payment_method_id: 6,
+    is_from_site:true,
   credit_card: {
     holder: null,
     card_number: null,
