@@ -115,8 +115,14 @@ const routes = [
         component: () => import('../pages/Sale/PaymentMethods.vue'),
     },
     {
-        path: '/compra-realizada',
-        name: 'compra-realizada',
+        path: '/compra-realizada/pix',
+        name: 'compra-realizada-pix',
+        meta: { title: 'Compra Realizada'},
+        component: () => import('../pages/Sale/PurchaseMade.vue'),
+    },
+    {
+        path: '/compra-realizada/credito',
+        name: 'compra-realizada-credito',
         meta: { title: 'Compra Realizada'},
         component: () => import('../pages/Sale/PurchaseMade.vue'),
     },

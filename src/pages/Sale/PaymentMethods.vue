@@ -128,7 +128,11 @@ function clearCheckTimeout() {
 function nextStep(){
     orderConfirmation.value.payment_method_id = formPayment.payment_method_id
     saveConfirmPaymentToSession(orderConfirmation.value)
-    router.push({name:'compra-realizada'})
+    if(orderConfirmation.value.payment_method_id === 3){
+        router.push({name:'compra-realizada-credito'})
+    }else{
+        router.push({name:'compra-realizada-pix'})
+    }
 }
 
 function prevStep(){
