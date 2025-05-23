@@ -31,6 +31,29 @@ export function restoreFormSaleFromSession(formSale) {
     }
 }
 
+export function saveConfirmPaymentToSession(data) {
+    sessionStorage.setItem('oder-confirm-payment', JSON.stringify(data));
+}
+
+export function restoreConfirmPaymentToSession(formSale) {
+    const saved = sessionStorage.getItem('oder-confirm-payment');
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            Object.assign(formSale, parsed);
+        } catch (e) {
+            sessionStorage.removeItem('oder-confirm-payment');
+        }
+    }
+}
+
+
+
+export function clearConfirmPaymentToSession() {
+    sessionStorage.removeItem('oder-confirm-payment');
+}
+
+
 export function clearFormSaleSession() {
     sessionStorage.removeItem('form-sale');
 }

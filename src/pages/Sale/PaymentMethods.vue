@@ -2,7 +2,6 @@
 
 import {Icon} from "@iconify/vue";
 import {computed, nextTick, onMounted, onUnmounted, reactive, ref} from "vue";
-import { useRoute} from "vue-router";
 import {routes} from "../../services/fetch.js";
 import BaseCard from "../../components/shared/BaseCard.vue";
 import {formatCurrency} from "../../Helper/Ultis.js";
@@ -12,19 +11,16 @@ import VueQrcode from "vue-qrcode";
 import {useCartStore} from "../../store/CartStore.js";
 import CartItem from "../../components/app/Cart/CartItem.vue";
 import {userAuthStore} from "../../store/AuthStore.js";
-import {getApiBaseUrl} from "../../services/api.js";
 import { showErrorNotification, showSuccessNotification} from "../../event-bus.js";
 import {useLoadingStore} from "../../store/states.js";
 import Steps from "../../components/app/Sale/Steps.vue";
-import {restoreFormSaleFromSession} from "../../store/SalesSection.js";
+import {restoreFormSaleFromSession, saveConfirmPaymentToSession} from "../../store/SalesSection.js";
 import router from "../../routes/index.js";
 const props = defineProps({
     step:String,
 })
 
-const route = useRoute();
 const cartStore = useCartStore()
-const authStore = userAuthStore()
 const percentToPay = ref(0)
 const timeToPay = ref(30 * 60)
 const whatPayment = ref(false)
@@ -121,14 +117,6 @@ const formatarTempo = () => {
     return `${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
 };
 
-const downloadFile = async (url, filename) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.target = '_blank'; // Abre em nova aba
-    link.download = filename;
-    link.click()
-}
-
 
 function clearCheckTimeout() {
     if (checkTimeout) {
@@ -138,9 +126,9 @@ function clearCheckTimeout() {
 }
 
 function nextStep(){
-    if(stepSale.value < 3){
-        stepSale.value++;
-    }
+    orderConfirmation.value.payment_method_id = formPayment.payment_method_id
+    saveConfirmPaymentToSession(orderConfirmation.value)
+    router.push({name:'compra-realizada'})
 }
 
 function prevStep(){
@@ -165,7 +153,6 @@ const validateFormCredit = () => {
         }
     };
 
-
     validateField('credit_card.holder', formPayment.credit_card.holder, 'Por favor, insira seu nome que esta no cartão.',formPayment);
     validateField('credit_card.card_number', formPayment.credit_card.card_number, 'Por favor, insira o número do cartão.',formPayment);
     validateField('credit_card.expiration_date', formPayment.credit_card.expiration_date, 'Por favor, insira a data de vencimento.',formPayment);
@@ -185,7 +172,7 @@ function checkStatusPayment() {
         if (res.data.success) {
             orderConfirmation.value = res.data.data;
             if (orderConfirmation.value.status === "Pago") {
-                stepSale.value = 3;
+                nextStep()
                 whatPayment.value = false;
                 cartStore.clearCartLocal();
             } else {
@@ -204,17 +191,6 @@ function checkStatusPayment() {
         stepSale.value = 1
     });
 }
-
-function reSendTickets(){
-    useLoadingStore().startLoading()
-    routes["order.send-passenger"](orderConfirmation.value.id).then(response => {
-        useLoadingStore().stopLoading()
-        showSuccessNotification(response.data.data)
-
-    }).catch(error=>{
-        showErrorNotification('Algo deu errado!')
-    })
-}
 function submitPaymentCredit(){
 
     if(!validateFormCredit()) return
@@ -232,10 +208,9 @@ function submitPaymentCredit(){
     routes["payment.credito"](data).then(res => {
         if(res.data.success){
             orderConfirmation.value = res.data.data;
-            stepSale.value = 3
             useCartStore().clearCartLocal()
             showSuccessNotification(res.data.message);
-
+            nextStep()
         }
         loadingStore.stopLoading();
     }).catch(error=>{
@@ -245,7 +220,6 @@ function submitPaymentCredit(){
             cartStore.addItem(error.response.data.data.pedido)
             cartStore.loadCart()
         }
-        stepSale.value = 1
     })
 }
 
@@ -257,8 +231,7 @@ function submitPaymentPix(){
             paymentPending.value = res.data.data;
             loadingStore.stopLoading();
             whatPayment.value = true
-            // showSuccessNotification(res.data.message);
-            nextStep()
+            stepSale.value = 2
             iniciarTemporizador()
             checkStatusPayment()
         }
@@ -284,33 +257,6 @@ function updateFormattedDate(value,type) {
     formPayment.credit_card.expiration_date = `${month}/${year}`;
 }
 
-function getTicketPdf(){
-    const baseUrl = getApiBaseUrl().replaceAll('api','')
-    const pathToReplace = "/var/www/storage/app/public/";
-    const newPathPrefix = `${baseUrl}/storage/`;
-
-    let trips = {}
-    if(formPayment.payment_method_id == 6){
-        trips = orderConfirmation.value
-    }else if(formPayment.payment_method_id == 3){
-        trips = orderConfirmation.value.pedido
-    }
-
-    trips?.passagens_agrupadas?.forEach(passage => {
-        passage.passagem_pedidos.forEach(it => {
-            routes["ticket.print"](it.passageiro_viagem_id).then(response => {
-                if(response.data.success){
-                    downloadFile(
-                        response.data.data.replace(pathToReplace, newPathPrefix),
-                        it.passageiro?.nome
-                    );
-                }
-            }).catch(error => {
-                showErrorNotification(error.response.data.data.error);
-            })
-        })
-    })
-}
 
 
 onMounted(() => {
@@ -567,49 +513,6 @@ onUnmounted(() => {
                         </BaseCard>
                         <v-btn  variant="flat" color="secondary" rounded  class="d-lg-flex  !tw-font-extrabold px-2 mt-3"  @click="prevStep">
                             <Icon icon="mdi:navigate-before" width="20"  class="mr-1 tw-text-white"  /> <span class=" !tw-text-xs tw-text-white mr-1"  >Voltar</span>
-                        </v-btn>
-                    </v-col>
-                </v-row>
-            </v-tabs-window-item>
-            <v-tabs-window-item :value="3">
-                <v-row  >
-                    <v-col cols="12" v-if="formPayment.payment_method_id == 6" >
-                        <BaseCard title="Confirmação da compra"  class="mt-3">
-                            <div class="tw-flex tw-justify-center tw-flex-col tw-items-center tw-text-center">
-                                <Icon icon="icon-park-outline:ticket"  class="mr-2 tw-text-secondary !tw-text-[80px]"  />
-                                <p class="tw-text-xl tw-text-secondary tw-font-bold my-2">Compra realizada com sucesso!</p>
-                                <p> Olá, {{orderConfirmation.contato.nome}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
-                                <p><strong>Pedido {{orderConfirmation.id}}</strong></p>
-                            </div>
-                        </BaseCard>
-                    </v-col>
-
-                    <v-col cols="12" v-if="formPayment.payment_method_id == 3" >
-                        <BaseCard title="Confirmação da compra"  class="mt-3">
-                            <div class="tw-flex tw-justify-center tw-flex-col tw-items-center tw-text-center">
-                                <Icon icon="icon-park-outline:ticket"  class="mr-2 tw-text-secondary !tw-text-[80px]"  />
-                                <p class="tw-text-xl tw-text-secondary tw-font-bold my-2">Compra realizada com sucesso!</p>
-                                <p> Olá, {{authStore.user.name}}! <br> Sua passagem está confirmada e foi enviada para seu email e WhatsApp</p>
-                                <p><strong> {{orderConfirmation.description}}</strong></p>
-                                <p><strong> {{formatCurrency(orderConfirmation.amount)}}</strong></p>
-                                <p><strong> {{orderConfirmation.installments}}x  {{orderConfirmation.payment_method}}</strong></p>
-                            </div>
-                        </BaseCard>
-                    </v-col>
-
-                    <v-col v-if="userAuthStore().isAuthenticated()" cols="12" class="tw-flex tw-justify-center tw-items-center tw-gap-1 py-2 pb-5" >
-                        <RouterLink :to="{name:'area-do-cliente',params:{tab:'pedidos'}}">
-                            <v-btn  flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
-                                <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/>  Ver pedidos</span>
-                            </v-btn>
-                        </RouterLink>
-                        <v-btn @click="getTicketPdf()" flat color="secondary" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
-                            <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/> Baixar bilhete</span>
-                        </v-btn>
-                    </v-col>
-                    <v-col v-if="!userAuthStore().isAuthenticated()"  cols="12" class="tw-flex tw-justify-center tw-items-center tw-gap-1 py-2 pb-5" >
-                        <v-btn @click="reSendTickets()" flat color="info" class="tw-flex tw-items-center !tw-font-extrabold tw-text-sm" >
-                            <span class="tw-text-white tw-flex"><Icon icon="material-symbols-light:order-approve" class="mr-2 tw-text-xl"/> Enviar bilhete para meu contato</span>
                         </v-btn>
                     </v-col>
                 </v-row>

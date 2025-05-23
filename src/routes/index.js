@@ -115,6 +115,12 @@ const routes = [
         component: () => import('../pages/Sale/PaymentMethods.vue'),
     },
     {
+        path: '/compra-realizada',
+        name: 'compra-realizada',
+        meta: { title: 'Compra Realizada'},
+        component: () => import('../pages/Sale/PurchaseMade.vue'),
+    },
+    {
         path: '/area-do-cliente/:tab',
         component: () => import('../pages/AreaDoCliente.vue'),
         name: 'area-do-cliente',
@@ -167,6 +173,10 @@ router.beforeEach((to, from, next) => {
     }
 
     if(to.name === 'informa-dados' && !sessionStorage.getItem('form-sale')){
+        next({ name: 'home' });
+    }
+
+    if(to.name === 'compra-realizada' && !sessionStorage.getItem('oder-confirm-payment')){
         next({ name: 'home' });
     }
     next();
