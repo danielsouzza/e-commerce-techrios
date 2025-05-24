@@ -83,7 +83,7 @@ const orders = computed(() => {
 
               const dataEmbarque = new Date(ano, mes - 1, dia, hora, minuto);
               const agora = new Date();
-              let embarque_passado = dataEmbarque < agora
+              embarque_passado = dataEmbarque < agora
           }
 
 
@@ -569,7 +569,7 @@ onMounted(()=>{
                   </RouterLink>
                 </v-col>
               </v-row>
-              <v-row v-if="item.status == 'Solicitado' && !item.passagens.some(it=>it.embarque_passado)" class="px-4">
+              <v-row v-if="item.status == 'Solicitado' && !item.passagens?.some(it=>it.embarque_passado)" class="px-4">
                 <v-col cols="12" lg="6" class="d-flex justify-end  mb-3">
                     <v-btn variant="tonal" @click="submitPaymentPix(item.codigo)" color="primary" rounded="lg" class="tw-w-full" >Pagar no Pix</v-btn>
                 </v-col>
