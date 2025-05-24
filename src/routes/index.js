@@ -170,6 +170,7 @@ router.afterEach((to, from) => {
 
 router.beforeEach((to, from, next) => {
 
+
     if (to.meta.requiresAuth && !localStorage.getItem('auth_token')) {
         next({ name: 'login' });
     }

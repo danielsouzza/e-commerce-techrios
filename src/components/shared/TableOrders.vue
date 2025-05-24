@@ -564,7 +564,7 @@ onMounted(()=>{
 
               <v-row v-if="item.status == 'Em aberto' && item.passagens?.length > 0" >
                 <v-col class="d-flex justify-end mx-4 mb-3">
-                  <RouterLink :to="{name:'sale',params:{tab:'pagamento'}}">
+                  <RouterLink :to="{name:'pagamento'}">
                     <v-btn color="primary" rounded="lg" class="tw-w-full" >Ir para o pagamento</v-btn>
                   </RouterLink>
                 </v-col>

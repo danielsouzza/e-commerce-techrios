@@ -146,8 +146,13 @@ function scrollToStartDiv(){
 
 
 function nextStep(){
-    saveFormSaleToSession(formSale)
-    router.push({name: 'pagamento'});
+    useCartStore().loadCart().then(()=>{
+        if(!useCartStore().isEmptyCart()){
+            saveFormSaleToSession(formSale)
+            router.push({name: 'pagamento'});
+        }
+    })
+
 }
 
 function prevStep(){

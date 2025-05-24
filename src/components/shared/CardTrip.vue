@@ -33,6 +33,13 @@ const valor = computed(()=>{
   return formatMoney(props.data?.valor) + formatMoney(props.data?.taxa_de_embarque);
 })
 
+const superSale = computed(() => {
+  const valorOriginal = formatMoney(props.data?.valor) + formatMoney(props.data?.taxa_de_embarque);
+  const desconto = props.data?.desconto?.desconto ? props.data.desconto.desconto : 0;
+  if (!valorOriginal || !desconto) return false;
+  const percentual = (desconto / valorOriginal) * 100;
+  return percentual >= 30;
+});
 
 function goToSalePage(){
   if(props.dragging)return;
