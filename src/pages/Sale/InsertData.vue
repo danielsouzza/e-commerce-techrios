@@ -436,6 +436,10 @@ onMounted(() => {
         restoreFormSaleFromSession(formSale)
     })
 
+    window.dataLayer.push({
+        event: 'pagina_acessada',
+        pagina: 'informar-dados'
+    });
 
 });
 

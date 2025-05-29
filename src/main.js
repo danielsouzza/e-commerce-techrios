@@ -49,6 +49,8 @@ const themeConfig = reactive({
     logo: '/assets/images/logo-yjara.svg',
 });
 
+window.dataLayer = window.dataLayer || [];
+
 async function fetchTheme() {
     if (window.subdomain) {
         try {

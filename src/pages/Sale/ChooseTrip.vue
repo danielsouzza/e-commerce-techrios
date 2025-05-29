@@ -543,8 +543,11 @@ onMounted(() => {
         loadData()
         getEmpresas()
     }
-
     window.addEventListener('resize', updateWidth);
+    window.dataLayer.push({
+        event: 'pagina_acessada',
+        pagina: 'escolher-viagem'
+    });
 
 });
 

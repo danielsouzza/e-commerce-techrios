@@ -86,7 +86,13 @@ onMounted(() => {
         clearConfirmPaymentToSession()
     })
 
+    window.dataLayer.push({
+        event: 'pagina_acessada',
+        pagina: 'compra-realizada',
+    });
+
 })
+
 
 
 

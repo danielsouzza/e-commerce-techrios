@@ -228,6 +228,7 @@ function cancelarPayment() {
   percentToPay.value = 0;
   nextTick(() => {
     orderConfirmation.value = null;
+      whatPayment.value = false
     getOrderDetails();
   });
 }
@@ -322,7 +323,7 @@ onUnmounted(() => {
                     <li>O pagamento poderá ser efetuado via aplicativos de pagamento, lendo o QR Code ou copiar e colando a URL gerada</li>
                   </ul>
                 </div>
-                <v-btn variant="flat" color="success" rounded class="d-lg-flex !tw-font-extrabold px-2 mt-3 lg:!tw-py-5 tw-w-full" @click="submitPaymentPix">
+                <v-btn :loading="whatPayment" :disabled="whatPayment" variant="flat" color="success" rounded class="d-lg-flex !tw-font-extrabold px-2 mt-3 lg:!tw-py-5 tw-w-full" @click="submitPaymentPix">
                   <Icon icon="ic:baseline-pix" class="mr-2 tw-text-white" width="26" />
                   <span class="!tw-text-xs lg:!tw-text-sm tw-text-white ml-1">REALIZAR PAGAMENTO VIA PIX</span>
                 </v-btn>
@@ -433,7 +434,7 @@ onUnmounted(() => {
                     </v-row>
                   </v-col>
                 </v-row>
-                <v-btn variant="flat" color="success" rounded class="d-lg-flex !tw-font-extrabold px-2 mt-3 lg:!tw-py-5" @click="submitPaymentCredit">
+                <v-btn :loading="whatPayment" :disabled="whatPayment" variant="flat" color="success" rounded class="d-lg-flex !tw-font-extrabold px-2 mt-3 lg:!tw-py-5" @click="submitPaymentCredit">
                   <Icon icon="heroicons:credit-card-20-solid" class="mr-2 tw-text-white" width="26" />
                   <span class="!tw-text-xs lg:!tw-text-sm tw-text-white ml-1">REALIZAR PAGAMENTO</span>
                 </v-btn>

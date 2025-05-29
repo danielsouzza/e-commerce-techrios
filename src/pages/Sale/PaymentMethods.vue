@@ -179,6 +179,10 @@ function checkStatusPayment() {
                 nextStep()
                 whatPayment.value = false;
                 cartStore.clearCartLocal();
+                window.dataLayer.push({
+                    event: 'pagamento_pix_aprovado',
+                    pagina: 'forma-de-pagamento'
+                });
             } else {
                 if (timeToPay.value === 0) {
                     showErrorNotification('Tempo de venda expirou');
@@ -196,6 +200,10 @@ function checkStatusPayment() {
     });
 }
 function submitPaymentCredit(){
+    window.dataLayer.push({
+        event: 'pagamento_credito_solicitado',
+        pagina: 'forma-de-pagamento'
+    });
 
     if(!validateFormCredit()) return
 
@@ -214,6 +222,10 @@ function submitPaymentCredit(){
             orderConfirmation.value = res.data.data;
             useCartStore().clearCartLocal()
             showSuccessNotification(res.data.message);
+            window.dataLayer.push({
+                event: 'pagamento_credito_aprovado',
+                pagina: 'forma-de-pagamento'
+            });
             nextStep()
         }
         loadingStore.stopLoading();
@@ -238,6 +250,11 @@ function submitPaymentPix(){
             stepSale.value = 2
             iniciarTemporizador()
             checkStatusPayment()
+
+            window.dataLayer.push({
+                event: 'pagamento_pix_solicitado',
+                pagina: 'forma-de-pagamento'
+            });
         }
     }).catch(error=>{
         loadingStore.stopLoading();
@@ -281,6 +298,10 @@ onUnmounted(() => {
     clearCheckTimeout()
 });
 
+window.dataLayer.push({
+    event: 'pagina_acessada',
+    pagina: 'forma-de-pagamento'
+});
 
 </script>
 
