@@ -28,11 +28,6 @@ const cartStore = useCartStore()
 const authStore = userAuthStore()
 const orderResponse = ref(null)
 const loadingStore = useLoadingStore();
-const windowWidth = ref(window.innerWidth);
-const tripsSelecteds = ref({
-    dataIda:null,
-    dataVolta:null
-})
 const formPayment = reactive({
     order_id:null,
     payment_method_id:6,
@@ -75,67 +70,7 @@ const formSale = reactive({
     errors:{},
     processing:false
 })
-const nextDaysIda = ref([])
-const nextDaysVolta = ref([])
-const isLargeScreen = computed(()=> windowWidth.value >= 1024)
-function generateNextDays( type='ida') {
-    let dateCurrent = filtersSelected.value.dataIda
-    if(type == 'volta'){
-        dateCurrent = filtersSelected.value.dataVolta
-    }
 
-    if (!dateCurrent) return;
-
-    let date = new Date(dateCurrent);
-    const hoje = new Date();
-    hoje.setHours(0, 0, 0, 0);
-
-    if (date < hoje) {
-        date = hoje;
-    }
-
-    let futureDates = [];
-    let start = isLargeScreen.value ? -3 : -1;
-    let end = isLargeScreen.value ? 4 : 2;
-
-    while (start < 0) {
-        let pastDate = new Date(date);
-        pastDate.setDate(date.getDate() + start);
-        if(type == 'ida'){
-            if (pastDate < hoje) {
-                start++;
-            } else {
-                break;
-            }
-        }else{
-            if (pastDate < filtersSelected.value.dataIda) {
-                start++;
-            } else {
-                break;
-            }
-        }
-
-    }
-
-    for (let i = start; i < end; i++) {
-        let futureDate = new Date(date);
-        futureDate.setDate(date.getDate() + i);
-
-        if(type == 'ida'){
-            if (filtersSelected.value.dataVolta && futureDate > filtersSelected.value.dataVolta) {
-                break;
-            }
-        }
-
-        futureDates.push(futureDate);
-    }
-
-    if(type == 'ida'){
-        nextDaysIda.value = futureDates;
-    }else{
-        nextDaysVolta.value = futureDates
-    }
-}
 
 
 function scrollToStartDiv(){
@@ -288,6 +223,9 @@ function submitOrder(){
                 orderResponse.value = response.data.data;
                 cartStore.addItem(orderResponse.value)
                 cartStore.loadCart()
+                window.dataLayer.push({
+                    event: 'adicionado-ao-carrinho'
+                });
                 formPayment.order_id = orderResponse.value.id;
                 nextStep()
             }
@@ -334,6 +272,9 @@ function addCart(){
                 cartStore.addItem(orderResponse.value)
                 cartStore.loadCart()
                 formPayment.order_id = orderResponse.value.id;
+                window.dataLayer.push({
+                    event: 'adicionado-ao-carrinho'
+                });
                 showSuccessNotification('Viagem adicionado ao carrinho');
                 scrollToStartDiv()
             }
@@ -437,8 +378,7 @@ onMounted(() => {
     })
 
     window.dataLayer.push({
-        event: 'pagina_acessada',
-        pagina: 'informar-dados'
+        event: 'informar-dados',
     });
 
 });

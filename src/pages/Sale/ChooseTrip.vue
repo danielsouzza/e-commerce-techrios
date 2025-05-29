@@ -545,9 +545,7 @@ onMounted(() => {
     }
     window.addEventListener('resize', updateWidth);
     window.dataLayer.push({
-        event: 'pagina_acessada',
-        pagina: 'escolher-viagem'
-    });
+        event: 'escolher-viagem'});
 
 });
 
