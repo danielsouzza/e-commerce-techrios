@@ -75,7 +75,7 @@ const formSale = reactive({
 const formNotification = reactive({
     email: authStore.user?.email ?? null,
     telefone: authStore.user?.comprador.telefone ?? null,
-    url:getAppBaseUrl()+'/comprar-passagem/escolher-passagem',
+    url:getAppBaseUrl(),
     municipio_origem_id:null,
     municipio_destino_id:null,
     subdomain:window.subdomain || '',
