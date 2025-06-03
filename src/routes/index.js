@@ -141,6 +141,12 @@ const routes = [
         meta: { title: 'Pagamento' }
     },
     {
+        path: '/pix',
+        component: () => import('../pages/Pix.vue'),
+        name: 'pix',
+        meta: { title: 'Pix', single: true }
+    },
+    {
         path: '/:pathMatch(.*)*',
         component: () => import('../pages/NotFound.vue'),
         name: 'not-found',

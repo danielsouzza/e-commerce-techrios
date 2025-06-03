@@ -1,7 +1,8 @@
 <script setup>
-import { defineAsyncComponent, onMounted, onUnmounted, ref } from "vue"
+import { defineAsyncComponent, onMounted, onUnmounted, ref, computed } from "vue"
 import {emitter, SCROLL_BEHAVIOR, SHOW_NOTIFICATION} from "../event-bus.js"
 import {useLoadingStore} from "../store/states.js"
+import { useRoute } from 'vue-router'
 
 // Componentes carregados assincronamente
 const Footer = defineAsyncComponent(() => import("./Footer.vue"))
@@ -16,6 +17,10 @@ const message = ref('')
 
 // Debounce para scroll
 let scrollTimeout
+
+const route = useRoute()
+
+const isSinglePage = computed(() => route.meta.single)
 
 function scrollBehavior() {
   if (scrollTimeout) {
@@ -64,10 +69,10 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="lp-wraper tw-bg-gray-50">
-    <Header class="mb-auto border-t-lg !tw-border-secondary" />
+  <div class="lp-wraper tw-bg-gray-50" :class="isSinglePage ? '!tw-mt-0' : ''">
+    <Header v-if="!isSinglePage" class="mb-auto border-t-lg !tw-border-secondary" />
     <slot/>
-    <Footer class="mt-auto"/>
+    <Footer v-if="!isSinglePage" class="mt-auto"/>
 
     <!-- Loading overlay com transição suave -->
     <Transition name="fade">
