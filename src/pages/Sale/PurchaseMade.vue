@@ -88,7 +88,6 @@ onMounted(() => {
 
     window.dataLayer.push({
         event: 'pagina_acessada',
-        pagina: 'compra-realizada',
     });
 
 })

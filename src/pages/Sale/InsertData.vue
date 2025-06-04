@@ -224,7 +224,7 @@ function submitOrder(){
                 cartStore.addItem(orderResponse.value)
                 cartStore.loadCart()
                 window.dataLayer.push({
-                    event: 'adicionado-ao-carrinho'
+                    event: 'adicionado_ao_carrinho'
                 });
                 formPayment.order_id = orderResponse.value.id;
                 nextStep()
@@ -273,7 +273,7 @@ function addCart(){
                 cartStore.loadCart()
                 formPayment.order_id = orderResponse.value.id;
                 window.dataLayer.push({
-                    event: 'adicionado-ao-carrinho'
+                    event: 'adicionado_ao_carrinho'
                 });
                 showSuccessNotification('Viagem adicionado ao carrinho');
                 scrollToStartDiv()
@@ -378,7 +378,7 @@ onMounted(() => {
     })
 
     window.dataLayer.push({
-        event: 'informar-dados',
+        event: 'informar_dados',
     });
 
 });
