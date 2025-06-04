@@ -396,7 +396,7 @@ function onClickBtnSelect(){
     }
     step.value = 1
   }
-}
+}pagina: 'compra-realizada',
 
 
 function generateLayout() {

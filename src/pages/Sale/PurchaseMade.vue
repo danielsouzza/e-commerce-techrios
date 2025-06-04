@@ -87,7 +87,7 @@ onMounted(() => {
     })
 
     window.dataLayer.push({
-        event: 'pagina_acessada',
+        event: 'compra_finalizada',
     });
 
 })
