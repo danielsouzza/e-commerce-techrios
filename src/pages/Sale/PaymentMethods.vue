@@ -295,7 +295,7 @@ onUnmounted(() => {
 });
 
 window.dataLayer.push({
-    event: 'em-checkout'
+    event: 'em_checkout'
 });
 
 </script>
