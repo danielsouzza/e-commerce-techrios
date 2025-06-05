@@ -11,7 +11,7 @@ import {
     formatCurrency,
     formatDate,
     formatMoney,
-    gerarStringTiposComodos,
+    gerarStringTiposComodos, validarEmail,
 } from "../../Helper/Ultis.js";
 import PassegerForm from "../../components/app/PassegerForm.vue";
 import {useCartStore} from "../../store/CartStore.js";
@@ -174,6 +174,12 @@ const validateForm = () => {
 
     validateField('contato.nome', formSale.contato.nome, 'Por favor, insira seu nome e sobrenome.',formSale);
     validateField('contato.email', formSale.contato.email, 'Por favor, insira seu email.',formSale);
+    if(formSale.contato.email){
+        if(!validarEmail(formSale.contato.email)){
+            formSale.errors['contato.email'] = 'Email invalido'
+            hasError = true;
+        }
+    }
     validateField('contato.telefone', formSale.contato.telefone, 'Por favor, insira um número de telefone.',formSale);
 
     return !hasError
