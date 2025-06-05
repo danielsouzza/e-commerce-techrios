@@ -396,8 +396,7 @@ function onClickBtnSelect(){
     }
     step.value = 1
   }
-}pagina: 'compra-realizada',
-
+}
 
 function generateLayout() {
   const linhas = step.value === 1 ? props.dataIda.linhas : props.dataVolta.linhas
