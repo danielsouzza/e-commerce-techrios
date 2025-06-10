@@ -425,7 +425,7 @@ onUnmounted(() => {
                         <v-text-field
                           variant="outlined"
                           hide-details="auto"
-                          v-mask="'###'"
+                          v-mask="'####'"
                           :error-messages="formPayment.errors['credit_card.security_code']"
                           v-model="formPayment.credit_card.security_code"
                           label="CVV"
