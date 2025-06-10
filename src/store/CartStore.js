@@ -24,7 +24,7 @@ export const useCartStore = defineStore('cart', {
         async loadCart() {
             const authStore = userAuthStore()
             if (authStore.isAuthenticated()) {
-                await routes['order.open']({subdomain:window.subdomain}).then((response) => {
+                await routes['order.open']().then((response) => {
                     this.order = response.data.data
                 }).catch((error) => {
 

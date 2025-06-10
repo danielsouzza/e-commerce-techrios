@@ -48,7 +48,6 @@ const config = {
 function getMunicipios(search=''){
   const params = {
     search:search,
-    subdomain:window.subdomain || ''
   }
   routes["filtros"](params).then(response => {
     if(!response.data.data.success){

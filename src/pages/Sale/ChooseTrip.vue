@@ -78,7 +78,6 @@ const formNotification = reactive({
     url:getAppBaseUrl(),
     municipio_origem_id:null,
     municipio_destino_id:null,
-    subdomain:window.subdomain || '',
     errors:{},
     processing:false
 })

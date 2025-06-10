@@ -34,14 +34,26 @@ mdiStyles.media = 'print'
 mdiStyles.onload = function() { this.media = 'all' }
 document.head.appendChild(mdiStyles)
 
-const hostname = window.location.hostname;
-const parts = hostname.split(".");
+const hostname = window.location.hostname; // ex: "agencia.exemplo.com" ou "empresa.com.br"
+const parts = hostname.split('.');
 
-if(import.meta.env.VITE_APP_ENV === 'producao') {
-    window.subdomain = parts.length > 2  ? parts[0] : null;
-}else{
-    window.subdomain = parts.length > 2 && parts[0] !== "loja" ? parts[0] : null;
+// Regra para produção
+if (import.meta.env.VITE_APP_ENV === 'producao') {
+    // Se for subdomínio (ex: agencia.exemplo.com)
+    if (parts.length > 2) {
+        window.subdomain = parts[0]; // pega só o subdomínio
+    } else {
+        window.subdomain = hostname; // pega o domínio inteiro
+    }
+} else {
+    // Ambiente local ou dev
+    if (parts.length > 2 && parts[0] !== 'loja') {
+        window.subdomain = parts[0];
+    } else {
+        window.subdomain = hostname;
+    }
 }
+
 
 const themeConfig = reactive({
     primaryColor: '#00579d',
@@ -54,15 +66,17 @@ window.dataLayer = window.dataLayer || [];
 async function fetchTheme() {
     if (window.subdomain) {
         try {
-            const response = await  routes['empresa.theme']({subdomain:window.subdomain})
+            const response = await  routes['empresa.theme']()
             const baseurl = getApiBaseUrl()?.replaceAll('api','')
-            const { theme, image_path , custom_name} = response.data.data;
+            const { theme, image_path , custom_name, empresa_id, agencia_id} = response.data.data;
 
 
             themeConfig.primaryColor = theme.primary_color || themeConfig.primaryColor;
             themeConfig.secondaryColor = theme.secondary_color || themeConfig.secondaryColor;
             themeConfig.logo = baseurl + image_path
             window.appname = custom_name
+            window.empresa_id = empresa_id
+            window.agencia_id = agencia_id
 
 
         } catch (error) {

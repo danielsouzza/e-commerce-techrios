@@ -110,7 +110,6 @@ const formNotification = reactive({
   url:getAppBaseUrl()+'/comprar-passagem/escolher-passagem',
   municipio_origem_id:null,
   municipio_destino_id:null,
-  subdomain:window.subdomain || '',
   errors:{},
   processing:false
 })
@@ -711,7 +710,6 @@ function submitOrder(){
   formSale.total = formSale.total_passagems + formSale.total_taxas;
 
   const params = {
-    subdomain:window.subdomain || '',
     pedido_id: useCartStore().order?.id,
     ...formSale,
     trecho:formSale.trecho.id,
@@ -760,7 +758,6 @@ function addCart(){
   formSale.total = formSale.total_passagems + formSale.total_taxas;
 
   const params = {
-    subdomain:window.subdomain || '',
     pedido_id: useCartStore().order?.id,
     ...formSale,
     trecho:formSale.trecho.id,

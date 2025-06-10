@@ -123,7 +123,6 @@ const updateWidth = () => {
 
 function getQuantityRoomsFree() {
   const params = new URLSearchParams();
-  params.append('subdomain', window.subdomain || '')
 
   if(step.value === 1){
     params.append('trecho_id', props.dataIda.id);
@@ -146,7 +145,6 @@ function getQuantityRoomsFree() {
 function getRoomsByTrecho() {
   loadingSets.value = true
   const params = new URLSearchParams();
-  params.append('subdomain', window.subdomain || '')
   let tipoComodos = []
   if(step.value === 1){
     params.append('trecho_id', props.dataIda.id);
@@ -264,13 +262,13 @@ function postReserva(room){
   const params = new URLSearchParams();
   params.append('trecho_id', step.value === 1 ? props.dataIda.id : props.dataVolta.id);
   params.append('viagem_id', step.value === 1 ? props.dataIda.id_viagem : props.dataVolta.id_viagem);
-  params.append('subdomain', window.subdomain || '')
 
   params.append('comodo_id', room.id);
   routes['rooms.reservas'](params).then((response) => {
     loadingReserva.value = false
   }).catch(error => {
     loadingReserva.value = false
+      console.log(error)
     showErrorNotification(error.response.data.data.error);
     if(step.value === 1){
       roomsSelected.value.dataIda.selectedsById.splice(roomsSelected.value.dataIda.selectedsById.indexOf(room), 1)
@@ -286,7 +284,6 @@ function deleteReserva(room){
       trecho_id: step.value === 1 ? props.dataIda.id : props.dataVolta.id,
       viagem_id: step.value === 1 ? props.dataIda.id_viagem : props.dataVolta.id_viagem,
       comodo_ids:[room.id],
-      subdomain: window.subdomain || null
 
     }
   }).then((response) => {
@@ -321,8 +318,7 @@ async  function initSale(){
     'trecho_id': props.dataIda.id,
     'viagem_id': props.dataIda.id_viagem,
     'tiposComodoEscolhidos': tiposComodoEscolhidosIda,
-    'comodosAssentosEscolhidos': roomsSelected.value.dataIda.selectedsById.map(item => item.id),
-     subdomain:  window.subdomain || ''
+    'comodosAssentosEscolhidos': roomsSelected.value.dataIda.selectedsById.map(item => item.id)
 
   };
   loadingStore.startLoading();
@@ -353,8 +349,7 @@ async  function initSale(){
       'trecho_id': props.dataVolta.id,
       'viagem_id': props.dataVolta.id_viagem,
       'tiposComodoEscolhidos': tiposComodoEscolhidosVolta,
-      'comodosAssentosEscolhidos': roomsSelected.value.dataVolta.selectedsById.map(item => item.id),
-      subdomain:  window.subdomain || ''
+      'comodosAssentosEscolhidos': roomsSelected.value.dataVolta.selectedsById.map(item => item.id)
     };
 
     await routes['rooms.init-vendas'](params).then((response) => {

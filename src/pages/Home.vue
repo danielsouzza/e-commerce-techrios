@@ -14,7 +14,7 @@ const Banner2 = defineAsyncComponent(() => import("../components/widgets/banners
 const FeaturedTrip = defineAsyncComponent(() => import("../components/app/FeaturedTrip.vue"));
 const TravelAtUnbeatablePrices = defineAsyncComponent(() => import("../components/app/TravelAtUnbeatablePrices.vue"));
 
-const is_enterprise = !!window.subdomain
+const is_enterprise = !!window.empresa_id
 const filtersData = ref([])
 const filtersSelected = ref({
   origem:null,
@@ -26,7 +26,7 @@ const filtersSelected = ref({
 
 const slides = ref([])
 async function getSlides() {
-  routes["banners"]({subdomain:window.subdomain,principal:0}).then(res => {
+  routes["banners"]({principal:0}).then(res => {
     slides.value = res.data.data;
   })
 }
