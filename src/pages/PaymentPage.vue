@@ -11,6 +11,7 @@ import { Icon } from "@iconify/vue";
 import { formatCurrency, formatMoney, formatDate } from "../Helper/Ultis.js";
 import { useLoadingStore } from "../store/states.js";
 import { userAuthStore } from "../store/AuthStore.js";
+import router from "../routes/index.js";
 
 const route = useRoute();
 const orderId = ref(route.params.id);
@@ -95,6 +96,7 @@ async function getOrderDetails() {
     order.value = response.data.data;
   } catch (error) {
     showErrorNotification('Erro ao carregar detalhes do pedido');
+    router.push({name:'not-found'})
   } finally {
     loading.value = false;
   }
