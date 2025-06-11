@@ -29,7 +29,7 @@ let intervalo = null;
 let checkTimeout = null;
 
 const formPayment = reactive({
-  order_id: null,
+  pedido_id: null,
   payment_method_id: 6,
     is_from_site:true,
   credit_card: {
@@ -156,7 +156,7 @@ const iniciarTemporizador = () => {
 
 function submitPaymentPix() {
   loadingStore.startLoading();
-  routes["payment.pix"]({ order_id: orderId.value }).then(res => {
+  routes["payment.pix"]({ pedido_id: orderId.value }).then(res => {
     if (res.data.success) {
       paymentPending.value = res.data.data;
       loadingStore.stopLoading();
@@ -201,7 +201,7 @@ function submitPaymentCredit() {
 
   const data = {
     ...formPayment,
-    order_id: orderId.value.toString(),
+    pedido_id: orderId.value.toString(),
     credit_card: {
       ...formPayment.credit_card,
       installment_quantity: formPayment.credit_card.installment_quantity.value,
