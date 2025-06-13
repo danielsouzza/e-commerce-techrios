@@ -43,7 +43,7 @@ function setToDelete(item){
 
 function confirmDelete(){
   loadingDelete.value = true
-  useCartStore().removerItem({pedido:comodoToDelete.value.pedido_id,comodos_ids:[comodoToDelete.value.comodo.id],viagem_id:props.data.viagem.id}).then(()=>{
+  useCartStore().removerItem({pedido_id:comodoToDelete.value.pedido_id,comodos_ids:[comodoToDelete.value.comodo.id],viagem_id:props.data.viagem.id}).then(()=>{
     loadingDelete.value = false
     showDialogDelete.value = false
     comodoToDelete.value = null
