@@ -47,7 +47,10 @@ function confirmDelete(){
     loadingDelete.value = false
     showDialogDelete.value = false
     comodoToDelete.value = null
-  }).catch(()=>{
+  }).catch((error)=>{
+      if (error.response && error.response.status === 404) {
+          useCartStore().clearCart()
+      }
     loadingDelete.value = false
     showErrorNotification('Erro ao remover passagem, tente novamente mais tarde.')
   })
