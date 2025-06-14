@@ -43,11 +43,14 @@ function setToDelete(item){
 
 function confirmDelete(){
   loadingDelete.value = true
-  useCartStore().removerItem({pedido:comodoToDelete.value.pedido_id,comodos_ids:[comodoToDelete.value.comodo.id],viagem_id:props.data.viagem.id}).then(()=>{
+  useCartStore().removerItem({pedido_id:comodoToDelete.value.pedido_id,comodos_ids:[comodoToDelete.value.comodo.id],viagem_id:props.data.viagem.id}).then(()=>{
     loadingDelete.value = false
     showDialogDelete.value = false
     comodoToDelete.value = null
-  }).catch(()=>{
+  }).catch((error)=>{
+      if (error.response && error.response.status === 404) {
+          useCartStore().clearCart()
+      }
     loadingDelete.value = false
     showErrorNotification('Erro ao remover passagem, tente novamente mais tarde.')
   })

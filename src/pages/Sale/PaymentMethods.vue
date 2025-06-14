@@ -28,7 +28,7 @@ const paymentPending = ref(null)
 const loadingStore = useLoadingStore();
 const orderConfirmation = ref(null)
 const formPayment = reactive({
-    order_id:null,
+    pedido_id:null,
     payment_method_id:6,
     credit_card:{
         holder:null,
@@ -208,7 +208,7 @@ function submitPaymentCredit(){
 
     const data = {
         ...formPayment,
-        order_id:cartStore.order?.id.toString(),
+        pedido_id:cartStore.order?.id.toString(),
         credit_card:{
             ...formPayment.credit_card,
             installment_quantity: formPayment.credit_card.installment_quantity.value,
@@ -240,7 +240,7 @@ function submitPaymentCredit(){
 function submitPaymentPix(){
 
     loadingStore.startLoading();
-    routes["payment.pix"]({order_id:useCartStore().order?.id}).then(res => {
+    routes["payment.pix"]({pedido_id:useCartStore().order?.id}).then(res => {
         if(res.data.success){
             paymentPending.value = res.data.data;
             loadingStore.stopLoading();
@@ -472,7 +472,7 @@ window.dataLayer.push({
                                                     <v-text-field
                                                         variant="outlined"
                                                         hide-details="auto"
-                                                        v-mask="'###'"
+                                                        v-mask="'####'"
                                                         :error-messages="formPayment.errors['credit_card.security_code']"
                                                         v-model="formPayment.credit_card.security_code"
                                                         label="CV"

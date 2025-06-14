@@ -499,7 +499,7 @@ onBeforeUnmount(() => {
         <v-tabs-window-item :value="1">
           <v-expand-transition>
             <div class="tw-flex tw-flex-col my-3 tw-w-full" v-if="openRooms">
-              <div v-if="dataIda?.desconto" class="lg:tw-flex  tw-items-center justify-end">
+              <div  class="lg:tw-flex  tw-items-center justify-end">
                 <div class="tw-flex tw-justify-end tw-items-center   lg:tw-gap-3">
                   <div class="tw-text-[12px] lg:tw-text-sm">Restam <strong class="tw-font-extrabold">{{quantityRoomsFree}} LUGARES</strong> </div>
                 </div>
@@ -652,6 +652,7 @@ onBeforeUnmount(() => {
       <v-divider  :thickness="1" class="border-opacity-100 tw-my-2  " ></v-divider>
       <div class="tw-flex tw-flex-col tw-justify-center lg:tw-justify-between lg:tw-items-center lg:tw-flex-row-reverse mb-2">
 
+
         <v-btn
             v-if="openRooms"
             variant="flat"
@@ -685,6 +686,10 @@ onBeforeUnmount(() => {
               {{ !openRooms ? 'Comprar' : 'Cancelar' }}
           </span>
         </v-btn>
+          <div  v-if="!openRooms">
+            <div v-if="quantityRoomsFree > 0" class="tw-text-[12px] lg:tw-text-sm">Restam <strong class="tw-font-extrabold">{{quantityRoomsFree}} LUGARES</strong> </div>
+            <div v-else class="tw-text-[12px] lg:tw-text-sm tw-text-red-500">Sem cômodos disponíveis </div>
+          </div>
       </div>
     </v-tabs-window>
 

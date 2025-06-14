@@ -11,6 +11,7 @@ import { Icon } from "@iconify/vue";
 import { formatCurrency, formatMoney, formatDate } from "../Helper/Ultis.js";
 import { useLoadingStore } from "../store/states.js";
 import { userAuthStore } from "../store/AuthStore.js";
+import router from "../routes/index.js";
 
 const route = useRoute();
 const orderId = ref(route.params.id);
@@ -28,7 +29,7 @@ let intervalo = null;
 let checkTimeout = null;
 
 const formPayment = reactive({
-  order_id: null,
+  pedido_id: null,
   payment_method_id: 6,
     is_from_site:true,
   credit_card: {
@@ -95,6 +96,7 @@ async function getOrderDetails() {
     order.value = response.data.data;
   } catch (error) {
     showErrorNotification('Erro ao carregar detalhes do pedido');
+    router.push({name:'not-found'})
   } finally {
     loading.value = false;
   }
@@ -154,7 +156,7 @@ const iniciarTemporizador = () => {
 
 function submitPaymentPix() {
   loadingStore.startLoading();
-  routes["payment.pix"]({ order_id: orderId.value }).then(res => {
+  routes["payment.pix"]({ pedido_id: orderId.value }).then(res => {
     if (res.data.success) {
       paymentPending.value = res.data.data;
       loadingStore.stopLoading();
@@ -199,7 +201,7 @@ function submitPaymentCredit() {
 
   const data = {
     ...formPayment,
-    order_id: orderId.value.toString(),
+    pedido_id: orderId.value.toString(),
     credit_card: {
       ...formPayment.credit_card,
       installment_quantity: formPayment.credit_card.installment_quantity.value,
@@ -425,7 +427,7 @@ onUnmounted(() => {
                         <v-text-field
                           variant="outlined"
                           hide-details="auto"
-                          v-mask="'###'"
+                          v-mask="'####'"
                           :error-messages="formPayment.errors['credit_card.security_code']"
                           v-model="formPayment.credit_card.security_code"
                           label="CVV"
