@@ -22,6 +22,7 @@ const props = defineProps({
 
 const cartStore = useCartStore()
 const percentToPay = ref(0)
+const taxa = ref(window.taxa ?? 0)
 const timeToPay = ref(30 * 60)
 const whatPayment = ref(false)
 const paymentPending = ref(null)
@@ -86,14 +87,14 @@ const stepSale = ref(1)
 const cart = computed(()=>{
     return cartStore
 })
-const pacerls = [
+const pacerls = ref([
     {value:1,pencet:0.04},
     {value:2,pencet:0.06},
     {value:3,pencet:0.07},
     {value:4,pencet:0.08},
     {value:5,pencet:0.09},
     {value:6,pencet:0.10},
-]
+]);
 let intervalo = null;
 let checkTimeout = null;
 
@@ -278,6 +279,13 @@ function updateFormattedDate(value,type) {
 
 
 onMounted(() => {
+    if (Array.isArray(window.juros) && window.juros.length > 0) {
+        pacerls.value = window.juros.map((juros, idx) => ({
+            value: idx + 1,
+            pencet: juros / 100
+        }));
+    }
+    console.log(window.juros, pacerls.value)
     useCartStore().loadCart();
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible" && whatPayment.value) {
@@ -345,13 +353,13 @@ window.dataLayer.push({
                                     </v-col>
                                     <v-col cols="6" class="tw-flex tw-items-center  !tw-font-black tw-text-[17px] !tw-text-primary tw-justify-end">
                                         <div class="tw-text-end" v-if="formPayment.payment_method_id == 3">
-                                            {{formatCurrency(useCartStore().getTotal() + (useCartStore().getTotal() * (formPayment.credit_card.installment_quantity.pencet ?? 0) ) )}}<br>
+                                            {{formatCurrency(useCartStore().getTotal() + (useCartStore().getTotal() * (formPayment.credit_card.installment_quantity.pencet ?? 0) ) + taxa )}}<br>
                                         </div>
                                         <div class="tw-text-end" v-else-if="formPayment.payment_method_id == 6">
                                             {{formatCurrency(useCartStore().getTotal() )}} <span class="tw-text-p tw-text-[10px]"> no PIX</span><br>
                                         </div>
                                         <div class="tw-text-end" v-else>
-                                            {{formatCurrency(useCartStore().getTotal())}}<br>
+                                            {{formatCurrency(useCartStore().getTotal() )}}<br>
                                         </div>
                                     </v-col>
                                 </v-row>
@@ -361,7 +369,7 @@ window.dataLayer.push({
                                     </v-col>
                                     <v-col v-if="formPayment.credit_card.installment_quantity" cols="6" class="tw-flex tw-items-center py-0  !tw-font-black tw-text-[17px] !tw-text-primary tw-justify-end">
                                         <div class="tw-text-end">
-                                            <div  class="tw-text-p tw-flex tw-text-[13px] "> {{ formatCurrency((useCartStore().getTotal() + (useCartStore().getTotal() * formPayment.credit_card.installment_quantity.pencet) ) / formPayment.credit_card.installment_quantity.value ) }}</div>
+                                            <div  class="tw-text-p tw-flex tw-text-[13px] "> {{ formatCurrency(((useCartStore().getTotal() + (useCartStore().getTotal() * formPayment.credit_card.installment_quantity.pencet) ) / formPayment.credit_card.installment_quantity.value ) + taxa) }}</div>
                                         </div>
                                     </v-col>
                                 </v-row>
@@ -460,11 +468,11 @@ window.dataLayer.push({
                                                         label="Parcelas"
                                                     >
                                                         <template v-slot:selection="{ item, index }">
-                                                            <div>{{item.raw.value}}x {{(formatCurrency((cart.getTotal() + (cart.getTotal() * item.raw.pencet) )/ item.raw.value )) }}</div>
+                                                            <div>{{item.raw.value}}x {{(formatCurrency(((cart.getTotal() + (cart.getTotal() * item.raw.pencet) )/ item.raw.value ) + taxa) ) }}</div>
                                                         </template>
                                                         <template v-slot:item="{ props, item }">
 
-                                                            <v-list-item class="!tw-my-0 !tw-py-0" v-bind="props" title="" >{{item.raw.value}}x {{(formatCurrency((cart.getTotal() + (cart.getTotal() * item.raw.pencet) )/ item.raw.value )) }}</v-list-item>
+                                                            <v-list-item class="!tw-my-0 !tw-py-0" v-bind="props" title="" >{{item.raw.value}}x {{(formatCurrency(((cart.getTotal() + (cart.getTotal() * item.raw.pencet) )/ item.raw.value )+taxa)) }}</v-list-item>
                                                         </template>
                                                     </v-select>
                                                 </v-col>
