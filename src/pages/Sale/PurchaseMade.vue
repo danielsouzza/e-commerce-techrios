@@ -11,6 +11,7 @@ import { showErrorNotification, showSuccessNotification} from "../../event-bus.j
 import {useLoadingStore} from "../../store/states.js";
 import Steps from "../../components/app/Sale/Steps.vue";
 import {clearConfirmPaymentToSession, restoreConfirmPaymentToSession} from "../../store/SalesSection.js";
+import router from "../../routes/index.js";
 const props = defineProps({
     step:String,
 })
@@ -43,7 +44,7 @@ const downloadFile = async (url, filename) => {
 
 function reSendTickets(){
     useLoadingStore().startLoading()
-    routes["order.send-passenger"](orderConfirmation.value.id).then(response => {
+    routes["order.send-passenger"](orderConfirmation?.id).then(response => {
         useLoadingStore().stopLoading()
         showSuccessNotification(response.data.data)
 
@@ -82,6 +83,9 @@ function getTicketPdf(){
 
 onMounted(() => {
     restoreConfirmPaymentToSession(orderConfirmation)
+    if(!orderConfirmation.id){
+        router.push({name:'home'})
+    }
     nextTick(()=>{
         clearConfirmPaymentToSession()
     })
