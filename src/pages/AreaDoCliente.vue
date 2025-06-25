@@ -240,7 +240,7 @@ const updateWidth = () => {
 };
 
 function getMunicipios(){
-  axios.get("https://yjaraviagens.com/municipios/PA").then((response) => {
+  axios.get("https://site.yjaraviagens.com/municipios/PA").then((response) => {
     console.log(response)
     municipios.value = response.data
   })

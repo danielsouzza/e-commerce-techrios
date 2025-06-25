@@ -86,14 +86,14 @@ const stepSale = ref(1)
 const cart = computed(()=>{
     return cartStore
 })
-const pacerls = [
+const pacerls = ref([
     {value:1,pencet:0.04},
     {value:2,pencet:0.06},
     {value:3,pencet:0.07},
     {value:4,pencet:0.08},
     {value:5,pencet:0.09},
     {value:6,pencet:0.10},
-]
+])
 let intervalo = null;
 let checkTimeout = null;
 
@@ -278,6 +278,16 @@ function updateFormattedDate(value,type) {
 
 
 onMounted(() => {
+    console.log(window.juros)
+    
+    // Atualizar pacerls com window.juros se existir
+    if (Array.isArray(window.juros) && window.juros.length > 0) {
+        pacerls.value = window.juros.map((juros, idx) => ({
+            value: idx + 1,
+            pencet: juros / 100
+        }));
+    }
+    
     useCartStore().loadCart();
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible" && whatPayment.value) {
@@ -452,7 +462,7 @@ window.dataLayer.push({
                                                         hide-details="auto"
                                                         :error-messages="formPayment.errors['credit_card.installment_quantity']"
                                                         v-model="formPayment.credit_card.installment_quantity"
-                                                        :items="pacerls"
+                                                        :items="pacerls.value"
 
                                                         item-value="value"
                                                         item-title="value"
