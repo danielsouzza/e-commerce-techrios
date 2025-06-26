@@ -15,7 +15,7 @@ import { VDateInput } from 'vuetify/labs/VDateInput';
 import axios from "axios";
 import {
   converterData,
-  formatDateToServe, 
+  formatDateToServe,
   isValidDate,
   permitirDatasNascimento,
   validarCPF,
@@ -120,18 +120,19 @@ async function getOrderDetails() {
     loading.value = true;
     const response = await routes['order.open']({ pedido_id: orderId.value });
     order.value = response.data.data;
-    formPayment.nascimento = order.value.comprador.nascimento ? new Date(order.value.comprador.nascimento+'T00:00:00') : null
-    formPayment.comprador.nascimento = order.value.comprador.nascimento;
-    formPayment.comprador.telefone = order.value.comprador.telefone;
-    formPayment.comprador.xnome = order.value.comprador.xnome;
-    formPayment.comprador.cpf_cnpj = order.value.comprador.cpf_cnpj;
-    formPayment.comprador.estrangeiro = order.value.comprador.estrangeiro;
-    formPayment.comprador.cep = order.value.comprador.cep;
-    formPayment.comprador.nro = order.value.comprador.nro;
-    formPayment.comprador.xlgr = order.value.comprador.xlgr;
-    formPayment.comprador.bairro = order.value.comprador.bairro;
-    formPayment.comprador.cmun = order.value.comprador.cmun;
+    formPayment.nascimento = order.value.comprador?.nascimento ? new Date(order.value.comprador?.nascimento+'T00:00:00') : null
+    formPayment.comprador.nascimento = order.value.comprador?.nascimento || '';
+    formPayment.comprador.telefone = order.value.comprador?.telefone;
+    formPayment.comprador.xnome = order.value.comprador?.xnome;
+    formPayment.comprador.cpf_cnpj = order.value.comprador?.cpf_cnpj;
+    formPayment.comprador.estrangeiro = order.value.comprador?.estrangeiro;
+    formPayment.comprador.cep = order.value.comprador?.cep;
+    formPayment.comprador.nro = order.value.comprador?.nro;
+    formPayment.comprador.xlgr = order.value.comprador?.xlgr;
+    formPayment.comprador.bairro = order.value.comprador?.bairro;
+    formPayment.comprador.cmun = order.value.comprador?.cmun;
   } catch (error) {
+      console.log(error)
     showErrorNotification('Erro ao carregar detalhes do pedido');
     router.push({name:'not-found'})
   } finally {
@@ -379,7 +380,7 @@ function clearCheckTimeout() {
 onMounted(() => {
   getOrderDetails();
   getMunicipios();
-  
+
   // Atualizar pacerls com window.juros se existir
   if (Array.isArray(window.juros) && window.juros.length > 0) {
     pacerls.value = window.juros.map((juros, idx) => ({
@@ -387,7 +388,7 @@ onMounted(() => {
       pencet: juros / 100
     }));
   }
-  
+
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && whatPayment.value) {
       checkStatusPayment();
@@ -559,7 +560,7 @@ onUnmounted(() => {
                           hide-details="auto"
                           :error-messages="formPayment.errors['credit_card.installment_quantity']"
                           v-model="formPayment.credit_card.installment_quantity"
-                          :items="pacerls.value"
+                          :items="pacerls"
                           item-value="value"
                           item-title="value"
                           return-object
@@ -629,7 +630,7 @@ onUnmounted(() => {
                   </v-col>
                   <v-col cols="12"  lg="6">
             <v-date-input
-                
+
                 color="secondary"
                 hide-details="auto"
                 prepend-icon=""
@@ -728,7 +729,7 @@ onUnmounted(() => {
                 </v-row>
 
                 <!-- Dados do Cartão -->
-                
+
                 <v-btn :loading="whatPayment" :disabled="whatPayment" variant="flat" color="success" rounded class="d-lg-flex !tw-font-extrabold px-2 mt-3 lg:!tw-py-5" @click="submitPaymentCredit">
                   <Icon icon="heroicons:credit-card-20-solid" class="mr-2 tw-text-white" width="26" />
                   <span class="!tw-text-xs lg:!tw-text-sm tw-text-white ml-1">REALIZAR PAGAMENTO</span>
