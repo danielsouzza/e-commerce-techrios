@@ -229,11 +229,18 @@ function submitPaymentCredit(){
         loadingStore.stopLoading();
     }).catch(error=>{
         loadingStore.stopLoading();
-        showErrorNotification(error.response?.data?.data?.details ?? error.response?.data?.data?.error ?? error.response?.data?.message);
-        if(error.response.data.data?.pedido){
-            cartStore.addItem(error.response.data.data.pedido)
-            cartStore.loadCart()
+        if(error.response.data.errors){
+            formPayment.errors = error.response.data.errors
+            showErrorNotification(Object.values(error.response.data.errors).reduce((a,b)=>a+'\\n'+b));
+        }else{
+            console.log(error)
+            showErrorNotification(error.response?.data?.data?.details ?? error.response?.data?.data?.error ?? error.response?.data?.message);
+            if(error.response.data.data?.pedido){
+                cartStore.addItem(error.response.data.data.pedido)
+                cartStore.loadCart()
+            }
         }
+
     })
 }
 
@@ -279,7 +286,7 @@ function updateFormattedDate(value,type) {
 
 onMounted(() => {
     console.log(window.juros)
-    
+
     // Atualizar pacerls com window.juros se existir
     if (Array.isArray(window.juros) && window.juros.length > 0) {
         pacerls.value = window.juros.map((juros, idx) => ({
@@ -287,7 +294,7 @@ onMounted(() => {
             pencet: juros / 100
         }));
     }
-    
+
     useCartStore().loadCart();
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible" && whatPayment.value) {
