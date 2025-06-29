@@ -469,7 +469,7 @@ window.dataLayer.push({
                                                         hide-details="auto"
                                                         :error-messages="formPayment.errors['credit_card.installment_quantity']"
                                                         v-model="formPayment.credit_card.installment_quantity"
-                                                        :items="pacerls.value"
+                                                        :items="pacerls"
 
                                                         item-value="value"
                                                         item-title="value"
