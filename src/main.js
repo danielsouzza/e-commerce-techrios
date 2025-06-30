@@ -66,17 +66,19 @@ window.dataLayer = window.dataLayer || [];
 async function fetchTheme() {
     if (window.subdomain) {
         try {
+
             const response = await  routes['empresa.theme']()
             const baseurl = getApiBaseUrl()?.replaceAll('api','')
-            const { theme, image_path , custom_name, empresa_id, agencia_id,juros, taxa} = response.data.data;
-
-
+            const { theme, image_path , custom_name, empresa_id, agencia_id,juros, taxa, has_credito,has_pix } = response.data.data;
             themeConfig.primaryColor = theme.primary_color || themeConfig.primaryColor;
             themeConfig.secondaryColor = theme.secondary_color || themeConfig.secondaryColor;
             themeConfig.logo = baseurl + image_path
             window.appname = custom_name
             window.empresa_id = empresa_id
             window.agencia_id = agencia_id
+            window.paymnents_methods ={
+                has_credito, has_pix
+            }
             window.juros = juros
             window.taxa = taxa
 

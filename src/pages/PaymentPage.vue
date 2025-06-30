@@ -10,9 +10,15 @@ import CardPayment from "../components/shared/CardPayment.vue";
 import { Icon } from "@iconify/vue";
 import { formatCurrency, formatMoney, formatDate } from "../Helper/Ultis.js";
 import { useLoadingStore } from "../store/states.js";
-import { userAuthStore } from "../store/AuthStore.js";
 import router from "../routes/index.js";
 
+
+const paymentOn = ref({
+    pix:true,
+    credit:true
+})
+
+const taxa = ref(window.taxa ?? 0)
 const route = useRoute();
 const orderId = ref(route.params.id);
 const order = ref(null);
@@ -43,14 +49,14 @@ const formPayment = reactive({
 });
 
 const months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
-const pacerls = [
+const pacerls = ref([
   { value: 1, pencet: 0.04 },
   { value: 2, pencet: 0.06 },
   { value: 3, pencet: 0.07 },
   { value: 4, pencet: 0.08 },
   { value: 5, pencet: 0.09 },
   { value: 6, pencet: 0.10 },
-];
+]);
 
 const years = computed(() => {
   const currentYear = new Date().getFullYear();
@@ -243,6 +249,17 @@ function clearCheckTimeout() {
 
 onMounted(() => {
   getOrderDetails();
+    if (Array.isArray(window.juros) && window.juros.length > 0) {
+        pacerls.value = window.juros.map((juros, idx) => ({
+            value: idx + 1,
+            pencet: juros / 100
+        }));
+    }
+    paymentOn.value = {
+        pix: !!window.paymnents_methods.has_pix,
+        credit: !!window.paymnents_methods.has_credito
+    }
+
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && whatPayment.value) {
       checkStatusPayment();
@@ -307,7 +324,7 @@ onUnmounted(() => {
             <div class="tw-font-bold tw-px-2 tw-text-gray-800">Escolher como pagar sua viagem</div>
           </BaseCard>
 
-          <BaseCard title="Desconto de 4% para pagamento via pix" class="mt-3">
+          <BaseCard title="Desconto de 4% para pagamento via pix" class="mt-3" v-if="paymentOn.pix">
             <CardPayment title="PIX (liberação imediata)" icon="ic:baseline-pix" value="6" v-model="formPayment.payment_method_id">
               <template #icon>
                 <Icon icon="ic:baseline-pix" class="mr-2 tw-text-green-400" width="26" />
@@ -357,7 +374,7 @@ onUnmounted(() => {
             </CardPayment>
           </BaseCard>
 
-          <BaseCard class="mt-3">
+          <BaseCard class="mt-3" v-if="paymentOn.credit">
             <CardPayment title="Cartão de crédito" value="3" v-model="formPayment.payment_method_id">
               <template #icon>
                 <Icon icon="heroicons:credit-card-20-solid" class="mr-2" width="26" />
@@ -414,11 +431,11 @@ onUnmounted(() => {
                           label="Parcelas"
                         >
                           <template v-slot:selection="{ item }">
-                            <div>{{ item.raw.value }}x {{ formatCurrency((order?.total + (order?.total * item.raw.pencet)) / item.raw.value) }}</div>
+                            <div>{{ item.raw.value }}x {{ formatCurrency(((order?.total + (order?.total * item.raw.pencet)) / item.raw.value) + taxa) }}</div>
                           </template>
                           <template v-slot:item="{ props, item }">
                             <v-list-item class="!tw-my-0 !tw-py-0" v-bind="props" title="">
-                              {{ item.raw.value }}x {{ formatCurrency((order?.total + (order?.total * item.raw.pencet)) / item.raw.value) }}
+                              {{ item.raw.value }}x {{ formatCurrency(((order?.total + (order?.total * item.raw.pencet)) / item.raw.value)+taxa) }}
                             </v-list-item>
                           </template>
                         </v-select>
@@ -485,7 +502,7 @@ onUnmounted(() => {
               </v-col>
               <v-col cols="6" class="tw-flex tw-items-center !tw-font-black tw-text-[17px] !tw-text-primary tw-justify-end">
                 <div class="tw-text-end" v-if="formPayment.payment_method_id == 3">
-                  {{ formatCurrency(orderDetails.total + (orderDetails.total * (formPayment.credit_card.installment_quantity.pencet ?? 0))) }}<br>
+                  {{ formatCurrency((orderDetails.total + (orderDetails.total * (formPayment.credit_card.installment_quantity.pencet ?? 0)) + taxa) ) }}<br>
                 </div>
                 <div class="tw-text-end" v-else-if="formPayment.payment_method_id == 6">
                   {{ formatCurrency(orderDetails.total) }} <span class="tw-text-p tw-text-[10px]"> no PIX</span><br>
@@ -502,7 +519,7 @@ onUnmounted(() => {
               <v-col v-if="formPayment.credit_card.installment_quantity" cols="6" class="tw-flex tw-items-center py-0 !tw-font-black tw-text-[17px] !tw-text-primary tw-justify-end">
                 <div class="tw-text-end">
                   <div class="tw-text-p tw-flex tw-text-[13px]">
-                    {{ formatCurrency((orderDetails.total + (orderDetails.total * formPayment.credit_card.installment_quantity.pencet)) / formPayment.credit_card.installment_quantity.value) }}
+                    {{ formatCurrency(((orderDetails.total + (orderDetails.total * formPayment.credit_card.installment_quantity.pencet)) / formPayment.credit_card.installment_quantity.value) + taxa) }}
                   </div>
                 </div>
               </v-col>

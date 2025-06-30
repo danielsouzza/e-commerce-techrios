@@ -20,6 +20,10 @@ const props = defineProps({
     step:String,
 })
 
+const paymentOn = ref({
+    pix:true,
+    credit:true
+})
 const cartStore = useCartStore()
 const percentToPay = ref(0)
 const taxa = ref(window.taxa ?? 0)
@@ -285,6 +289,12 @@ onMounted(() => {
             pencet: juros / 100
         }));
     }
+
+    paymentOn.value = {
+        pix: !!window.paymnents_methods.has_pix,
+        credit: !!window.paymnents_methods.has_credito
+    }
+
     console.log(window.juros, pacerls.value)
     useCartStore().loadCart();
     document.addEventListener("visibilitychange", () => {
@@ -321,7 +331,7 @@ window.dataLayer.push({
             <v-tabs-window-item :value="1">
                 <v-row   class="!tw-flex-row-reverse">
                     <v-col cols="12" md="3">
-                        <BaseCard title="Pague no pix com desconto">
+                        <BaseCard title="Pague no pix com desconto" >
                             <div class="tw-flex tw-flex-col tw-px-4 tw-py-2">
                                 <div class=" tw-font-bold tw-text-gray-800 ">Resumo da compra</div>
 
@@ -388,7 +398,7 @@ window.dataLayer.push({
                         <BaseCard class="mt-3">
                             <div class=" tw-font-bold tw-px-2 tw-text-gray-800 ">Escolher como pagar sua viagem</div>
                         </BaseCard>
-                        <BaseCard title="Desconto de 4% para pagamento via pix"  class="mt-3">
+                        <BaseCard title="Desconto de 4% para pagamento via pix"  class="mt-3" v-if="paymentOn.pix">
                             <CardPayment title=" PIX (liberação imediata)" icon="ic:baseline-pix" value="6" v-model="formPayment.payment_method_id">
                                 <template #icon>
                                     <Icon icon="ic:baseline-pix"  class="mr-2 tw-text-green-400" width="26"/>
@@ -412,7 +422,7 @@ window.dataLayer.push({
                                 </v-btn>
                             </CardPayment>
                         </BaseCard>
-                        <BaseCard class="mt-3" >
+                        <BaseCard class="mt-3" v-if="paymentOn.credit">
                             <CardPayment title="Cartão de crédito" value="3" v-model="formPayment.payment_method_id">
                                 <template #icon>
                                     <Icon icon="heroicons:credit-card-20-solid"  class="mr-2 " width="26"/>
