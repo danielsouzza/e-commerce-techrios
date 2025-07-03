@@ -234,11 +234,18 @@ function submitPaymentCredit(){
         loadingStore.stopLoading();
     }).catch(error=>{
         loadingStore.stopLoading();
-        showErrorNotification(error.response?.data?.data?.details ?? error.response?.data?.data?.error ?? error.response?.data?.message);
-        if(error.response.data.data?.pedido){
-            cartStore.addItem(error.response.data.data.pedido)
-            cartStore.loadCart()
+        if(error.response.data.errors){
+            formPayment.errors = error.response.data.errors
+            showErrorNotification(Object.values(error.response.data.errors).reduce((a,b)=>a+'\\n'+b));
+        }else{
+            console.log(error)
+            showErrorNotification(error.response?.data?.data?.details ?? error.response?.data?.data?.error ?? error.response?.data?.message);
+            if(error.response.data.data?.pedido){
+                cartStore.addItem(error.response.data.data.pedido)
+                cartStore.loadCart()
+            }
         }
+
     })
 }
 

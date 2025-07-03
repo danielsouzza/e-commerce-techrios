@@ -11,6 +11,16 @@ import { Icon } from "@iconify/vue";
 import { formatCurrency, formatMoney, formatDate } from "../Helper/Ultis.js";
 import { useLoadingStore } from "../store/states.js";
 import router from "../routes/index.js";
+import { VDateInput } from 'vuetify/labs/VDateInput';
+import axios from "axios";
+import {
+  converterData,
+  formatDateToServe,
+  isValidDate,
+  permitirDatasNascimento,
+  validarCPF,
+  validarEmail
+} from "../Helper/Ultis.js";
 
 
 const paymentOn = ref({
@@ -31,13 +41,30 @@ const timeToPay = ref(30 * 60);
 const percentToPay = ref(0);
 const whatPayment = ref(false);
 
+// Variáveis para campos do comprador
+const municipios = ref([]);
+const loadCep = ref(false);
+
 let intervalo = null;
 let checkTimeout = null;
 
 const formPayment = reactive({
   pedido_id: null,
   payment_method_id: 6,
-    is_from_site:true,
+  is_from_site: true,
+  nascimento: null,
+  comprador: {
+    xnome: '',
+    cpf_cnpj: '',
+    estrangeiro: false,
+    nascimento: null,
+    telefone: '',
+    xlgr: '',
+    nro: '',
+    bairro: '',
+    cmun: null,
+    cep: '',
+  },
   credit_card: {
     holder: null,
     card_number: null,
@@ -100,7 +127,19 @@ async function getOrderDetails() {
     loading.value = true;
     const response = await routes['order.open']({ pedido_id: orderId.value });
     order.value = response.data.data;
+    formPayment.nascimento = order.value.comprador?.nascimento ? new Date(order.value.comprador?.nascimento+'T00:00:00') : null
+    formPayment.comprador.nascimento = order.value.comprador?.nascimento || '';
+    formPayment.comprador.telefone = order.value.comprador?.telefone;
+    formPayment.comprador.xnome = order.value.comprador?.xnome;
+    formPayment.comprador.cpf_cnpj = order.value.comprador?.cpf_cnpj;
+    formPayment.comprador.estrangeiro = order.value.comprador?.estrangeiro;
+    formPayment.comprador.cep = order.value.comprador?.cep;
+    formPayment.comprador.nro = order.value.comprador?.nro;
+    formPayment.comprador.xlgr = order.value.comprador?.xlgr;
+    formPayment.comprador.bairro = order.value.comprador?.bairro;
+    formPayment.comprador.cmun = order.value.comprador?.cmun;
   } catch (error) {
+      console.log(error)
     showErrorNotification('Erro ao carregar detalhes do pedido');
     router.push({name:'not-found'})
   } finally {
@@ -116,6 +155,56 @@ function updateFormattedDate(value, type) {
     year = value;
   }
   formPayment.credit_card.expiration_date = `${month}/${year}`;
+}
+
+// Funções para campos do comprador
+function getMunicipios(search = '', after = () => {}) {
+  routes['municipios']({ search: search }).then((response) => {
+    municipios.value = response.data.data;
+    after();
+  });
+}
+
+function resetAddress() {
+  formPayment.comprador.bairro = '';
+  formPayment.comprador.xlgr = '';
+  formPayment.comprador.cmun = null;
+}
+
+function getCep() {
+  if (formPayment.comprador.cep.length > 8) {
+    loadCep.value = true;
+    axios.get(`https://viacep.com.br/ws/${formPayment.comprador.cep}/json/`).then((response) => {
+      if (!response.data.erro) {
+        formPayment.comprador.bairro = response.data.bairro;
+        formPayment.comprador.xlgr = response.data.logradouro;
+        getMunicipios(response.data.localidade, () => {
+          formPayment.comprador.cmun = parseInt(municipios.value.find(it => it.codigo == response.data.ibge)?.codigo);
+        });
+      } else {
+        showErrorNotification('Cep não encontrado');
+        resetAddress();
+      }
+      loadCep.value = false;
+    }).catch(error => {
+      resetAddress();
+      loadCep.value = false;
+    });
+  } else {
+    resetAddress();
+  }
+}
+
+function removeAcentos(str) {
+  if (!str) return "";
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function customFilter(item, queryText) {
+  if (!queryText) return true;
+  const textoNormalizado = removeAcentos(item).toLowerCase();
+  const queryNormalizada = removeAcentos(queryText).toLowerCase();
+  return textoNormalizado.includes(queryNormalizada);
 }
 
 function checkStatusPayment() {
@@ -189,15 +278,59 @@ const validateFormCredit = () => {
     }
   };
 
+  const validarNomeSobrenome = (nome) => {
+    return nome.split(" ").length > 1 || "Digite nome e sobrenome";
+  };
+
+  const validatePhone = (field, value) => {
+    const phone = value.replace(/\D/g, '');
+    const phoneRegex = /^[0-9]{10,11}$/; // Aceita 10 ou 11 dígitos numéricos
+
+    if (!phone) {
+      formPayment.errors[field] = 'Por favor, insira um número de telefone.';
+      hasError = true;
+    } else if (!phoneRegex.test(phone)) {
+      formPayment.errors[field] = 'O telefone deve conter apenas números e ter 10 ou 11 dígitos.';
+      hasError = true;
+    } else {
+      delete formPayment.errors[field];
+    }
+  };
+
+  // Validação dos campos do cartão
   validateField('credit_card.holder', formPayment.credit_card.holder, 'Por favor, insira seu nome que esta no cartão.', formPayment);
   validateField('credit_card.card_number', formPayment.credit_card.card_number, 'Por favor, insira o número do cartão.', formPayment);
   validateField('credit_card.expiration_date', formPayment.credit_card.expiration_date, 'Por favor, insira a data de vencimento.', formPayment);
   validateField('credit_card.installment_quantity', formPayment.credit_card.installment_quantity, 'Por favor, insira a quantidade de parcelas.', formPayment);
   validateField('credit_card.security_code', formPayment.credit_card.security_code, 'Por favor, insira um código de validação.', formPayment);
 
+  // Validação dos campos do comprador
+  validateField('comprador.xnome', formPayment.comprador.xnome, 'Por favor, insira seu nome e sobrenome.', formPayment);
+  validateField('comprador.cpf_cnpj', formPayment.comprador.cpf_cnpj, formPayment.comprador.estrangeiro ? 'Por favor, insira seu passaporte.' : 'Por favor, insira seu cpf.', formPayment);
+  validateField('comprador.nascimento', formPayment.nascimento, 'Por favor, insira sua data de nascimento.', formPayment);
+  validateField('comprador.xlgr', formPayment.comprador.xlgr, 'Por favor, insira o logradouro.', formPayment);
+  validateField('comprador.bairro', formPayment.comprador.bairro, 'Por favor, insira o bairro.', formPayment);
+  validateField('comprador.cmun', formPayment.comprador.cmun, 'Por favor, escolha um municipío.', formPayment);
+  validateField('comprador.cep', formPayment.comprador.cep, 'Por favor, insira um cep.', formPayment);
+  validateField('comprador.nro', formPayment.comprador.nro, 'Por favor, insira o número.', formPayment);
+
+  // Validações específicas
   if (formPayment.credit_card.card_number && formPayment.credit_card.card_number.length < 16) {
     formPayment.errors['credit_card.card_number'] = 'O número do cartão deve ter exatamente 16 dígitos.';
+    hasError = true;
   }
+
+  if (formPayment.comprador.xnome && !validarNomeSobrenome(formPayment.comprador.xnome)) {
+    formPayment.errors['comprador.xnome'] = 'Digite nome e sobrenome';
+    hasError = true;
+  }
+
+  if (!formPayment.comprador.estrangeiro && formPayment.comprador.cpf_cnpj && !validarCPF(formPayment.comprador.cpf_cnpj)) {
+    formPayment.errors['comprador.cpf_cnpj'] = 'Número de CPF inválido';
+    hasError = true;
+  }
+
+  validatePhone('comprador.telefone', formPayment.comprador.telefone);
 
   return !hasError;
 };
@@ -208,6 +341,10 @@ function submitPaymentCredit() {
   const data = {
     ...formPayment,
     pedido_id: orderId.value.toString(),
+    comprador: {
+      ...formPayment.comprador,
+      nascimento: formatDateToServe(formPayment.nascimento)
+    },
     credit_card: {
       ...formPayment.credit_card,
       installment_quantity: formPayment.credit_card.installment_quantity.value,
@@ -379,7 +516,14 @@ onUnmounted(() => {
               <template #icon>
                 <Icon icon="heroicons:credit-card-20-solid" class="mr-2" width="26" />
               </template>
-              <div class="tw-w-full tw-flex tw-flex-col">
+              <div class="tw-w-full tw-flex tw-flex-col my-4">
+                <div class="tw-flex tw-items-center ">
+                  <v-btn variant="outlined" color="secondary" rounded>
+                    <span class="tw-text-xs">Dados do Cartão</span>
+                  </v-btn>
+                  <v-divider :thickness="1" class="border-opacity-100"></v-divider>
+                </div>
+
                 <v-row class="mt-3">
                   <v-col cols="12">
                     <v-text-field
@@ -453,6 +597,147 @@ onUnmounted(() => {
                     </v-row>
                   </v-col>
                 </v-row>
+                <!-- Dados do Comprador -->
+                <div class="tw-flex tw-items-center my-4">
+                  <v-btn variant="outlined" color="secondary" rounded>
+                    <span class="tw-text-xs">Dados do Comprador</span>
+                  </v-btn>
+                  <v-divider :thickness="1" class="border-opacity-100"></v-divider>
+                </div>
+
+                <v-row class="mb-4">
+                  <v-col cols="12">
+                    <div class="tw-flex tw-items-center tw-gap-2 mb-3">
+                      <v-btn variant="outlined" :active="!formPayment.comprador.estrangeiro" color="primary" @click="formPayment.comprador.estrangeiro = false">
+                        <span class="tw-text-xs">Brasileiro</span>
+                      </v-btn>
+                      <v-btn variant="outlined" :active="formPayment.comprador.estrangeiro" color="primary" @click="formPayment.comprador.estrangeiro = true">
+                        <span class="tw-text-xs">Estrangeiro</span>
+                      </v-btn>
+                    </div>
+                  </v-col>
+                  <v-col cols="12" lg="6">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.comprador.xnome"
+                      :error-messages="formPayment.errors['comprador.xnome']"
+                      :rules="[(nome) => nome.split(' ').length > 1 || 'Digite nome e sobrenome']"
+                      label="Nome completo"
+                      placeholder="Digite o seu nome completo"
+                    />
+                  </v-col>
+                  <v-col cols="12" lg="6">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.comprador.cpf_cnpj"
+                      :error-messages="formPayment.errors['comprador.cpf_cnpj']"
+                      v-mask="!formPayment.comprador.estrangeiro ? '###.###.###-##' : '#################'"
+                      :placeholder="!formPayment.comprador.estrangeiro ? 'Digite o seu cpf' : 'Digite seu passaporte'"
+                      :label="!formPayment.comprador.estrangeiro ? 'CPF' : 'Passaporte'"
+                    />
+                  </v-col>
+                  <v-col cols="12"  lg="6">
+            <v-date-input
+
+                color="secondary"
+                hide-details="auto"
+                prepend-icon=""
+                v-mask="'##/##/####'"
+                hide-actions
+                :allowed-dates="permitirDatasNascimento"
+                v-model="formPayment.nascimento"
+                @change="(e)=>{formPayment.nascimento =  isValidDate(e.target._value)? new Date(converterData(e.target._value) + 'T00:00:00') : null}"
+                :error-messages="formPayment.errors['comprador.nascimento']"
+                variant="outlined"
+                placeholder="Data de Nascimento">
+              <template #default>
+                <Icon icon="uis:calendar" class="mr-2 tw-text-p"/>
+              </template>
+            </v-date-input>
+          </v-col>
+                  <v-col cols="12" lg="6">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.telefone"
+                      :error-messages="formPayment.errors['comprador.telefone']"
+                      v-mask="'(##) #####-####'"
+                      label="Telefone"
+                      placeholder="Digite o seu numero de telefone"
+                    />
+                  </v-col>
+                </v-row>
+
+                <!-- Endereço -->
+                <div class="tw-flex tw-items-center mb-4">
+                  <v-btn variant="outlined" color="secondary" rounded>
+                    <span class="tw-text-xs">Endereço</span>
+                  </v-btn>
+                  <v-divider :thickness="1" class="border-opacity-100"></v-divider>
+                </div>
+
+                <v-row class="mb-4">
+                  <v-col cols="12" lg="6">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.comprador.cep"
+                      :loading="loadCep"
+                      @update:modelValue="getCep"
+                      :error-messages="formPayment.errors['comprador.cep']"
+                      v-mask="'#####-###'"
+                      label="CEP"
+                      placeholder="Digite o seu cep"
+                    />
+                  </v-col>
+                  <v-col cols="12" lg="6">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.comprador.bairro"
+                      :disabled="loadCep"
+                      :loading="loadCep"
+                      :error-messages="formPayment.errors['comprador.bairro']"
+                      label="Bairro"
+                      placeholder="Digite o seu bairro"
+                    />
+                  </v-col>
+                  <v-col cols="12" lg="6">
+                    <v-autocomplete
+                      variant="outlined"
+                      v-model="formPayment.comprador.cmun"
+                      :disabled="loadCep"
+                      :loading="loadCep"
+                      :error-messages="formPayment.errors['comprador.cmun']"
+                      :items="municipios"
+                      item-value="codigo"
+                      item-title="nome"
+                      :custom-filter="customFilter"
+                      label="Município"
+                      placeholder="Selecione seu município"
+                    />
+                  </v-col>
+                  <v-col cols="12" lg="6">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.comprador.xlgr"
+                      :disabled="loadCep"
+                      :loading="loadCep"
+                      :error-messages="formPayment.errors['comprador.xlgr']"
+                      label="Logradouro"
+                      placeholder="Digite o seu logradouro"
+                    />
+                  </v-col>
+                  <v-col cols="12" lg="6">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.comprador.nro"
+                      :error-messages="formPayment.errors['comprador.nro']"
+                      label="Número"
+                      placeholder="Digite o seu número"
+                    />
+                  </v-col>
+                </v-row>
+
+                <!-- Dados do Cartão -->
+
                 <v-btn :loading="whatPayment" :disabled="whatPayment" variant="flat" color="success" rounded class="d-lg-flex !tw-font-extrabold px-2 mt-3 lg:!tw-py-5" @click="submitPaymentCredit">
                   <Icon icon="heroicons:credit-card-20-solid" class="mr-2 tw-text-white" width="26" />
                   <span class="!tw-text-xs lg:!tw-text-sm tw-text-white ml-1">REALIZAR PAGAMENTO</span>

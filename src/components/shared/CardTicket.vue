@@ -98,10 +98,11 @@ function allRooms (data, rooms) {
   if (rooms["1"] && rooms["1"].length) {
     for (const comodo of rooms["1"]) {
       try {
-        const index = isLargeScreen.value
-            ? (comodo.linha - 1) * data.colunas + (comodo.coluna - 1)
-            : (comodo.coluna - 1) * data.linhas + (comodo.linha - 1)
-        linearRooms[index] = comodo;
+          const linhaInvertida = data.linhas - comodo.linha + 1
+          const index = isLargeScreen.value
+                ? (comodo.linha - 1) * data.colunas + (comodo.coluna - 1)
+                : (comodo.coluna - 1) * data.linhas + (linhaInvertida - 1)
+          linearRooms[index] = comodo;
       } catch (e) {
         console.error('Erro ao posicionar cômodo:', comodo, e);
       }
