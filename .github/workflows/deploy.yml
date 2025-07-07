@@ -1,4 +1,4 @@
-name: Deploy Super Agẽncia em 2 servidores
+name: Deploy Super Agência em 2 servidores
 
 on:
   push:
