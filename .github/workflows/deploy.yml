@@ -1,0 +1,71 @@
+name: Deploy Super Agẽncia em 2 servidores
+
+on:
+  push:
+    branches:
+      - main
+      - homologacao
+
+jobs:
+  deploy-yjaraviagens:
+    runs-on: ubuntu-latest
+    name: Deploy no Yjara
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Instala dependências
+      run: npm install
+
+    - name: Build para Yjara
+      run: |
+        if [ "${{ github.ref_name }}" = "main" ]; then
+          npm run build:prod:yjaraviagens
+        else
+          npm run build:homo:yjaravigens
+        fi
+
+    - name: Deploy no Yjara
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SSH_HOST_S1 }}
+        username: ${{ secrets.SSH_USER_S1 }}
+        key: ${{ secrets.SSH_KEY_S1 }}
+        source: "dist/*"
+        target: ${{ github.ref_name == 'main' && secrets.PROD_DIR_S1 || secrets.HOMO_DIR_S1 }}
+
+  deploy-ajato:
+    runs-on: ubuntu-latest
+    name: Deploy no Ajato
+    needs: deploy-yjaraviagens
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+
+    - name: Instala dependências
+      run: npm install
+
+    - name: Build para Ajato
+      run: |
+        if [ "${{ github.ref_name }}" = "main" ]; then
+          npm run build:prod:ajato
+        else
+          npm run build:homo:ajato
+        fi
+
+    - name: Deploy no Ajato
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SSH_HOST_S2 }}
+        username: ${{ secrets.SSH_USER_S2 }}
+        key: ${{ secrets.SSH_KEY_S2 }}
+        source: "dist/*"
+        target: ${{ github.ref_name == 'main' && secrets.PROD_DIR_S2 || secrets.HOMO_DIR_S2 }}

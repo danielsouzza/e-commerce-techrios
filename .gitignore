@@ -2,8 +2,6 @@
 logs
 *.log
 .env
-.env.homo*
-.env.prod*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

@@ -8,9 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "build:prod:ajato": "vite build --mode prod.ajato",
-    "build:prod:vjaraviagens": "vite build --mode prod.vjaraviagens",
+    "build:prod:yjaraviagens": "vite build --mode prod.yjaraviagens",
     "build:homo:ajato": "vite build --mode homo.ajato",
-    "build:homo:vjaraviagens": "vite build --mode homo.vjaraviagens"
+    "build:homo:yjaraviagens": "vite build --mode homo.yjaraviagens"
   },
   "dependencies": {
     "@iconify/vue": "^4.2.0",
