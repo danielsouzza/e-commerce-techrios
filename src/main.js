@@ -69,7 +69,7 @@ async function fetchTheme() {
 
             const response = await  routes['empresa.theme']()
             const baseurl = getApiBaseUrl()?.replaceAll('api','')
-            const { theme, image_path , custom_name, empresa_id, agencia_id,juros, taxa, has_credito,has_pix } = response.data.data;
+            const { theme, image_path , custom_name, empresa_id, agencia_id,juros, taxa, has_credito,has_pix, phone_atendimento} = response.data.data;
             themeConfig.primaryColor = theme.primary_color || themeConfig.primaryColor;
             themeConfig.secondaryColor = theme.secondary_color || themeConfig.secondaryColor;
             themeConfig.logo = baseurl + image_path
@@ -81,6 +81,7 @@ async function fetchTheme() {
             }
             window.juros = juros
             window.taxa = taxa
+            window.phone_atendimento = phone_atendimento
 
         } catch (error) {
             console.error("Erro ao buscar tema da loja:", error);

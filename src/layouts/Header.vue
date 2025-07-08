@@ -11,6 +11,7 @@ import router from "../routes/index.js";
 import {useCartStore} from "../store/CartStore.js";
 
 const authStore = userAuthStore()
+const number_atendimento = ref( window.phone_atendimento ?? null)
 const appsdrawer = ref(false);
 const menu = ref(false);
 const menuMobile = ref(false);
@@ -68,6 +69,13 @@ watch(()=>showCart.value, ()=>{
 onMounted(()=>{
   authStore.loadUser()
   useCartStore().loadCart()
+})
+
+const link_atendimento = computed(()=>{
+    if(number_atendimento.value){
+        return `https://wa.me/55${number_atendimento.value.replace(/\D/g, '')}?text=Olá,%20gostaria%20de%20mais%20informações!`
+    }
+    return false
 })
 
 
@@ -146,7 +154,7 @@ onMounted(()=>{
                     </v-list>
                   </v-card>
                 </v-menu>
-                <a  v-if="!isInterprise" href="https://wa.me/559391893803?text=Olá,%20gostaria%20de%20mais%20informações!" target="_blank">
+                <a  v-if="link_atendimento" :href="link_atendimento" target="_blank">
                   <v-btn   variant="flat" color="success" rounded  class="d-lg-flex d-none !tw-font-extrabold  ">
                     <Icon icon="ic:baseline-whatsapp" width="25"  class="mr-2 tw-text-white" /><span class="tw-text-white ">ATENDIMENTO</span>
                   </v-btn>
