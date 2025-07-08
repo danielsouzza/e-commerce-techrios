@@ -35,7 +35,7 @@ jobs:
         host: ${{ secrets.SSH_HOST_S1 }}
         username: ${{ secrets.SSH_USER_S1 }}
         key: ${{ secrets.SSH_KEY_S1 }}
-        source: "dist/*"
+        source: "./dist/."
         target: ${{ github.ref_name == 'main' && secrets.PROD_DIR_S1 || secrets.HOMO_DIR_S1 }}
 
   deploy-ajato:
@@ -67,5 +67,5 @@ jobs:
         host: ${{ secrets.SSH_HOST_S2 }}
         username: ${{ secrets.SSH_USER_S2 }}
         key: ${{ secrets.SSH_KEY_S2 }}
-        source: "dist/*"
+        source: "./dist/."
         target: ${{ github.ref_name == 'main' && secrets.PROD_DIR_S2 || secrets.HOMO_DIR_S2 }}
