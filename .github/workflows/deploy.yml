@@ -12,40 +12,31 @@ jobs:
     name: Deploy no Yjara
 
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
 
-      - name: Instala dependências
-        run: npm install
+    - name: Instala dependências
+      run: npm install
 
-      - name: Build para Yjara
-        run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            npm run build:prod:yjaraviagens
-          else
-            npm run build:homo:yjaraviagens
-          fi
+    - name: Build para Yjara
+      run: |
+        if [ "${{ github.ref_name }}" = "main" ]; then
+          npm run build:prod:yjaraviagens
+        else
+          npm run build:homo:yjaraviagens
+        fi
 
-      - name: Garante que o diretório remoto existe
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST_S1 }}
-          username: ${{ secrets.SSH_USER_S1 }}
-          key: ${{ secrets.SSH_KEY_S1 }}
-          script: |
-            mkdir -p ${{ github.ref_name == 'main' && secrets.PROD_DIR_S1 || secrets.HOMO_DIR_S1 }}
-
-      - name: Adiciona host remoto ao known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.SSH_HOST_S1 }} >> ~/.ssh/known_hosts
-
-      - name: Enviar conteúdo da dist com rsync
-        run: |
-          rsync -avz --delete ./dist/ ${{ secrets.SSH_USER_S1 }}@${{ secrets.SSH_HOST_S1 }}:${{ github.ref_name == 'main' && secrets.PROD_DIR_S1 || secrets.HOMO_DIR_S1 }}
+    - name: Deploy no Yjara
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SSH_HOST_S1 }}
+        username: ${{ secrets.SSH_USER_S1 }}
+        key: ${{ secrets.SSH_KEY_S1 }}
+        source: "dist/*"
+        target: ${{ github.ref_name == 'main' && secrets.PROD_DIR_S1 || secrets.HOMO_DIR_S1 }}
 
   deploy-ajato:
     runs-on: ubuntu-latest
@@ -53,37 +44,28 @@ jobs:
     needs: deploy-yjaraviagens
 
     steps:
-      - uses: actions/checkout@v3
+    - uses: actions/checkout@v3
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 18
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
 
-      - name: Instala dependências
-        run: npm install
+    - name: Instala dependências
+      run: npm install
 
-      - name: Build para Ajato
-        run: |
-          if [ "${{ github.ref_name }}" = "main" ]; then
-            npm run build:prod:ajato
-          else
-            npm run build:homo:ajato
-          fi
+    - name: Build para Ajato
+      run: |
+        if [ "${{ github.ref_name }}" = "main" ]; then
+          npm run build:prod:ajato
+        else
+          npm run build:homo:ajato
+        fi
 
-      - name: Garante que o diretório remoto existe
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.SSH_HOST_S2 }}
-          username: ${{ secrets.SSH_USER_S2 }}
-          key: ${{ secrets.SSH_KEY_S2 }}
-          script: |
-            mkdir -p ${{ github.ref_name == 'main' && secrets.PROD_DIR_S2 || secrets.HOMO_DIR_S2 }}
-
-      - name: Adiciona host remoto ao known_hosts
-        run: |
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.SSH_HOST_S2 }} >> ~/.ssh/known_hosts
-
-      - name: Enviar conteúdo da dist com rsync
-        run: |
-          rsync -avz --delete ./dist/ ${{ secrets.SSH_USER_S2 }}@${{ secrets.SSH_HOST_S2 }}:${{ github.ref_name == 'main' && secrets.PROD_DIR_S2 || secrets.HOMO_DIR_S2 }}
+    - name: Deploy no Ajato
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.SSH_HOST_S2 }}
+        username: ${{ secrets.SSH_USER_S2 }}
+        key: ${{ secrets.SSH_KEY_S2 }}
+        source: "dist/*"
+        target: ${{ github.ref_name == 'main' && secrets.PROD_DIR_S2 || secrets.HOMO_DIR_S2 }}
