@@ -219,7 +219,6 @@ onMounted(()=>{
         <v-divider  :thickness="1" class="border-opacity-25 tw-my-2  " color="secondary"></v-divider>
         <div class="tw-flex tw-gap-2  tw-items-center  tw-text-white tw-text-[10px] mb-3">
           <p>{{new Date().getFullYear()}} © TechRios Gestão de Transporte Fluvial.</p>
-            Teste Daniel
         </div>
       </div>
     </div>
