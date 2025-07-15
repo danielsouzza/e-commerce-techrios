@@ -70,7 +70,7 @@ const formSale = reactive({
     errors:{},
     processing:false
 })
-
+const acceptPrivacy = ref(false)
 
 
 function scrollToStartDiv(){
@@ -560,6 +560,39 @@ onMounted(() => {
                             </v-col>
                         </v-row>
                     </BaseCard>
+                    <v-row class="!tw-mt-3">
+                        <v-col cols="12" lg="6" class="tw-flex tw-items-center  !tw-my-0 !tw-py-0">
+                            <v-tooltip location="top" max-width="400">
+                                <template v-slot:activator="{ props }">
+                                <v-chip color="warning" class="tw-ml-1 tw-text-xs tw-text-warning" v-bind="props" variant="outlined">
+                                    <Icon icon="mdi:alert-circle-outline" width="20" />
+                                    <span class="tw-ml-2 tw-text-xs tw-text-warning">Atenção</span>
+                                </v-chip>
+                                </template>
+                                <span>
+                                <strong>ATENÇÃO:</strong><br>
+                                Todos os passageiros devem apresentar documento oficial com foto durante o embarque, salvo aqueles que apresentarem boletim de ocorrência de extravio ou criança até 5 anos que tiverem somente a certidão de nascimento. A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.<br><br>
+                                Crianças ou adolescentes menores de 16 anos não podem viajar sozinhos ou acompanhados sem autorização autenticada em cartório.<br>
+                                A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.
+                                </span>
+                            </v-tooltip>
+                        </v-col>
+                        <v-col cols="12" lg="6" class="tw-flex tw-justify-end tw-items-center tw-mb-2">
+                        <v-checkbox
+                            v-model="acceptPrivacy"
+                            :rules="[v => !!v || 'É necessário aceitar os termos de privacidade para continuar.']"
+                            hide-details="auto"
+                            class="!tw-text-xs !tw-mb-0"
+                            density="compact"
+                            :label="'Li e aceito os ' + ''"
+                        >
+                            <template #label>
+                            Li e aceito os &nbsp;<a href='/politica-de-privacidade' target='_blank' rel='noopener noreferrer' class='tw-text-primary tw-underline'> termos de privacidade</a>.
+                            </template>
+                        </v-checkbox>
+                        </v-col>
+                    </v-row>
+                    
                     <v-col cols="12">
                         <v-btn variant="tonal" color="secondary" rounded  class="!tw-flex lg:!tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
                             <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 "  /><span class=" !tw-text-xs  ml-1">Adicionar ao carrinho</span>
@@ -575,11 +608,12 @@ onMounted(() => {
                             <v-btn variant="tonal" color="secondary" rounded  class="lg:!tw-flex !tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
                                 <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 "  /><span class=" !tw-text-xs  ml-1">Adicionar ao carrinho</span>
                             </v-btn>
-                            <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="submitOrder">
+                            <v-btn variant="flat" color="success" rounded  class="d-lg-flex  !tw-font-extrabold px-2 "  @click="submitOrder" :disabled="!acceptPrivacy">
                                 <span class=" !tw-text-xs tw-text-white ml-1"  >Ir para o pagamento</span><Icon icon="mdi:navigate-next" width="20"  class="ml-1 tw-text-white"  />
                             </v-btn>
                         </div>
                     </v-col>
+                   
                 </v-form>
             </v-col>
         </v-row>
