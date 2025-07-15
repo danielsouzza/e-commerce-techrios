@@ -562,6 +562,22 @@ onMounted(() => {
                             </v-col>
                         </v-row>
                     </BaseCard>
+                    <v-col cols="12" class="tw-flex tw-justify-end tw-items-center !tw-mt-3 !tw-my-0 !tw-py-0">
+                      <v-tooltip location="top" max-width="400">
+                        <template v-slot:activator="{ props }">
+                          <v-chip color="warning" class="tw-ml-1 tw-text-xs tw-text-warning" v-bind="props" variant="outlined">
+                            <Icon icon="mdi:alert-circle-outline" width="20" />
+                            <span class="tw-ml-2 tw-text-xs tw-text-warning">Atenção</span>
+                          </v-chip>
+                        </template>
+                        <span>
+                          <strong>ATENÇÃO:</strong><br>
+                          Todos os passageiros devem apresentar documento oficial com foto durante o embarque, salvo aqueles que apresentarem boletim de ocorrência de extravio ou criança até 5 anos que tiverem somente a certidão de nascimento. A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.<br><br>
+                          Crianças ou adolescentes menores de 16 anos não podem viajar sozinhos ou acompanhados sem autorização autenticada em cartório.<br>
+                          A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.
+                        </span>
+                      </v-tooltip>
+                    </v-col>
                     <v-col cols="12">
                         <v-btn variant="tonal" color="secondary" rounded  class="!tw-flex lg:!tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
                             <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 "  /><span class=" !tw-text-xs  ml-1">Adicionar ao carrinho</span>
@@ -582,6 +598,7 @@ onMounted(() => {
                             </v-btn>
                         </div>
                     </v-col>
+                   
                 </v-form>
             </v-col>
         </v-row>
