@@ -21,6 +21,7 @@ import {closeAllCards, showErrorNotification, showSuccessNotification} from "../
 import {useLoadingStore} from "../../store/states.js";
 import {clearFormSaleSession, restoreFormSaleFromSession, saveFormSaleToSession} from "../../store/SalesSection.js";
 import Steps from "../../components/app/Sale/Steps.vue";
+import CardPayment from "../../components/shared/CardPayment.vue";
 
 const formRef = ref()
 const route = useRoute();
@@ -71,6 +72,31 @@ const formSale = reactive({
     processing:false
 })
 const acceptPrivacy = ref(false)
+const expandAttention = ref(true)
+
+// Modal para menores de 16 anos
+const showMinorModal = ref(false)
+
+// Texto do aviso para menores de 16 anos
+const minorWarningText = `
+<strong>ATENÇÃO</strong><br>
+Crianças ou adolescentes menores de 16 anos não podem viajar sozinhos ou acompanhados sem autorização autenticada em cartório.<br>
+A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.
+`;
+
+function checkMinorAge(date) {
+    if (!date) return;
+    const nascimento = new Date(date)
+    const hoje = new Date();
+    let idade = hoje.getFullYear() - nascimento.getFullYear();
+    const m = hoje.getMonth() - nascimento.getMonth();
+    if (m < 0 || (m === 0 && hoje.getDate() < nascimento.getDate())) {
+        idade--;
+    }
+    if (idade < 16) {
+        showMinorModal.value = true;
+    }
+}
 
 
 function scrollToStartDiv(){
@@ -495,7 +521,8 @@ onMounted(() => {
                             @add-me-to-passenger="(args)=>addMeToPassenger(index,'ida')"
                             @addComodoRelated="(args)=>addComodoRelated(index,'ida')"
                             @add-to-contact="(index)=>addPassegerToContact(index,'ida')"
-                            @remove-to-contact="removePassegerToContact"/>
+                            @remove-to-contact="removePassegerToContact"
+                            @check-minor-age="(date)=>checkMinorAge(date)"/>
                         <v-divider  :thickness="1" class="border-opacity-100 my-3  "  v-if="formSale.dataVolta" ></v-divider>
 
                         <v-checkbox
@@ -562,38 +589,45 @@ onMounted(() => {
                             </v-col>
                         </v-row>
                     </BaseCard>
-                    <v-row class="!tw-mt-3">
-                        <v-col cols="12" lg="6" class="tw-flex tw-items-center  !tw-my-0 !tw-py-0">
-                            <v-tooltip location="top" max-width="400">
-                                <template v-slot:activator="{ props }">
-                                <v-chip color="warning" class="tw-ml-1 tw-text-xs tw-text-warning" v-bind="props" variant="outlined">
-                                    <Icon icon="mdi:alert-circle-outline" width="20" />
-                                    <span class="tw-ml-2 tw-text-xs tw-text-warning">Atenção</span>
-                                </v-chip>
-                                </template>
-                                <span>
-                                <strong>ATENÇÃO:</strong><br>
-                                Todos os passageiros devem apresentar documento oficial com foto durante o embarque, salvo aqueles que apresentarem boletim de ocorrência de extravio ou criança até 5 anos que tiverem somente a certidão de nascimento. A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.<br><br>
-                                Crianças ou adolescentes menores de 16 anos não podem viajar sozinhos ou acompanhados sem autorização autenticada em cartório.<br>
-                                A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.
-                                </span>
-                            </v-tooltip>
-                        </v-col>
-                        <v-col cols="12" lg="6" class="tw-flex tw-justify-end tw-items-center tw-mb-2">
-                        <v-checkbox
-                            v-model="acceptPrivacy"
-                            :rules="[v => !!v || 'É necessário aceitar os termos de privacidade para continuar.']"
-                            hide-details="auto"
-                            class="!tw-text-xs !tw-mb-0"
-                            density="compact"
-                            :label="'Li e aceito os ' + ''"
+                    <BaseCard class="tw-mt-3 !tw-border-yellow-500"  >
+                        <CardPayment
+                            v-model="expandAttention"
+                            icon="mdi:alert-circle-outline"
+                            title="Atenção"
+                            value="attention"
+                            class="tw-my-2"
                         >
-                            <template #label>
-                            Li e aceito os &nbsp;<a href='/politica-de-privacidade' target='_blank' rel='noopener noreferrer' class='tw-text-primary tw-underline'> termos de privacidade</a>.
+                            <template #icon>
+                                <Icon icon="mdi:alert-circle-outline"  class="mr-2 " width="26"/>
                             </template>
-                        </v-checkbox>
-                        </v-col>
-                    </v-row>
+                        <span class="tw-text-yellow-500 tw-mt-2 tw-text-justify">
+                            <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
+                            Todos os passageiros devem apresentar documento oficial com foto durante o embarque, salvo aqueles que apresentarem boletim de ocorrência de extravio ou criança até 5 anos que tiverem somente a certidão de nascimento. A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.<br><br>
+                            Crianças ou adolescentes menores de 16 anos não podem viajar sozinhos ou acompanhados sem autorização autenticada em cartório.<br>
+                            A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.
+                        </span>
+                    </CardPayment>
+                    </BaseCard>
+                    
+                    <BaseCard class="tw-mt-3">
+                        <v-row>
+                            <v-col cols="12" class="tw-flex tw-items-center tw-mb-2">
+                                <v-switch
+                                    v-model="acceptPrivacy"
+                                    :rules="[v => !!v || 'É necessário aceitar os termos de privacidade para continuar.']"
+                                    hide-details="auto"
+                                    class="!tw-text-xs !tw-mb-0"
+                                    density="compact"
+                                    color="success"
+                                    inset
+                                >
+                                    <template #label>
+                                    Li e aceito os &nbsp;<a href='/politica-de-privacidade' target='_blank' rel='noopener noreferrer' class='tw-text-primary tw-underline'> termos de uso e política de privacidade</a>.
+                                    </template>
+                                </v-switch>
+                            </v-col>
+                        </v-row>
+                    </BaseCard>
                     
                     <v-col cols="12">
                         <v-btn variant="tonal" color="secondary" rounded  class="!tw-flex lg:!tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
@@ -620,6 +654,15 @@ onMounted(() => {
             </v-col>
         </v-row>
     </div>
+
+    <v-dialog v-model="showMinorModal" persistent max-width="420" transition="dialog-bottom-transition">
+      <v-card class="!tw-pt-8 !tw-pb-4 !tw-px-8 tw-rounded-xl tw-shadow-lg tw-border tw-border-gray-200">
+        <div class="tw-text-gray-700 tw-mb-6 tw-text-base tw-text-justify" v-html="minorWarningText"></div>
+        <div class="tw-flex tw-justify-end tw-gap-2">
+          <v-btn color="primary" variant="flat" class="tw-font-bold tw-px-6 tw-py-2 tw-text-base" @click="showMinorModal = false">ENTENDI</v-btn>
+        </div>
+      </v-card>
+    </v-dialog>
 </template>
 
 <style scoped>

@@ -103,11 +103,14 @@ const tiposDoc = [
           hide-actions
           :allowed-dates="permitirDatasNascimento"
           v-mask="'##/##/####'"
-          @change="(e)=>{form.nascimento =  isValidDate(e.target._value)? new Date(converterData(e.target._value) + 'T00:00:00') : null}"
+          @change="(e)=>{
+            const data = isValidDate(e.target._value)? new Date(converterData(e.target._value) + 'T00:00:00') : null;
+            form.nascimento = data;
+            emits('check-minor-age', data);
+          }"
           v-model="form.nascimento"
           :error-messages="form.errors.nascimento"
           variant="outlined"
-
           placeholder="Data de Nascimento">
         <template #default>
           <Icon icon="uis:calendar" class="mr-2"/>
