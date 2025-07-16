@@ -589,11 +589,11 @@ onMounted(() => {
                             </v-col>
                         </v-row>
                     </BaseCard>
-                    <BaseCard class="tw-mt-3 !tw-border-yellow-500"  >
+                    <BaseCard class="tw-mt-3 "  >
                         <CardPayment
                             v-model="expandAttention"
                             icon="mdi:alert-circle-outline"
-                            title="Atenção"
+                            title="Leia com atenção"
                             value="attention"
                             class="tw-my-2"
                         >
