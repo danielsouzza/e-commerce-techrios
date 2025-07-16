@@ -47,7 +47,7 @@ jobs:
 
       - name: Enviar conteúdo da dist com rsync
         run: |
-          rsync -avz --delete ./dist/ ${{ secrets.SSH_USER_S1 }}@${{ secrets.SSH_HOST_S1 }}:${{ github.ref_name == 'main' && secrets.PROD_DIR_S1 || secrets.HOMO_DIR_S1 }}
+          rsync -avz --delete --exclude='.htaccess' ./dist/ ${{ secrets.SSH_USER_S1 }}@${{ secrets.SSH_HOST_S1 }}:${{ github.ref_name == 'main' && secrets.PROD_DIR_S1 || secrets.HOMO_DIR_S1 }}
 
   deploy-ajato:
     runs-on: ubuntu-latest
@@ -90,4 +90,4 @@ jobs:
 
       - name: Enviar conteúdo da dist com rsync
         run: |
-          rsync -avz --delete ./dist/ ${{ secrets.SSH_USER_S2 }}@${{ secrets.SSH_HOST_S2 }}:${{ github.ref_name == 'main' && secrets.PROD_DIR_S2 || secrets.HOMO_DIR_S2 }}
+          rsync -avz --delete --exclude='.htaccess' ./dist/ ${{ secrets.SSH_USER_S2 }}@${{ secrets.SSH_HOST_S2 }}:${{ github.ref_name == 'main' && secrets.PROD_DIR_S2 || secrets.HOMO_DIR_S2 }}
