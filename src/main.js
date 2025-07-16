@@ -47,11 +47,11 @@ if (import.meta.env.VITE_APP_ENV === 'producao') {
     }
 } else {
     // Ambiente local ou dev
-    window.subdomain = parts[0];
-    // if (parts.length > 2 && parts[0] !== 'loja') {
-    // } else {
-    //     window.subdomain = hostname;
-    // }
+    if (parts.length > 2) {
+        window.subdomain = parts[0];
+    } else {
+        window.subdomain = hostname;
+    }
 }
 
 
