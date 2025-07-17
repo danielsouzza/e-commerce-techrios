@@ -589,25 +589,23 @@ onMounted(() => {
                             </v-col>
                         </v-row>
                     </BaseCard>
-                    <BaseCard class="tw-mt-3 "  >
-                        <CardPayment
-                            v-model="expandAttention"
-                            icon="mdi:alert-circle-outline"
-                            title="Leia com atenção"
-                            value="attention"
-                            class="tw-my-2"
-                        >
-                            <template #icon>
-                                <Icon icon="mdi:alert-circle-outline"  class="mr-2 " width="26"/>
-                            </template>
-                        <span class="tw-text-yellow-500 tw-mt-2 tw-text-justify">
-                            <v-divider  :thickness="1" class="border-opacity-100 my-3 " ></v-divider>
-                            Todos os passageiros devem apresentar documento oficial com foto durante o embarque, salvo aqueles que apresentarem boletim de ocorrência de extravio ou criança até 5 anos que tiverem somente a certidão de nascimento. A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.<br><br>
-                            Crianças ou adolescentes menores de 16 anos não podem viajar sozinhos ou acompanhados sem autorização autenticada em cartório.<br>
-                            A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.
-                        </span>
-                    </CardPayment>
-                    </BaseCard>
+                    <v-container class="!tw-p-0 !tw-mx-0 !tw-bg-white !tw-max-w-full mt-3" rounded="lg">
+                        <v-card  variant="outlined" elevation="0" rounded="lg" class="!tw-bg-[#FFF3CD] !tw-border-[#F8EBC6]">
+                            <v-card class="px-3 pt-3 pb-2 !tw-bg-transparent !tw-h-full" variant="flat" elevation="0" rounded="lg">
+                                <div class="tw-flex tw-items-center tw-mb-2">
+                                    <Icon icon="mdi:alert-circle-outline" class="mr-2 tw-text-[#9F8D61]" width="26"/>
+                                    <span class="tw-font-bold tw-text-[#9F8D61] tw-text-base">Leia com atenção</span>
+                                </div>
+                                <v-divider :thickness="1" class="border-opacity-100 my-3" />
+                                <span class="tw-text-[#9F8D61] tw-text-justify">
+                                    Todos os passageiros devem apresentar documento oficial com foto durante o embarque, salvo aqueles que apresentarem boletim de ocorrência de extravio ou criança até 5 anos que tiverem somente a certidão de nascimento. A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.<br><br>
+                                    Crianças ou adolescentes menores de 16 anos não podem viajar sozinhos ou acompanhados sem autorização autenticada em cartório.<br>
+                                    A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.
+                                </span>
+                            </v-card>
+                        </v-card>
+                    </v-container>
+
                     
                     <BaseCard class="tw-mt-3">
                         <v-row>
