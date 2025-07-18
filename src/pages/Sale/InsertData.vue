@@ -80,7 +80,7 @@ const showMinorModal = ref(false)
 // Texto do aviso para menores de 16 anos
 const minorWarningText = `
 <strong>ATENÇÃO</strong><br>
-Crianças ou adolescentes menores de 16 anos não podem viajar sozinhos ou acompanhados sem autorização autenticada em cartório.<br>
+Crianças ou adolescentes menores de 16 anos não podem viajar sozinhos ou acompanhados sem autorização autenticada em cartório.<br><br>
 A ausência deste documento impedirá o embarque e, consequentemente, a realização da viagem.
 `;
 
@@ -653,11 +653,11 @@ onMounted(() => {
         </v-row>
     </div>
 
-    <v-dialog v-model="showMinorModal" persistent max-width="420" transition="dialog-bottom-transition">
-      <v-card class="!tw-pt-8 !tw-pb-4 !tw-px-8 tw-rounded-xl tw-shadow-lg tw-border tw-border-gray-200">
-        <div class="tw-text-gray-700 tw-mb-6 tw-text-base tw-text-justify" v-html="minorWarningText"></div>
+    <v-dialog v-model="showMinorModal" persistent max-width="420"  transition="dialog-bottom-transition">
+      <v-card variant="outlined" class="!tw-pt-8 !tw-pb-4 !tw-px-8 tw-rounded-xl tw-shadow-lg tw-border  !tw-bg-[#FFF3CD] !tw-border-[#F8EBC6]">
+        <div class="tw-text-[#9F8D61] tw-mb-6 tw-text-base tw-text-justify" v-html="minorWarningText"></div>
         <div class="tw-flex tw-justify-end tw-gap-2">
-          <v-btn color="primary" variant="flat" class="tw-font-bold tw-px-6 tw-py-2 tw-text-base" @click="showMinorModal = false">ENTENDI</v-btn>
+          <v-btn color="success" variant="flat" class="tw-font-bold tw-px-6 tw-py-2 tw-text-base" @click="showMinorModal = false">ENTENDI</v-btn>
         </div>
       </v-card>
     </v-dialog>
