@@ -147,9 +147,9 @@ const routes = [
         meta: { title: 'Pix', single: true }
     },
     {
-        path: '/opt-out',
+        path: '/nao-quero-receber-marketing',
         component: () => import('../pages/OptOut.vue'),
-        name: 'opt-out',
+        name: 'nao-quero-receber-marketing',
         meta: { title: 'Opt-out de Marketing' }
     },
     {
