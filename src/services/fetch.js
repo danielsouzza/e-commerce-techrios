@@ -43,6 +43,8 @@ export const routes = {
     'newletters':(params= {}) => api.post('/newsletter',params),
     'notification':(params= {}) => api.post('/trechos-viagem/notificar-trecho',params),
 
+    'opt-out':(params= {}) => api.post('/person-no-list',params),
+
 
 }
 
