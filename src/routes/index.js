@@ -147,6 +147,12 @@ const routes = [
         meta: { title: 'Pix', single: true }
     },
     {
+        path: '/opt-out',
+        component: () => import('../pages/OptOut.vue'),
+        name: 'opt-out',
+        meta: { title: 'Opt-out de Marketing' }
+    },
+    {
         path: '/:pathMatch(.*)*',
         component: () => import('../pages/NotFound.vue'),
         name: 'not-found',
