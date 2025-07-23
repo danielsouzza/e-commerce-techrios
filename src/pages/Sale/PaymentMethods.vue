@@ -405,7 +405,7 @@ window.dataLayer.push({
                         <BaseCard class="mt-3">
                             <div class=" tw-font-bold tw-px-2 tw-text-gray-800 ">Escolher como pagar sua viagem</div>
                         </BaseCard>
-                        <BaseCard title="Desconto de 4% para pagamento via pix"  class="mt-3" v-if="paymentOn.pix">
+                        <BaseCard  class="mt-3">
                             <CardPayment title=" PIX (liberação imediata)" icon="ic:baseline-pix" value="6" v-model="formPayment.payment_method_id">
                                 <template #icon>
                                     <Icon icon="ic:baseline-pix"  class="mr-2 tw-text-green-400" width="26"/>
