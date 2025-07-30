@@ -80,7 +80,11 @@ onMounted(()=>{
                   Politicas e privacidades
                 </RouterLink>
               </li>
-             
+              <li class="tw-pb-1 tw-font-normal">
+                <RouterLink  :to="{name: 'politica-de-exclusao'}">
+                  Política de Exclusão de Dados
+                </RouterLink>
+              </li>
             </ul>
 
           </ListExpensiveItem>
@@ -95,11 +99,6 @@ onMounted(()=>{
               <li class="tw-pb-1 tw-font-normal">
                 <RouterLink  :to="{name: 'onde-estamos'}">
                   Onde Estamos
-                </RouterLink>
-              </li>
-              <li class="tw-pb-1 tw-font-normal">
-                <RouterLink  :to="{name: 'nao-quero-receber-marketing'}">
-                  Remover de Marketing
                 </RouterLink>
               </li>
               <li  v-if="!is_enterprise" class="tw-pb-1 tw-font-normal">

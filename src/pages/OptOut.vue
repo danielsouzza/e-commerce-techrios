@@ -37,7 +37,7 @@ function validationName(name) {
 
 async function handleSubmit() {
   const { valid } = await formRef.value.validate()
-  
+
   if (!valid) {
     showErrorNotification('Por favor, corrija os erros no formulário')
     return
@@ -53,25 +53,25 @@ async function handleSubmit() {
       telefone: form.telefone, // Remove formatação, envia apenas números
       email: form.email.trim()
     }
-    
+
     // Fazer requisição para a API
     const response = await routes['opt-out'](payload)
-    
+
     showSuccessNotification('Sua solicitação de opt-out foi processada com sucesso!')
-    
+
     // Limpar formulário
     form.name = ""
     form.telefone = ""
     form.email = ""
-    
+
     // Redirecionar para home após alguns segundos
     setTimeout(() => {
       router.push({ name: 'home' })
     }, 2000)
-    
+
   } catch (error) {
     console.error('Erro ao processar opt-out:', error)
-    
+
     // Tratar erros específicos da API
     if (error.response?.data?.errors) {
       form.errors = error.response.data.errors
@@ -106,10 +106,10 @@ function onPhoneInput(event) {
     <v-card class="tw-w-full tw-max-w-md tw-mx-4">
       <v-card-title class="text-center tw-py-6">
         <div class="tw-text-2xl tw-font-bold text-secondary">
-          Remover de Marketing
+            Politica de exclusão de dados
         </div>
         <div class="tw-text-sm tw-text-gray-600 tw-mt-2">
-          Remova seu número das nossas campanhas de marketing
+         Exclua seus dados de nossa plataforma
         </div>
       </v-card-title>
 
@@ -145,7 +145,7 @@ function onPhoneInput(event) {
               variant="outlined"
               maxlength="15"
                v-mask="'(##) #####-####'"
-        
+
               required
             />
           </div>
@@ -172,8 +172,7 @@ function onPhoneInput(event) {
           <div class="tw-flex tw-items-start tw-space-x-2">
             <v-icon color="orange" size="20" class="tw-mt-0.5">mdi-information-outline</v-icon>
             <div class="tw-text-sm tw-text-gray-700">
-              <strong>Importante:</strong> Ao enviar este formulário, você será removido de nossas campanhas de marketing. 
-              Você ainda poderá receber comunicações relacionadas a compras já realizadas.
+              <strong>Importante:</strong> Após a solicitação de exclusão, confirmaremos o recebimento e processaremos o pedido dentro de até 15 dias úteis, conforme previsto em lei.
             </div>
           </div>
         </div>
@@ -209,4 +208,4 @@ function onPhoneInput(event) {
 .v-card {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
-</style> 
+</style>
