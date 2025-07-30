@@ -106,7 +106,7 @@ function onPhoneInput(event) {
     <v-card class="tw-w-full tw-max-w-md tw-mx-4">
       <v-card-title class="text-center tw-py-6">
         <div class="tw-text-2xl tw-font-bold text-secondary">
-            Politica de exclusão de dados
+            Quero excluir meus dados
         </div>
         <div class="tw-text-sm tw-text-gray-600 tw-mt-2">
          Exclua seus dados de nossa plataforma
