@@ -188,7 +188,7 @@ function onPhoneInput(event) {
           block
           class="tw-mt-6"
         >
-          Solicitar remoçõa
+          Solicitar exclusão
         </v-btn>
 
         <v-card-text class="text-center tw-mt-4">
