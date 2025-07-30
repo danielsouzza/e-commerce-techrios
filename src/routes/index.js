@@ -147,10 +147,16 @@ const routes = [
         meta: { title: 'Pix', single: true }
     },
     {
-        path: '/nao-quero-receber-marketing',
+        path: '/excluir-dados',
         component: () => import('../pages/OptOut.vue'),
-        name: 'nao-quero-receber-marketing',
-        meta: { title: 'Opt-out de Marketing' }
+        name: 'excluir-dados',
+        meta: { title: 'Politica de exclusão de dados' }
+    },
+    {
+        path: '/politica-de-exclusao',
+        component: () => import('../pages/PoliticaExclusao.vue'),
+        name: 'politica-de-exclusao',
+        meta: { title: 'Política de Exclusão de Dados' }
     },
     {
         path: '/:pathMatch(.*)*',
