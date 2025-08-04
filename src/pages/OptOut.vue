@@ -57,7 +57,7 @@ async function handleSubmit() {
     // Fazer requisição para a API
     const response = await routes['opt-out'](payload)
 
-    showSuccessNotification('Sua solicitação de opt-out foi processada com sucesso!')
+    showSuccessNotification('Sua solicitação de exclusão foi processada com sucesso!')
 
     // Limpar formulário
     form.name = ""
@@ -105,12 +105,10 @@ function onPhoneInput(event) {
   <div class="tw-flex tw-justify-center tw-items-center  tw-py-8">
     <v-card class="tw-w-full tw-max-w-md tw-mx-4">
       <v-card-title class="text-center tw-py-6">
-        <div class="tw-text-2xl tw-font-bold text-secondary">
-            Quero excluir meus dados
+        <div class="tw-text-xl tw-font-bold text-secondary">
+            Quero excluir meus dados do Marketing
         </div>
-        <div class="tw-text-sm tw-text-gray-600 tw-mt-2">
-         Exclua seus dados de nossa plataforma
-        </div>
+
       </v-card-title>
 
       <v-form ref="formRef" @submit.prevent="handleSubmit" class="tw-px-6 tw-pb-6">
