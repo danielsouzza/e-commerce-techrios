@@ -8,7 +8,7 @@ import CopyToClipboard from "../components/shared/CopyToClipboard.vue";
 import BaseCard from "../components/shared/BaseCard.vue";
 import CardPayment from "../components/shared/CardPayment.vue";
 import { Icon } from "@iconify/vue";
-import { formatCurrency, formatMoney, formatDate } from "../Helper/Ultis.js";
+import { formatCurrency, formatDate } from "../Helper/Ultis.js";
 import { useLoadingStore } from "../store/states.js";
 import router from "../routes/index.js";
 import { VDateInput } from 'vuetify/labs/VDateInput';
@@ -18,8 +18,7 @@ import {
   formatDateToServe,
   isValidDate,
   permitirDatasNascimento,
-  validarCPF,
-  validarEmail
+  validarCPF
 } from "../Helper/Ultis.js";
 
 
