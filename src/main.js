@@ -37,22 +37,19 @@ document.head.appendChild(mdiStyles)
 const hostname = window.location.hostname; // ex: "agencia.exemplo.com" ou "empresa.com.br"
 const parts = hostname.split('.');
 
+console.log(parts)
 // Regra para produção
 if (import.meta.env.VITE_APP_ENV === 'producao') {
     // Se for subdomínio (ex: agencia.exemplo.com)
-    if (parts.length > 2) {
+    if(parts[0] != 'yjaraviagens'){
         window.subdomain = parts[0]; // pega só o subdomínio
-    } else {
-        window.subdomain = hostname; // pega o domínio inteiro
-    }
-} else {
-    // Ambiente local ou dev
-    if (parts.length > 2) {
-        window.subdomain = parts[0];
-    } else {
-        window.subdomain = hostname;
     }
 
+} else {
+    // Ambiente local ou dev
+    if(parts[0] != 'loja' && parts[0] != 'localhost'){
+        window.subdomain = parts[0];
+    }
 }
 
 

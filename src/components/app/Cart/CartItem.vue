@@ -93,7 +93,7 @@ function onOpenRooms(){
       </v-card>
     </template>
   </v-dialog>
-  <v-card variant="outlined" rounded="lg" class="!tw-p-4 !tw-border-secondary">
+  <v-card variant="outlined" rounded="lg" class="!tw-p-4 !tw-border-secondary !tw-bg-white">
     <div class="tw-flex  mt-3 tw-w-full ">
       <v-row>
           <v-col cols="12" sm="6" md="6" lg="4">

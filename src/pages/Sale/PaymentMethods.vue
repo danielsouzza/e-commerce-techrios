@@ -297,12 +297,13 @@ onMounted(() => {
         }));
     }
 
-    paymentOn.value = {
-        pix: !!window.paymnents_methods.has_pix,
-        credit: !!window.paymnents_methods.has_credito
+    if(!!window.paymnents_methods?.has_pix || !!window.paymnents_methods?.has_credito){
+        paymentOn.value = {
+            pix: !!window.paymnents_methods?.has_pix,
+            credit: !!window.paymnents_methods?.has_credito
+        }
     }
 
-    console.log(window.juros, pacerls.value)
     useCartStore().loadCart();
     document.addEventListener("visibilitychange", () => {
         if (document.visibilityState === "visible" && whatPayment.value) {
