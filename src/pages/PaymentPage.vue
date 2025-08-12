@@ -42,7 +42,9 @@ const whatPayment = ref(false);
 
 // Variáveis para campos do comprador
 const municipios = ref([]);
+const paises = ref([]);
 const loadCep = ref(false);
+const loadPaises = ref(false);
 
 let intervalo = null;
 let checkTimeout = null;
@@ -63,6 +65,11 @@ const formPayment = reactive({
     bairro: '',
     cmun: null,
     cep: '',
+    cidade: '',
+    estado: '',
+    pais: '',
+    linha1: '',
+    linha2: '',
   },
   credit_card: {
     holder: null,
@@ -137,6 +144,12 @@ async function getOrderDetails() {
     formPayment.comprador.xlgr = order.value.comprador?.xlgr;
     formPayment.comprador.bairro = order.value.comprador?.bairro;
     formPayment.comprador.cmun = order.value.comprador?.cmun;
+    // Campos para estrangeiros
+    formPayment.comprador.cidade = order.value.comprador?.cidade;
+    formPayment.comprador.estado = order.value.comprador?.estado;
+    formPayment.comprador.pais = order.value.comprador?.pais;
+    formPayment.comprador.linha1 = order.value.comprador?.linha1;
+    formPayment.comprador.linha2 = order.value.comprador?.linha2;
   } catch (error) {
       console.log(error)
     showErrorNotification('Erro ao carregar detalhes do pedido');
@@ -164,13 +177,53 @@ function getMunicipios(search = '', after = () => {}) {
   });
 }
 
+function getPaises() {
+  if (routes['paises']) {
+    // Se existe rota local, usa ela
+    routes['paises']().then((response) => {
+      paises.value = response.data.data;
+      loadPaises.value = false;
+    }).catch(() => {
+      loadPaises.value = false;
+    });
+  } else {
+    // Usa API externa gratuita
+    loadPaises.value = true;
+    axios.get('https://restcountries.com/v3.1/all?fields=name,cca2').then((response) => {
+      paises.value = response.data
+        .map(country => ({
+          codigo: country.cca2,
+          nome: country.name.common,
+          nomeOficial: country.name.official
+        }))
+        .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+      loadPaises.value = false;
+    }).catch(error => {
+      console.error('Erro ao buscar países:', error);
+      loadPaises.value = false;
+    });
+  }
+}
+
 function resetAddress() {
   formPayment.comprador.bairro = '';
   formPayment.comprador.xlgr = '';
   formPayment.comprador.cmun = null;
+  if (formPayment.comprador.estrangeiro) {
+    formPayment.comprador.cep = '';
+    formPayment.comprador.cidade = '';
+    formPayment.comprador.estado = '';
+    formPayment.comprador.pais = '';
+    formPayment.comprador.linha1 = '';
+    formPayment.comprador.linha2 = '';
+  }
 }
 
 function getCep() {
+  if (formPayment.comprador.estrangeiro) {
+    return; // Não busca CEP para estrangeiros
+  }
+  
   if (formPayment.comprador.cep.length > 8) {
     loadCep.value = true;
     axios.get(`https://viacep.com.br/ws/${formPayment.comprador.cep}/json/`).then((response) => {
@@ -307,11 +360,22 @@ const validateFormCredit = () => {
   validateField('comprador.xnome', formPayment.comprador.xnome, 'Por favor, insira seu nome e sobrenome.', formPayment);
   validateField('comprador.cpf_cnpj', formPayment.comprador.cpf_cnpj, formPayment.comprador.estrangeiro ? 'Por favor, insira seu passaporte.' : 'Por favor, insira seu cpf.', formPayment);
   validateField('comprador.nascimento', formPayment.nascimento, 'Por favor, insira sua data de nascimento.', formPayment);
-  validateField('comprador.xlgr', formPayment.comprador.xlgr, 'Por favor, insira o logradouro.', formPayment);
-  validateField('comprador.bairro', formPayment.comprador.bairro, 'Por favor, insira o bairro.', formPayment);
-  validateField('comprador.cmun', formPayment.comprador.cmun, 'Por favor, escolha um municipío.', formPayment);
-  validateField('comprador.cep', formPayment.comprador.cep, 'Por favor, insira um cep.', formPayment);
-  validateField('comprador.nro', formPayment.comprador.nro, 'Por favor, insira o número.', formPayment);
+  
+  // Validação de endereço diferente para estrangeiros
+  if (formPayment.comprador.estrangeiro) {
+    // Para estrangeiros, campos básicos são obrigatórios
+    validateField('comprador.pais', formPayment.comprador.pais, 'Por favor, insira o país.', formPayment);
+    validateField('comprador.cidade', formPayment.comprador.cidade, 'Por favor, insira a cidade.', formPayment);
+    validateField('comprador.estado', formPayment.comprador.estado, 'Por favor, insira o estado/província.', formPayment);
+    validateField('comprador.linha1', formPayment.comprador.linha1, 'Por favor, insira o endereço (linha 1).', formPayment);
+  } else {
+    // Para brasileiros, todos os campos de endereço são obrigatórios
+    validateField('comprador.xlgr', formPayment.comprador.xlgr, 'Por favor, insira o logradouro.', formPayment);
+    validateField('comprador.bairro', formPayment.comprador.bairro, 'Por favor, insira o bairro.', formPayment);
+    validateField('comprador.cmun', formPayment.comprador.cmun, 'Por favor, escolha um municipío.', formPayment);
+    validateField('comprador.cep', formPayment.comprador.cep, 'Por favor, insira um cep válido.', formPayment);
+    validateField('comprador.nro', formPayment.comprador.nro, 'Por favor, insira o número.', formPayment);
+  }
 
   // Validações específicas
   if (formPayment.credit_card.card_number && formPayment.credit_card.card_number.length < 16) {
@@ -397,6 +461,7 @@ onMounted(() => {
             credit: !!window.paymnents_methods?.has_credito
         }
     }
+  getPaises();
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible" && whatPayment.value) {
@@ -405,6 +470,27 @@ onMounted(() => {
       clearCheckTimeout();
     }
   });
+});
+
+// Watcher para quando alternar entre brasileiro/estrangeiro
+watch(() => formPayment.comprador.estrangeiro, (newValue) => {
+  if (newValue) {
+    // Se virou estrangeiro, limpa campos específicos do Brasil
+    formPayment.comprador.cep = '';
+    formPayment.comprador.bairro = '';
+    formPayment.comprador.cmun = null;
+    formPayment.comprador.xlgr = '';
+    formPayment.comprador.nro = '';
+    // Busca países disponíveis
+    getPaises();
+  } else {
+    // Se virou brasileiro, limpa campos de estrangeiro
+    formPayment.comprador.cidade = '';
+    formPayment.comprador.estado = '';
+    formPayment.comprador.pais = '';
+    formPayment.comprador.linha1 = '';
+    formPayment.comprador.linha2 = '';
+  }
 });
 
 onUnmounted(() => {
@@ -677,7 +763,8 @@ onUnmounted(() => {
                 </div>
 
                 <v-row class="mb-4">
-                  <v-col cols="12" lg="6">
+                  <!-- Campos para brasileiros -->
+                  <v-col cols="12" lg="6" v-if="!formPayment.comprador.estrangeiro">
                     <v-text-field
                       variant="outlined"
                       v-model="formPayment.comprador.cep"
@@ -689,7 +776,7 @@ onUnmounted(() => {
                       placeholder="Digite o seu cep"
                     />
                   </v-col>
-                  <v-col cols="12" lg="6">
+                  <v-col cols="12" lg="6" v-if="!formPayment.comprador.estrangeiro">
                     <v-text-field
                       variant="outlined"
                       v-model="formPayment.comprador.bairro"
@@ -700,7 +787,7 @@ onUnmounted(() => {
                       placeholder="Digite o seu bairro"
                     />
                   </v-col>
-                  <v-col cols="12" lg="6">
+                  <v-col cols="12" lg="6" v-if="!formPayment.comprador.estrangeiro">
                     <v-autocomplete
                       variant="outlined"
                       v-model="formPayment.comprador.cmun"
@@ -715,7 +802,7 @@ onUnmounted(() => {
                       placeholder="Selecione seu município"
                     />
                   </v-col>
-                  <v-col cols="12" lg="6">
+                  <v-col cols="12" lg="6" v-if="!formPayment.comprador.estrangeiro">
                     <v-text-field
                       variant="outlined"
                       v-model="formPayment.comprador.xlgr"
@@ -726,13 +813,72 @@ onUnmounted(() => {
                       placeholder="Digite o seu logradouro"
                     />
                   </v-col>
-                  <v-col cols="12" lg="6">
+                  <v-col cols="12" lg="6" v-if="!formPayment.comprador.estrangeiro">
                     <v-text-field
                       variant="outlined"
                       v-model="formPayment.comprador.nro"
                       :error-messages="formPayment.errors['comprador.nro']"
                       label="Número"
                       placeholder="Digite o seu número"
+                    />
+                  </v-col>
+                  
+                  <!-- Campos para estrangeiros -->
+                  <v-col cols="12" lg="6" v-if="formPayment.comprador.estrangeiro">
+                    <v-autocomplete
+                      variant="outlined"
+                      item-value="codigo"
+                      item-title="nome"
+                      :loading="loadPaises"
+                      v-model="formPayment.comprador.pais"
+                      :error-messages="formPayment.errors['comprador.pais']"
+                      :items="paises"
+                      label="País"
+                      placeholder="Selecione o país"
+                    />
+                  </v-col>
+                  <v-col cols="12" lg="6" v-if="formPayment.comprador.estrangeiro">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.comprador.estado"
+                      :error-messages="formPayment.errors['comprador.estado']"
+                      label="Estado/Província"
+                      placeholder="Digite o estado/província"
+                    />
+                  </v-col>
+                  <v-col cols="12" lg="6" v-if="formPayment.comprador.estrangeiro">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.comprador.cidade"
+                      :error-messages="formPayment.errors['comprador.cidade']"
+                      label="Cidade"
+                      placeholder="Digite a cidade"
+                    />
+                  </v-col>
+                  <v-col cols="12" lg="6" v-if="formPayment.comprador.estrangeiro">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.comprador.cep"
+                      :error-messages="formPayment.errors['comprador.cep']"
+                      label="CEP/Código Postal"
+                      placeholder="Digite o CEP/código postal"
+                    />
+                  </v-col>
+                  <v-col cols="12" lg="6" v-if="formPayment.comprador.estrangeiro">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.comprador.linha1"
+                      :error-messages="formPayment.errors['comprador.linha1']"
+                      label="Endereço - Linha 1"
+                      placeholder="Ex: Rua, número, apartamento"
+                    />
+                  </v-col>
+                  <v-col cols="12" lg="6" v-if="formPayment.comprador.estrangeiro">
+                    <v-text-field
+                      variant="outlined"
+                      v-model="formPayment.comprador.linha2"
+                      label="Endereço - Linha 2 (opcional)"
+                      placeholder="Ex: Complemento, referência"
                     />
                   </v-col>
                 </v-row>

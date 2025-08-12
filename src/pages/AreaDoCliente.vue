@@ -1,6 +1,6 @@
 <script setup>
 
-import {computed, nextTick, onMounted, reactive, ref} from "vue";
+import {computed, nextTick, onMounted, reactive, ref, watch} from "vue";
 import {Icon} from "@iconify/vue";
 import TableOrders from "../components/shared/TableOrders.vue";
 import {routes} from "../services/fetch.js";
@@ -21,6 +21,8 @@ const route = useRoute();
 const auth = ref(null)
 const showDialogDelete = ref(null)
 const municipios = ref([]);
+const paises = ref([]);
+const loadPaises = ref(false);
 const tab = ref(props.tab)
 const visible1 = ref(false);
 const visible3 = ref(false);
@@ -68,6 +70,7 @@ const form = reactive({
   comprador:{
     nascimento:null,
     cpf_cnpj:"",
+    xnome:"",
     estrangeiro:false,
     xlgr:"",
     nro:"",
@@ -75,6 +78,11 @@ const form = reactive({
     cmun:null,
     cep:"",
     telefone:"",
+    cidade:"",
+    estado:"",
+    pais:"",
+    linha1:"",
+    linha2:"",
   },
   errors:{},
   processing:false
@@ -110,6 +118,11 @@ function fillFormDataUser(){
   form.comprador.telefone = auth.value.comprador.telefone
   form.nascimento = auth.value.comprador.nascimento ? new Date(auth.value.comprador.nascimento+'T00:00:00') : null
   form.comprador.telefone = auth.value.comprador.telefone
+  form.comprador.pais = auth.value.comprador.pais
+  form.comprador.cidade = auth.value.comprador.cidade
+  form.comprador.estado = auth.value.comprador.estado
+  form.comprador.linha1 = auth.value.comprador.linha1
+  form.comprador.linha2 = auth.value.comprador.linha2
   form.comprador.estrangeiro = auth.value.comprador.estrangeiro
   form.comprador.bairro = auth.value.comprador.bairro
   form.comprador.nro = auth.value.comprador.nro
@@ -151,11 +164,21 @@ const validateForm = () => {
   validateField('comprador.nascimento', form.nascimento, 'Por favor, insira sua data de nascimento.');
   validatePhone('telefone', form.telefone, 'Por favor, insira seu telefone.')
   validateField(`comprador.cpf_cnpj`, form.comprador.cpf_cnpj, form.comprador.estrangeiro ? `Por favor, insira seu passaporte.` :`Por favor, insira seu cpf.`);
-  validateField(`comprador.xlgr`, form.comprador.xlgr, `Por favor, insira o logradouro.`);
-  validateField(`comprador.bairro`, form.comprador.bairro, `Por favor, insira o bairro.`);
-  validateField(`comprador.cmun`, form.comprador.cmun, `Por favor, escolha um municipío.`);
-  validateField(`comprador.cep`, form.comprador.cmun, `Por favor, escolha um cep.`);
-  validateField(`comprador.nro`, form.comprador.nro, `Por favor, insira o número.`);
+  if(form.comprador.estrangeiro){
+    validateField(`comprador.pais`, form.comprador.pais, `Por favor, insira seu país.`);
+    validateField(`comprador.cidade`, form.comprador.cidade, `Por favor, insira sua cidade.`);
+    validateField(`comprador.estado`, form.comprador.estado, `Por favor, insira seu estado.`);
+    validateField(`comprador.linha1`, form.comprador.linha1, `Por favor, insira o logradouro.`);
+    validateField(`comprador.linha2`, form.comprador.linha2, `Por favor, insira o complemento.`);
+  }else{
+    validateField(`comprador.xlgr`, form.comprador.xlgr, `Por favor, insira o logradouro.`);
+    validateField(`comprador.bairro`, form.comprador.bairro, `Por favor, insira o bairro.`);
+    validateField(`comprador.cmun`, form.comprador.cmun, `Por favor, escolha um municipío.`);
+    validateField(`comprador.cep`, form.comprador.cmun, `Por favor, escolha um cep.`);
+    validateField(`comprador.nro`, form.comprador.nro, `Por favor, insira o número.`);
+  }
+
+
 
   if(form.name && !validarNomeSobrenome(form.name)){
     form.errors.name = 'Digite nome e sobrenome'
@@ -194,13 +217,28 @@ function handleSubmitNewEmail() {
 }
 
 function handleSubmit() {
-  form.processing = true
   const data = {
     ...form,
   }
   data.comprador.xnome = form.name
   data.comprador.telefone = form.telefone
   data.comprador.nascimento = formatDateToServe(data.nascimento)
+  
+  // Remove campos desnecessários baseado no tipo de usuário
+  if (data.comprador.estrangeiro) {
+    // Para estrangeiros, remove campos brasileiros
+    delete data.comprador.bairro;
+    delete data.comprador.cmun;
+    delete data.comprador.xlgr;
+    delete data.comprador.nro;
+  } else {
+    // Para brasileiros, remove campos de estrangeiro
+    delete data.comprador.cidade;
+    delete data.comprador.estado;
+    delete data.comprador.pais;
+    delete data.comprador.linha1;
+    delete data.comprador.linha2;
+  }
   if(validateForm()){
     routes['user.register'](data).then((response) => {
       showSuccessNotification(response.data.message)
@@ -213,6 +251,8 @@ function handleSubmit() {
 
     })
   }
+
+  
 }
 
 function deleteAccount() {
@@ -239,11 +279,43 @@ const updateWidth = () => {
   windowWidth.value = window.innerWidth;
 };
 
-function getMunicipios(){
-  axios.get("https://site.yjaraviagens.com/municipios/PA").then((response) => {
-    console.log(response)
-    municipios.value = response.data
+function getMunicipios(search='', after=()=>{}){
+  routes['municipios']({search:search}).then((response) => {
+    municipios.value = response.data.data
+    after()
   })
+}
+
+function getPaises(search='', after=()=>{}){
+  if (routes['paises']) {
+    // Se existe rota local, usa ela
+    routes['paises']({search:search}).then((response) => {
+      paises.value = response.data.data
+      after()
+    })
+  } else {
+    // Usa API externa gratuita
+    loadPaises.value = true
+    axios.get('https://restcountries.com/v3.1/all?fields=name,cca2').then((response) => {
+      paises.value = response.data
+        .filter(country => 
+          !search || 
+          country.name.common.toLowerCase().includes(search.toLowerCase()) ||
+          country.name.official.toLowerCase().includes(search.toLowerCase())
+        )
+        .map(country => ({
+          codigo: country.cca2,
+          nome: country.name.common,
+          nomeOficial: country.name.official
+        }))
+        .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+      after()
+      loadPaises.value = false
+    }).catch(error => {
+      console.error('Erro ao buscar países:', error)
+      loadPaises.value = false
+    })
+  }
 }
 
 const validatePassword = () => {
@@ -286,6 +358,27 @@ onMounted(()=>{
   getUser();
   window.addEventListener('resize', updateWidth);
 })
+
+// Watcher para quando alternar entre brasileiro/estrangeiro
+// watch(() => form.comprador.estrangeiro, (newValue) => {
+//   if (newValue) {
+//     // Se virou estrangeiro, limpa campos específicos do Brasil
+//     form.comprador.cep = '';
+//     form.comprador.bairro = '';
+//     form.comprador.cmun = null;
+//     form.comprador.xlgr = '';
+//     form.comprador.nro = '';
+//     // Busca países disponíveis
+//     getPaises();
+//   } else {
+//     // Se virou brasileiro, limpa campos de estrangeiro
+//     form.comprador.cidade = '';
+//     form.comprador.estado = '';
+//     form.comprador.pais = '';
+//     form.comprador.linha1 = '';
+//     form.comprador.linha2 = '';
+//   }
+// });
 </script>
 
 <template>
@@ -455,7 +548,8 @@ onMounted(()=>{
               </div>
 
               <v-row class="my-5">
-                <v-col cols="12" lg="6">
+                <!-- Campos para brasileiros -->
+                <v-col cols="12" lg="6" v-if="!form.comprador.estrangeiro">
                   <div class="text-subtitle-1 text-medium-emphasis">CEP</div>
 
                   <v-text-field
@@ -468,7 +562,7 @@ onMounted(()=>{
                       variant="outlined"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12"  lg="6">
+                <v-col cols="12" lg="6" v-if="!form.comprador.estrangeiro">
                   <div class="text-subtitle-1 text-medium-emphasis">Bairro</div>
 
                   <v-text-field
@@ -480,7 +574,7 @@ onMounted(()=>{
                       variant="outlined"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12"  lg="6">
+                <v-col cols="12" lg="6" v-if="!form.comprador.estrangeiro">
                   <div class="text-subtitle-1 text-medium-emphasis">Município</div>
 
                   <v-select
@@ -495,7 +589,7 @@ onMounted(()=>{
                       variant="outlined"
                   ></v-select>
                 </v-col>
-                <v-col cols="12"  lg="6">
+                <v-col cols="12" lg="6" v-if="!form.comprador.estrangeiro">
                   <div class="text-subtitle-1 text-medium-emphasis">Logradouro</div>
 
                   <v-text-field
@@ -507,7 +601,7 @@ onMounted(()=>{
                       variant="outlined"
                   ></v-text-field>
                 </v-col>
-                <v-col cols="12"  lg="6">
+                <v-col cols="12" lg="6" v-if="!form.comprador.estrangeiro">
                   <div class="text-subtitle-1 text-medium-emphasis">Número</div>
 
                   <v-text-field
@@ -516,6 +610,78 @@ onMounted(()=>{
                       v-model="form.comprador.nro"
                       hide-details="auto"
                       placeholder="Digite o seu número "
+                      variant="outlined"
+                  ></v-text-field>
+                </v-col>
+                
+                <!-- Campos para estrangeiros -->
+                <v-col cols="12" lg="6" v-if="form.comprador.estrangeiro">
+                  <div class="text-subtitle-1 text-medium-emphasis">País</div>
+                  <v-autocomplete
+                      density="compact"
+                      color="secondary"
+                      item-value="codigo"
+                      item-title="nome"
+                      :loading="loadPaises"
+                      v-model="form.comprador.pais"
+                      hide-details="auto"
+                      :items="paises"
+                      placeholder="Selecione o país"
+                      variant="outlined"
+                  ></v-autocomplete>
+                </v-col>
+                <v-col cols="12" lg="6" v-if="form.comprador.estrangeiro">
+                  <div class="text-subtitle-1 text-medium-emphasis">Estado/Província</div>
+                  <v-text-field
+                      density="compact"
+                      color="secondary"
+                      v-model="form.comprador.estado"
+                      hide-details="auto"
+                      placeholder="Digite o estado/província "
+                      variant="outlined"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" lg="6" v-if="form.comprador.estrangeiro">
+                  <div class="text-subtitle-1 text-medium-emphasis">Cidade</div>
+                  <v-text-field
+                      density="compact"
+                      color="secondary"
+                      v-model="form.comprador.cidade"
+                      hide-details="auto"
+                      placeholder="Digite a cidade "
+                      variant="outlined"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" lg="6" v-if="form.comprador.estrangeiro">
+                  <div class="text-subtitle-1 text-medium-emphasis">CEP/Código Postal</div>
+                  <v-text-field
+                      density="compact"
+                      color="secondary"
+                      v-model="form.comprador.cep"
+                      hide-details="auto"
+                      placeholder="Digite o CEP/código postal "
+                      variant="outlined"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" lg="6" v-if="form.comprador.estrangeiro">
+                  <div class="text-subtitle-1 text-medium-emphasis">Endereço - Linha 1</div>
+                  <v-text-field
+                      density="compact"
+                      color="secondary"
+                      v-model="form.comprador.linha1"
+                      hide-details="auto"
+                      placeholder="Ex: Rua, número, apartamento "
+                      variant="outlined"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" lg="6" v-if="form.comprador.estrangeiro">
+                  <div class="text-subtitle-1 text-medium-emphasis">Endereço - Linha 2 (opcional)</div>
+                  <v-text-field
+                      density="compact"
+                      color="secondary"
+                      v-model="form.comprador.linha2"
+                      hide-details="auto"
+                      placeholder="Ex: Complemento, referência "
                       variant="outlined"
                   ></v-text-field>
                 </v-col>
@@ -549,6 +715,8 @@ onMounted(()=>{
               <v-btn
                   @click="handleSubmit"
                   class=""
+                  :loading="form.processing"
+                  :disabled="form.processing"
                   color="secondary"
                   size="large"
                   rounded

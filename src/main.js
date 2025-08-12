@@ -47,7 +47,7 @@ if (import.meta.env.VITE_APP_ENV === 'producao') {
 
 } else {
     // Ambiente local ou dev
-    if(parts[0] != 'loja' && parts[0] != 'localhost'){
+    if( parts[0] != 'localhost'){
         window.subdomain = parts[0];
     }
 }
