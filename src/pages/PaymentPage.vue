@@ -335,9 +335,10 @@ const validateFormCredit = () => {
   };
 
   const validatePhone = (field, value) => {
-    const phone = value.replace(/\D/g, '');
+    const phone = value?.replace(/\D/g, '');
     const phoneRegex = /^[0-9]{10,11}$/; // Aceita 10 ou 11 dígitos numéricos
 
+      console.log(phone, value)
     if (!phone) {
       formPayment.errors[field] = 'Por favor, insira um número de telefone.';
       hasError = true;
@@ -395,6 +396,7 @@ const validateFormCredit = () => {
 
   validatePhone('comprador.telefone', formPayment.comprador.telefone);
 
+  console.log(formPayment.errors)
   return !hasError;
 };
 
@@ -708,7 +710,7 @@ onUnmounted(() => {
                       variant="outlined"
                       v-model="formPayment.comprador.xnome"
                       :error-messages="formPayment.errors['comprador.xnome']"
-                      :rules="[(nome) => nome.split(' ').length > 1 || 'Digite nome e sobrenome']"
+                      :rules="[(nome) => nome?.split(' ').length > 1 || 'Digite nome e sobrenome']"
                       label="Nome completo"
                       placeholder="Digite o seu nome completo"
                     />
@@ -745,7 +747,7 @@ onUnmounted(() => {
                   <v-col cols="12" lg="6">
                     <v-text-field
                       variant="outlined"
-                      v-model="formPayment.telefone"
+                      v-model="formPayment.comprador.telefone"
                       :error-messages="formPayment.errors['comprador.telefone']"
                       v-mask="'(##) #####-####'"
                       label="Telefone"
