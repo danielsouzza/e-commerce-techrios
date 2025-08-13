@@ -105,7 +105,7 @@ function goToSalePage() {
             <span class="tw-text-gray-300 tw-text-sm tw-ml-2">no PIX</span>
           </div>
           <p class="tw-text-gray-300 tw-text-xs">
-            ou a até 6x de <span class="tw-font-bold">{{formatCurrency(calcularValor(valor, data.desconto?.desconto,-0.04))}}</span> no cartão
+            ou a até 6x de <span class="tw-font-bold">{{formatCurrency(calcularValor(valor, data.desconto?.desconto,-0.05))}}</span> no cartão
           </p>
         </div>
       </div>

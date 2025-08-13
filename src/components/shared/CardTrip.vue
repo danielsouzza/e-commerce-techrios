@@ -84,7 +84,7 @@ function goToSalePage(){
 
         <p v-if="data?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(valor)}}</span> por</p>
         <div><span class="tw-text-2xl tw-text-primary tw-font-[900]">{{formatCurrency(calcularValor(valor, data.desconto?.desconto))}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
-        <p class="tw-text-[12px] tw-text-gray-500 tw-text-wrap">ou a partir de {{formatCurrency(calcularValor(valor, data.desconto?.desconto,-0.04))}}  no cartão</p>
+        <p class="tw-text-[12px] tw-text-gray-500 tw-text-wrap">ou a partir de {{formatCurrency(calcularValor(valor, data.desconto?.desconto,-0.05))}}  no cartão</p>
       </div>
     </v-card-title>
   </v-card>
