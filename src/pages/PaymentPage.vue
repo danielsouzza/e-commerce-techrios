@@ -83,12 +83,12 @@ const formPayment = reactive({
 
 const months = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
 const pacerls = ref([
-  { value: 1, pencet: 0.04 },
-  { value: 2, pencet: 0.06 },
-  { value: 3, pencet: 0.07 },
-  { value: 4, pencet: 0.08 },
-  { value: 5, pencet: 0.09 },
-  { value: 6, pencet: 0.10 },
+  { value: 1, pencet: 0.05 },
+  { value: 2, pencet: 0.07 },
+  { value: 3, pencet: 0.08 },
+  { value: 4, pencet: 0.09 },
+  { value: 5, pencet: 0.10 },
+  { value: 6, pencet: 0.11 },
 ]);
 
 const years = computed(() => {
