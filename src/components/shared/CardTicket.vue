@@ -479,7 +479,7 @@ onBeforeUnmount(() => {
           <div class="tw-mt-4 tw-text-right ">
             <p v-if="dataIda?.desconto" class="tw-text-sm tw-text-gray-500 ">De <span class="tw-line-through">{{ formatCurrency(valor)}}</span> por</p>
             <div><span class="tw-text-xl tw-text-primary tw-font-[900]">{{formatCurrency(calcularValor(valor, dataIda.desconto?.desconto))}}</span><span class="tw-text-p tw-text-[10px]"> no PIX</span></div>
-            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(calcularValor(valor, dataIda.desconto?.desconto,-0.04))}} no cartão</p>
+            <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(calcularValor(valor, dataIda.desconto?.desconto,-0.05))}} no cartão</p>
           </div>
         </div>
       </div>

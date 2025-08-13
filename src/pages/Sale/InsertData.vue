@@ -498,7 +498,7 @@ onMounted(() => {
                             <v-col cols="6" class="tw-flex tw-items-center  !tw-font-black tw-text-[17px] !tw-text-primary tw-justify-end">
                                 <div class="tw-text-end">
                                     {{formatCurrency(calcularValor(formSale.total_passagems + formSale.total_taxas, null ))}} <span class="tw-whitespace-nowrap w-text-p tw-text-[10px]"> no PIX</span><br>
-                                    <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(calcularValor(formSale.total_passagems + formSale.total_taxas, null, -0.04))}} no cartão</p>
+                                    <p class="tw-text-[10px] tw-text-gray-500">ou a partir de {{formatCurrency(calcularValor(formSale.total_passagems + formSale.total_taxas, null, -0.05))}} no cartão</p>
                                 </div>
                             </v-col>
                         </v-row>
@@ -604,7 +604,7 @@ onMounted(() => {
                         </v-card>
                     </v-container>
 
-                    
+
                     <BaseCard class="tw-mt-3">
                         <v-row>
                             <v-col cols="12" class="tw-flex tw-items-center tw-mb-2">
@@ -624,7 +624,7 @@ onMounted(() => {
                             </v-col>
                         </v-row>
                     </BaseCard>
-                    
+
                     <v-col cols="12">
                         <v-btn variant="tonal" color="secondary" rounded  class="!tw-flex lg:!tw-hidden  !tw-font-extrabold px-2 tw-w-full lg:tw-w-fit"  @click="addCart">
                             <Icon icon="fa6-solid:cart-plus" width="20"  class="mr-1 "  /><span class=" !tw-text-xs  ml-1">Adicionar ao carrinho</span>
@@ -645,7 +645,7 @@ onMounted(() => {
                             </v-btn>
                         </div>
                     </v-col>
-                   
+
                 </v-form>
             </v-col>
         </v-row>
