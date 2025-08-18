@@ -55,7 +55,7 @@ function handleSubmit() {
 <template>
   <v-dialog max-width="600" v-model="emailAlready">
     <template v-slot:default="{ isActive }">
-      <v-card title="Trecho indisponível">
+      <v-card title="Email já existente">
         <v-card-text>
           Já existe um usuário com esse email em nossa base de dado. Deseja recuperar sua senha?
         </v-card-text>
