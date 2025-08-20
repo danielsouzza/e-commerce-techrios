@@ -223,7 +223,7 @@ function handleSubmit() {
   data.comprador.xnome = form.name
   data.comprador.telefone = form.telefone
   data.comprador.nascimento = formatDateToServe(data.nascimento)
-  
+
   // Remove campos desnecessários baseado no tipo de usuário
   if (data.comprador.estrangeiro) {
     // Para estrangeiros, remove campos brasileiros
@@ -252,7 +252,7 @@ function handleSubmit() {
     })
   }
 
-  
+
 }
 
 function deleteAccount() {
@@ -298,8 +298,8 @@ function getPaises(search='', after=()=>{}){
     loadPaises.value = true
     axios.get('https://restcountries.com/v3.1/all?fields=name,cca2').then((response) => {
       paises.value = response.data
-        .filter(country => 
-          !search || 
+        .filter(country =>
+          !search ||
           country.name.common.toLowerCase().includes(search.toLowerCase()) ||
           country.name.official.toLowerCase().includes(search.toLowerCase())
         )
@@ -355,6 +355,7 @@ function permitirDatas(data) {
 
 onMounted(()=>{
   getMunicipios();
+    getPaises()
   getUser();
   window.addEventListener('resize', updateWidth);
 })
@@ -613,7 +614,7 @@ onMounted(()=>{
                       variant="outlined"
                   ></v-text-field>
                 </v-col>
-                
+
                 <!-- Campos para estrangeiros -->
                 <v-col cols="12" lg="6" v-if="form.comprador.estrangeiro">
                   <div class="text-subtitle-1 text-medium-emphasis">País</div>
