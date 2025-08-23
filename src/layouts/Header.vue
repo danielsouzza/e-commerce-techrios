@@ -74,8 +74,9 @@ onMounted(()=>{
 const link_atendimento = computed(()=>{
     if(number_atendimento.value){
         return `https://wa.me/55${number_atendimento.value.replace(/\D/g, '')}?text=Olá,%20gostaria%20de%20mais%20informações!`
+    }else{
+      return `https://wa.me/559391893803?text=Olá,%20gostaria%20de%20mais%20informações!`
     }
-    return false
 })
 
 
@@ -154,7 +155,7 @@ const link_atendimento = computed(()=>{
                     </v-list>
                   </v-card>
                 </v-menu>
-                <a  v-if="link_atendimento" :href="link_atendimento" target="_blank">
+                <a   :href="link_atendimento" target="_blank">
                   <v-btn   variant="flat" color="success" rounded  class="d-lg-flex d-none !tw-font-extrabold  ">
                     <Icon icon="ic:baseline-whatsapp" width="25"  class="mr-2 tw-text-white" /><span class="tw-text-white ">ATENDIMENTO</span>
                   </v-btn>
