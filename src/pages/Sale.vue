@@ -334,7 +334,7 @@ async function getTrechos(nextTrip=false, type='ida'){
         }
       }else{
         if(filtersSelected.value.type == "ida-e-volta"  && type == 'volta'){
-        showInfoNotification('Infelizmente não temos viajem de volta para o trecho escolhidos, mas temos viagem somente de ida');
+        showInfoNotification('Infelizmente não temos viagem de volta para o trecho escolhidos, mas temos viagem somente de ida');
         filtersSelected.value.type = 'somente-ida'
         filtersSelected.value.dataVolta = null
       }
@@ -1447,7 +1447,7 @@ onUnmounted(() => {
 
                     <p class="tw-text-p mt-1"> Nenhuma viagem foi encontrada. A próxima viagem de {{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}} para {{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}} será dia {{formatDate(nextTravel.ida.data_embarque)}} ás {{formatarHora(nextTravel.ida.horario)}}.</p>
 
-                    <v-btn @click="goToNextTrip()" variant="tonal" color="secondary" class="mt-3">Ir para próxima viajem</v-btn>
+                    <v-btn @click="goToNextTrip()" variant="tonal" color="secondary" class="mt-3">Ir para próxima viagem</v-btn>
                   </div>
                   <div class="tw-flex tw-justify-center"  v-else-if="loadingTrecho">
                     <v-progress-circular
@@ -1501,7 +1501,7 @@ onUnmounted(() => {
 
                     <p class="tw-text-p mt-1"> Nenhuma viagem foi encontrada. A próxima viagem de {{getMonicipioLabel(filtersSelected.destino,'municipiosDestino', filtersData)}} para {{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem',filtersData)}} será dia {{formatDate(nextTravel.volta.data_embarque)}} ás {{formatarHora(nextTravel.volta.horario)}}.</p>
 
-                    <v-btn @click="goToNextTrip('volta')" variant="tonal" color="secondary" class="mt-3">Ir para próxima viajem</v-btn>
+                    <v-btn @click="goToNextTrip('volta')" variant="tonal" color="secondary" class="mt-3">Ir para próxima viagem</v-btn>
             </div>
             <div class="tw-flex tw-justify-center"  v-else-if="loadingTrecho">
               <v-progress-circular
