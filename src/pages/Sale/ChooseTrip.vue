@@ -849,7 +849,7 @@ onMounted(() => {
 
                                 <p class="tw-text-p mt-1"> Nenhuma viagem foi encontrada. A próxima viagem de {{getMonicipioLabel(filtersSelected.origem,'municipiosOrigem', filtersData)}} para {{getMonicipioLabel(filtersSelected.destino,'municipiosDestino',filtersData)}} será dia {{formatDate(nextTravel.ida.data_embarque)}} ás {{formatarHora(nextTravel.ida.horario)}}.</p>
 
-                                <v-btn @click="goToNextTrip()" variant="tonal" color="secondary" class="mt-3">Ir para próxima viajem</v-btn>
+                                <v-btn @click="goToNextTrip()" variant="tonal" color="secondary" class="mt-3">Ir para próxima viagem</v-btn>
                             </div>
                             <div class="tw-flex tw-justify-center"  v-else-if="loadingTrecho">
                                 <v-progress-circular
